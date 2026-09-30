@@ -7,9 +7,7 @@ class Shop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(
-        title: 'John Doe Lv.21',
-      ),
+      appBar: const MyAppBar(title: 'John Doe Lv.21'),
       backgroundColor: Colors.teal[900],
       body: Center(
         child: Column(
@@ -17,10 +15,7 @@ class Shop extends StatelessWidget {
           children: [
             const Text(
               'Store Page',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 20),
             ),
           ],
         ),
