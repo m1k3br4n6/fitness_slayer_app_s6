@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
+import 'package:fitness_slayer_01/screens/Pages/workout.dart';
 
 class WorkoutPlanning extends StatelessWidget {
   const WorkoutPlanning({super.key});
@@ -15,13 +16,20 @@ class WorkoutPlanning extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Workout Planning Page',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-              ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WorkoutScreen()),
+                );
+              },
+              child: const Text('New Workout'),
             ),
+            ElevatedButton(
+              onPressed: (){
+
+              },
+              child: const Text('Select From Routines')),
           ],
         ),
       ),
