@@ -1,6 +1,7 @@
 import 'package:fitness_slayer_01/screens/authentication/login.dart';
 import 'package:fitness_slayer_01/screens/notifications/notifications.dart';
 import 'package:fitness_slayer_01/screens/notifications/side-quest.dart';
+import 'package:fitness_slayer_01/screens/planning/calendar.dart';
 import 'package:fitness_slayer_01/screens/planning/workout-planning.dart';
 import 'package:fitness_slayer_01/screens/profile/profile.dart';
 import 'package:fitness_slayer_01/screens/settings/settings.dart';
@@ -92,6 +93,23 @@ class Home extends StatelessWidget {
                 );
               },
               child: const Text('My Workouts',
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+            ),
+
+            //calendar page button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Calendar(),
+                  ),
+                );
+              },
+              child: const Text('Calendar',
                 style: TextStyle(
                   fontSize: 18,
                 ),
