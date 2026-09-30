@@ -9,5 +9,3 @@ class SlayerCustomize extends StatelessWidget {
     return const Placeholder();
   }
 }
-
-
