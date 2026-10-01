@@ -9,14 +9,28 @@ class WorkoutScreen extends StatefulWidget {
   @override
   State<WorkoutScreen> createState() => _WorkoutScreenState();
 }
-
 class _WorkoutScreenState extends State<WorkoutScreen> {
   List<Exercise> currentWorkoutExercises = [];
 
-  void _showExercisePicker() async {
-    List<Exercise> allExercises = await Exercise.loadExercises();
+  // Cache list of exercises so we only load the JSON once
+  List<Exercise> _cachedAllExercises = [];
 
-    if (!mounted) return;
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
+
+
+  Future<void> _loadInitialData() async {
+    _cachedAllExercises = await Exercise.loadExercises();
+  }
+
+  // List of all exercises
+  // TODO Make a filtering system, right now just returning entire json with all exercises- too long
+  // TODO Move styles into global styling- less clutter
+  void _showExercisePicker() {
+    if (_cachedAllExercises.isEmpty) return;
 
     showModalBottomSheet(
       context: context,
@@ -36,9 +50,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               ),
               Expanded(
                 child: ListView.builder(
-                  itemCount: allExercises.length,
+                  itemCount: _cachedAllExercises.length,
                   itemBuilder: (context, index) {
-                    final exercise = allExercises[index];
+                    final exercise = _cachedAllExercises[index];
                     return ListTile(
                       title: Text(exercise.name, style: const TextStyle(color: Colors.white)),
                       subtitle: Text(exercise.primaryMuscles.join(', '), style: const TextStyle(color: Colors.white54)),
@@ -63,6 +77,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // TODO Change to actual user name
       appBar: const MyAppBar(
         title: 'John Doe Lv.21',
       ),
@@ -77,8 +92,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 Exercise exercise = entry.value;
 
                 return ExerciseCard(
-                  exerciseName: exercise.name,
                   exerciseId: exercise.id,
+                  exerciseName: exercise.name,
+                    primaryMuscles: exercise.primaryMuscles,
+                  mechanic: exercise.mechanic,
+                  force: exercise.force,
+                  instructions: exercise.instructions,
                   onDelete: () {
                     setState(() {
                       currentWorkoutExercises.removeAt(index);
@@ -88,7 +107,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               }),
 
               const SizedBox(height: 20),
-
+              // TODO Make it look more nicer, right now just for testing
               ElevatedButton(
                 onPressed: _showExercisePicker,
                 child: const Text('Add Exercise'),
