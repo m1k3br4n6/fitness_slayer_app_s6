@@ -1,46 +1,94 @@
-import 'package:fitness_slayer_01/screens/authentication/register.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_slayer_01/widgets/app_bar.dart';
+import 'package:fitness_slayer_01/services/auth.dart';
 
-class Login extends StatelessWidget {
-  const Login({super.key});
+class Login extends StatefulWidget {
+  final Function toggleView;
+  const Login({super.key, required this.toggleView});
+
+  @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  final AuthService _auth = AuthService();
+  final _formKey = GlobalKey<FormState>();
+
+  String email = '';
+  String password = '';
+  String error = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(
-        title: 'Not logged in.',
-      ),
       backgroundColor: Colors.teal[900],
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Login Page',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
+      appBar: AppBar(
+        backgroundColor: Colors.teal,
+        elevation: 0.0,
+        title: Text('Sign in'),
+        actions: <Widget>[
+          TextButton.icon(
+            icon: const Icon(Icons.person),
+            label: const Text('Register'),
+            onPressed: () {
+              widget.toggleView();
+            },
+          ),
+        ],
+      ),
+      body: Container(
+        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: 20.0),
+              TextFormField(
+                validator: (val) => val == null || val.isEmpty
+                    ? 'Enter an email'
+                    : null,
+                onChanged: (val) {
+                  email = val;
+                },
               ),
-            ),
-
-            //register page button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Register(),
-                  ),
-                );
-              },
-              child: const Text('Sign up',
-                style: TextStyle(
-                  fontSize: 18,
+              SizedBox(height: 20.0),
+              TextFormField(
+                obscureText: true,
+                validator: (val) => val == null || val.length < 6
+                    ? 'Enter a password 6+ chars long'
+                    : null,
+                onChanged: (val) {
+                  setState(() {
+                    password = val;
+                  });
+                },
+              ),
+              SizedBox(height: 20.0),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink[400],
                 ),
+                child: Text('Sign in', style: TextStyle(color: Colors.white)),
+                onPressed: () async {
+                  if (_formKey.currentState?.validate() ??
+                      false)
+                  {
+                    dynamic result = await _auth.signInWithEmailAndPassword(
+                      email,
+                      password,
+                    );
+                    if (result == null) {
+                      setState(() {
+                        error =
+                            'could not sign in with those credentials';
+                      });
+                    }
+                  }
+                },
               ),
-            ),
-          ],
+              SizedBox(height: 12.0),
+              Text(error, style: TextStyle(color: Colors.red, fontSize: 14.0)),
+            ],
+          ),
         ),
       ),
     );
