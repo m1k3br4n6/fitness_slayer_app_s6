@@ -11,7 +11,7 @@ class WorkoutScreen extends StatefulWidget {
 }
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
-  List<String> currentWorkoutExercises = [];
+  List<Exercise> currentWorkoutExercises = [];
 
   void _showExercisePicker() async {
     List<Exercise> allExercises = await Exercise.loadExercises();
@@ -41,11 +41,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                     final exercise = allExercises[index];
                     return ListTile(
                       title: Text(exercise.name, style: const TextStyle(color: Colors.white)),
-                      subtitle: Text(exercise.bodyPart, style: const TextStyle(color: Colors.white54)),
+                      subtitle: Text(exercise.primaryMuscles.join(', '), style: const TextStyle(color: Colors.white54)),
                       trailing: const Icon(Icons.add_circle_outline, color: Colors.greenAccent),
                       onTap: () {
                         setState(() {
-                          currentWorkoutExercises.add(exercise.name);
+                          currentWorkoutExercises.add(exercise);
                         });
                         Navigator.pop(context);
                       },
@@ -74,10 +74,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             children: [
               ...currentWorkoutExercises.asMap().entries.map((entry) {
                 int index = entry.key;
-                String exerciseName = entry.value;
+                Exercise exercise = entry.value;
 
                 return ExerciseCard(
-                  exerciseName: exerciseName,
+                  exerciseName: exercise.name,
+                  exerciseId: exercise.id,
                   onDelete: () {
                     setState(() {
                       currentWorkoutExercises.removeAt(index);

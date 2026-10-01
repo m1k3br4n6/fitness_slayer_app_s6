@@ -4,29 +4,32 @@ import 'package:flutter/services.dart';
 class Exercise {
   final String id;
   final String name;
-  final String bodyPart;
+  final String equipment;
+  final List<String> primaryMuscles;
+  final String category;
 
   Exercise({
     required this.id,
     required this.name,
-    required this.bodyPart
+    required this.equipment,
+    required this.primaryMuscles,
+    required this.category,
   });
 
   factory Exercise.fromJson(Map<String, dynamic> json) {
     return Exercise(
-      id: json['slug'] ?? '',
-      name: json['name_en'] ?? 'Unknown',
-      bodyPart: json['category'] ?? 'General',
+      id: json['id'] ?? '',
+      name: json['name'] ?? 'Unknown',
+      equipment: json['equipment'] ?? 'body only',
+      primaryMuscles: List<String>.from(json['primaryMuscles'] ?? []),
+      category: json['category'] ?? 'strength',
     );
   }
 
-  // Parses the RepDB exercises.json file
   static Future<List<Exercise>> loadExercises() async {
-    final String response = await rootBundle.loadString('assets/exercise-list.json');
-    final data = json.decode(response);
+    final String response = await rootBundle.loadString('assets/exercises.json');
+    final List<dynamic> data = json.decode(response);
 
-    // RepDB nests the array under exercises key
-    final List<dynamic> exercisesJson = data['exercises'];
-    return exercisesJson.map((json) => Exercise.fromJson(json)).toList();
+    return data.map((json) => Exercise.fromJson(json)).toList();
   }
 }

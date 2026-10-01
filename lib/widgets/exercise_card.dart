@@ -3,11 +3,13 @@ import 'package:flutter/services.dart';
 
 class ExerciseCard extends StatefulWidget {
   final String exerciseName;
+  final String exerciseId;
   final VoidCallback onDelete;
 
   const ExerciseCard({
     super.key,
     required this.exerciseName,
+    required this.exerciseId,
     required this.onDelete,
   });
 
