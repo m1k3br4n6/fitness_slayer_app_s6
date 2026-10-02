@@ -8,9 +8,7 @@ class WorkoutPlanning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(
-        title: 'John Doe Lv.21',
-      ),
+      appBar: const MyAppBar(title: 'John Doe Lv.21'),
       backgroundColor: Colors.teal[900],
       body: Center(
         child: Column(

@@ -1,21 +1,35 @@
-import 'package:fitness_slayer_01/screens/authentication/login.dart';
 import 'package:fitness_slayer_01/screens/notifications/notifications.dart';
 import 'package:fitness_slayer_01/screens/notifications/side-quest.dart';
+import 'package:fitness_slayer_01/screens/planning/calendar.dart';
 import 'package:fitness_slayer_01/screens/planning/workout-planning.dart';
 import 'package:fitness_slayer_01/screens/profile/profile.dart';
 import 'package:fitness_slayer_01/screens/settings/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/screens/game-features/shop.dart';
-import 'package:fitness_slayer_01/widgets/app_bar.dart';
+import 'package:fitness_slayer_01/services/auth.dart';
 
 class Home extends StatelessWidget {
-  const Home({super.key});
+  Home({super.key});
+  final AuthService _auth = AuthService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(
-        title: 'John Doe Lv.21',
+      appBar: AppBar(
+        title: Text('Fitness Slayer',
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        backgroundColor: Colors.teal,
+        elevation: 0.0,
+        actions: <Widget>[
+          TextButton.icon(
+            icon: Icon(Icons.person),
+            label: Text('Logout'),
+            onPressed: () async {
+              await _auth.signOut();
+            },
+          ),
+        ],
       ),
       backgroundColor: Colors.teal[900],
       body: Center(
@@ -24,27 +38,7 @@ class Home extends StatelessWidget {
           children: [
             const Text(
               'Home Page',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-              ),
-            ),
-
-            //login page button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Login(),
-                  ),
-                );
-              },
-              child: const Text('Log In',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 20),
             ),
 
             //store page button
@@ -52,16 +46,10 @@ class Home extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const Shop(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const Shop()),
                 );
               },
-              child: const Text('Store',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
+              child: const Text('Store', style: TextStyle(fontSize: 18)),
             ),
 
             //profile page button
@@ -69,16 +57,10 @@ class Home extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const Profile(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const Profile()),
                 );
               },
-              child: const Text('My Profile',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
+              child: const Text('My Profile', style: TextStyle(fontSize: 18)),
             ),
 
             //workout page button
@@ -91,7 +73,20 @@ class Home extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('My Workouts',
+              child: const Text('My Workouts', style: TextStyle(fontSize: 18)),
+            ),
+
+            //calendar page button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Calendar(),
+                  ),
+                );
+              },
+              child: const Text('Calendar',
                 style: TextStyle(
                   fontSize: 18,
                 ),
@@ -103,16 +98,10 @@ class Home extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const Settings(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const Settings()),
                 );
               },
-              child: const Text('Settings',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
+              child: const Text('Settings', style: TextStyle(fontSize: 18)),
             ),
 
             //notification page
@@ -125,10 +114,9 @@ class Home extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('Notifications',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
+              child: const Text(
+                'Notifications',
+                style: TextStyle(fontSize: 18),
               ),
             ),
 
@@ -137,18 +125,11 @@ class Home extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const SideQuest(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const SideQuest()),
                 );
               },
-              child: const Text('Side Quest',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
+              child: const Text('Side Quest', style: TextStyle(fontSize: 18)),
             ),
-
           ],
         ),
       ),
