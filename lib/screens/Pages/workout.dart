@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/widgets/exercise_card.dart';
 import 'package:fitness_slayer_01/models/exercises.dart';
+import 'package:fitness_slayer_01/widgets/exercise_search.dart';
 
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
@@ -9,69 +10,24 @@ class WorkoutScreen extends StatefulWidget {
   @override
   State<WorkoutScreen> createState() => _WorkoutScreenState();
 }
+
 class _WorkoutScreenState extends State<WorkoutScreen> {
   List<Exercise> currentWorkoutExercises = [];
 
-  // Cache list of exercises so we only load the JSON once
-  List<Exercise> _cachedAllExercises = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadInitialData();
-  }
-
-
-  Future<void> _loadInitialData() async {
-    _cachedAllExercises = await Exercise.loadExercises();
-  }
-
-  // List of all exercises
-  // TODO Make a filtering system, right now just returning entire json with all exercises- too long
-  // TODO Move styles into global styling- less clutter
-  void _showExercisePicker() {
-    if (_cachedAllExercises.isEmpty) return;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.teal[800],
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return FractionallySizedBox(
-          heightFactor: 0.85,
-          child: Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                    'Select Exercise',
-                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _cachedAllExercises.length,
-                  itemBuilder: (context, index) {
-                    final exercise = _cachedAllExercises[index];
-                    return ListTile(
-                      title: Text(exercise.name, style: const TextStyle(color: Colors.white)),
-                      subtitle: Text(exercise.primaryMuscles.join(', '), style: const TextStyle(color: Colors.white54)),
-                      trailing: const Icon(Icons.add_circle_outline, color: Colors.greenAccent),
-                      onTap: () {
-                        setState(() {
-                          currentWorkoutExercises.add(exercise);
-                        });
-                        Navigator.pop(context);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+  Future<void> _navigateAndAddExercise() async {
+    final selectedExercise = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ExerciseSearchScreen(),
+      ),
     );
+
+    // If the user picked an exercise add it
+    if (selectedExercise != null && mounted) {
+      setState(() {
+        currentWorkoutExercises.add(selectedExercise);
+      });
+    }
   }
 
   @override
@@ -87,6 +43,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: Column(
             children: [
+              //Spread operator lets line read from right to left and after each entry has been mapped with its
+              // own key value pair the ... lets each container be its own widget so that each of the objects gets mapped
+              // and displayed properly
               ...currentWorkoutExercises.asMap().entries.map((entry) {
                 int index = entry.key;
                 Exercise exercise = entry.value;
@@ -94,7 +53,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 return ExerciseCard(
                   exerciseId: exercise.id,
                   exerciseName: exercise.name,
-                    primaryMuscles: exercise.primaryMuscles,
+                  primaryMuscles: exercise.primaryMuscles,
                   mechanic: exercise.mechanic,
                   force: exercise.force,
                   instructions: exercise.instructions,
@@ -107,9 +66,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               }),
 
               const SizedBox(height: 20),
+
               // TODO Make it look more nicer, right now just for testing
               ElevatedButton(
-                onPressed: _showExercisePicker,
+                onPressed: _navigateAndAddExercise,
                 child: const Text('Add Exercise'),
               ),
             ],
