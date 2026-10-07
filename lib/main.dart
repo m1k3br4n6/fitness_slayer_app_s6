@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
+import 'package:fitness_slayer_01/providers/workout_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,12 +23,20 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<myUser?>.value( //stream actively listens for user related auth changes
-      value: AuthService().user, //stream we are going to listen to, accessing 'user' stream in auth class
-      initialData: null,
-      child: MaterialApp(
-        home: Wrapper(), //wrapper should be the home/main screen
-      ),
-    );
+    return MultiProvider(
+        providers: [
+          StreamProvider<myUser?>.value( //stream actively listens for user related auth changes
+          value: AuthService().user, //stream we are going to listen to, accessing 'user' stream in auth class
+          initialData: null,
+          ),
+          ChangeNotifierProvider( //actively listens for Changes in the workout screen
+          create: (_) => WorkoutProvider(),
+          ),
+        ],
+        child: MaterialApp(
+          home: Wrapper(), //wrapper should be the home/main screen
+         ),
+    ) ;
+
   }
 }

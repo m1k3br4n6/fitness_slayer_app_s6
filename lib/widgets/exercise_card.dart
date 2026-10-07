@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:fitness_slayer_01/screens/Pages/exercise_info_screen.dart';
 
 class ExerciseCard extends StatefulWidget {
+  final int exerciseIndex;
   final String exerciseId;
   final String exerciseName;
   final List<String> primaryMuscles;
@@ -13,6 +16,7 @@ class ExerciseCard extends StatefulWidget {
 
   const ExerciseCard({
     super.key,
+    required this.exerciseIndex,
     required this.exerciseId,
     required this.exerciseName,
     required this.primaryMuscles,
@@ -29,34 +33,7 @@ class ExerciseCard extends StatefulWidget {
 class _ExerciseCardState extends State<ExerciseCard> {
   bool _isExpanded = true;
 
-  List<Map<String, dynamic>> workoutSets = [
-    {'weight': '', 'reps': '', 'isCompleted': false},
-    {'weight': '', 'reps': '', 'isCompleted': false},
-  ];
-
-  void _addSet() {
-    setState(() {
-      workoutSets.add({
-        'weight': '',
-        'reps': '',
-        'isCompleted': false,
-      });
-    });
-  }
-
-  void _toggleSetCompletion(int index) {
-    setState(() {
-      workoutSets[index]['isCompleted'] = !workoutSets[index]['isCompleted'];
-    });
-  }
-
-  void _deleteSet(int index) {
-    setState(() {
-      workoutSets.removeAt(index);
-    });
-  }
-
-  //TODO Front end people make pretty these are just placeholders and not very accurate
+  // TODO Front end people make pretty these are just placeholders and not very accurate
   IconData _getMuscleIcon() {
     if (widget.primaryMuscles.isEmpty) return Icons.fitness_center;
 
@@ -72,11 +49,22 @@ class _ExerciseCardState extends State<ExerciseCard> {
 
   @override
   Widget build(BuildContext context) {
+
     final Color cardColor = Colors.teal[800]!;
     final Color inputColor = Colors.teal[900]!;
     final Color completedColor = Colors.green[800]!;
     final Color activeIconColor = Colors.greenAccent;
     final Color textColor = Colors.white70;
+
+    // Listens for updates
+    final provider = context.watch<WorkoutProvider>();
+
+    if (widget.exerciseIndex >= provider.activeExercises.length) {
+      return const SizedBox.shrink();
+    }
+
+    // sets and data for each specific exercise
+    final activeSets = provider.activeExercises[widget.exerciseIndex].sets;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -111,8 +99,8 @@ class _ExerciseCardState extends State<ExerciseCard> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ExerciseInfoScreen(
-                            exerciseId : widget.exerciseId,
-                            mechanic : widget.mechanic,
+                            exerciseId: widget.exerciseId,
+                            mechanic: widget.mechanic,
                             force: widget.force,
                             instructions: widget.instructions,
                             exerciseName: widget.exerciseName,
@@ -152,7 +140,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                   color: inputColor,
                   onSelected: (value) {
                     if (value == 'delete') {
-                      widget.onDelete();
+                      widget.onDelete(); //workout.dart handles removing it from the provider
                     }
                   },
                   itemBuilder: (context) => [
@@ -183,16 +171,43 @@ class _ExerciseCardState extends State<ExerciseCard> {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: workoutSets.length,
+              itemCount: activeSets.length,
               itemBuilder: (context, index) {
+                final currentSet = activeSets[index];
+
                 return SetInputRow(
                   setIndex: index,
-                  setData: workoutSets[index],
+                  // Passing properties
+                  weight: currentSet.weight,
+                  reps: currentSet.reps,
+                  isCompleted: currentSet.isCompleted,
                   inputColor: inputColor,
                   completedColor: completedColor,
                   activeIconColor: activeIconColor,
-                  onToggleCompletion: () => _toggleSetCompletion(index),
-                  onDelete: () => _deleteSet(index),
+
+                  // Link all actions directly to the Provider
+                  onToggleCompletion: () {
+                    context.read<WorkoutProvider>().toggleSetCompletion(widget.exerciseIndex, index);
+                  },
+                  onDelete: () {
+                    context.read<WorkoutProvider>().removeSet(widget.exerciseIndex, index);
+                  },
+                  onWeightChanged: (value) {
+                    context.read<WorkoutProvider>().updateSetValues(
+                        widget.exerciseIndex,
+                        index,
+                        value,
+                        currentSet.reps
+                    );
+                  },
+                  onRepsChanged: (value) {
+                    context.read<WorkoutProvider>().updateSetValues(
+                        widget.exerciseIndex,
+                        index,
+                        currentSet.weight,
+                        value
+                    );
+                  },
                 );
               },
             ),
@@ -201,7 +216,8 @@ class _ExerciseCardState extends State<ExerciseCard> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: InkWell(
-                onTap: _addSet,
+                // Directly call the provider to add a set
+                onTap: () => context.read<WorkoutProvider>().addSet(widget.exerciseIndex),
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   width: double.infinity,
@@ -234,28 +250,36 @@ class _ExerciseCardState extends State<ExerciseCard> {
 // -----------------------------------------------------------------------------
 class SetInputRow extends StatelessWidget {
   final int setIndex;
-  final Map<String, dynamic> setData;
+  final String weight;
+  final String reps;
+  final bool isCompleted;
+
   final Color inputColor;
   final Color completedColor;
   final Color activeIconColor;
+
   final VoidCallback onToggleCompletion;
   final VoidCallback onDelete;
+  final ValueChanged<String> onWeightChanged;
+  final ValueChanged<String> onRepsChanged;
 
   const SetInputRow({
     super.key,
     required this.setIndex,
-    required this.setData,
+    required this.weight,
+    required this.reps,
+    required this.isCompleted,
     required this.inputColor,
     required this.completedColor,
     required this.activeIconColor,
     required this.onToggleCompletion,
     required this.onDelete,
+    required this.onWeightChanged,
+    required this.onRepsChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bool isCompleted = setData['isCompleted'];
-
     return Container(
       color: isCompleted ? completedColor : Colors.transparent,
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -281,7 +305,7 @@ class SetInputRow extends StatelessWidget {
               ),
               alignment: Alignment.center,
               child: TextFormField(
-                initialValue: setData['weight'],
+                initialValue: weight,
                 textAlign: TextAlign.center,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
@@ -296,9 +320,7 @@ class SetInputRow extends StatelessWidget {
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                   isDense: true,
                 ),
-                onChanged: (value) {
-                  setData['weight'] = value;
-                },
+                onChanged: onWeightChanged,
                 enabled: !isCompleted,
               ),
             ),
@@ -315,7 +337,7 @@ class SetInputRow extends StatelessWidget {
               ),
               alignment: Alignment.center,
               child: TextFormField(
-                initialValue: setData['reps'],
+                initialValue: reps,
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.number,
                 inputFormatters: [
@@ -330,9 +352,7 @@ class SetInputRow extends StatelessWidget {
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                   isDense: true,
                 ),
-                onChanged: (value) {
-                  setData['reps'] = value;
-                },
+                onChanged: onRepsChanged,
                 enabled: !isCompleted,
               ),
             ),
