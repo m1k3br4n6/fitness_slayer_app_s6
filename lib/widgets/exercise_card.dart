@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:fitness_slayer_01/screens/Pages/exercise_info_screen.dart';
+import 'package:fitness_slayer_01/screens/Pages/rest_timer.dart';
+
+import '../providers/workout_timer.dart';
 
 class ExerciseCard extends StatefulWidget {
   final int exerciseIndex;
@@ -10,6 +13,7 @@ class ExerciseCard extends StatefulWidget {
   final String exerciseName;
   final List<String> primaryMuscles;
   final String mechanic;
+
   final String force;
   final List<String> instructions;
   final VoidCallback onDelete;
@@ -187,6 +191,31 @@ class _ExerciseCardState extends State<ExerciseCard> {
 
                   // Link all actions directly to the Provider
                   onToggleCompletion: () {
+
+                    // Validation check
+                    if (!currentSet.isCompleted && (currentSet.weight.isEmpty || currentSet.reps.isEmpty)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please enter weight and reps first'),
+                          backgroundColor: Colors.redAccent,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      return;
+                    }
+
+                    // Start rest timer
+                    if (!currentSet.isCompleted) {
+                      context.read<WorkoutTimerProvider>().startRest(120);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RestTimerCard(), // Pages/rest_timer
+                        ),
+                      );
+                    }
+
+                    // toggle state
                     context.read<WorkoutProvider>().toggleSetCompletion(widget.exerciseIndex, index);
                   },
                   onDelete: () {

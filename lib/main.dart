@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
+import 'package:fitness_slayer_01/providers/workout_timer.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,9 @@ class MyApp extends StatelessWidget {
           ),
           ChangeNotifierProvider( //actively listens for Changes in the workout screen
           create: (_) => WorkoutProvider(),
+          ),
+          ChangeNotifierProvider( //
+            create: (_) => WorkoutTimerProvider(),
           ),
         ],
         child: MaterialApp(

@@ -5,8 +5,10 @@ import 'package:fitness_slayer_01/widgets/exercise_search.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
-
 import '../../services/database_service.dart';
+import 'package:fitness_slayer_01/providers/workout_timer.dart';
+import 'package:fitness_slayer_01/widgets/workout_timer_card.dart';
+import 'package:fitness_slayer_01/widgets/mini_rest_timer.dart';
 
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
@@ -17,13 +19,22 @@ class WorkoutScreen extends StatefulWidget {
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
 
-  bool _isSubmitting = false;
+  bool _isSubmitting = false; //For disabling finish workout button after submit
+
+  @override
+  void initState() {
+    super.initState();
+    // timer provider init as screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WorkoutTimerProvider>().start();
+    });
+  }
 
   Future<void> _navigateAndAddExercise() async {
     final selectedExercise = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const ExerciseSearchScreen(),
+        builder: (context) => const ExerciseSearchScreen(), //widgets/exercise_search
       ),
     );
 
@@ -37,6 +48,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
   Future<void> _finishWorkout() async {
     final workoutProvider = context.read<WorkoutProvider>();
+    final timerProvider = context.read<WorkoutTimerProvider>();
 
     // TODO: AUTH TEAM - Remove hardcoded ID once login is fully ready please.
     const String currentUserId = 'Bernard';
@@ -63,7 +75,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     // NEW: Map Provider data into Database Models
     final completedWorkout = CompletedWorkout(
       dateCompleted: DateTime.now(),
-      durationMinutes: 60, // TODO: Add real timer later
+      durationMinutes: timerProvider.elapsedMinutes, // TODO: Add real timer later
       exercises: workoutProvider.activeExercises.map((activeEx) {
         return WorkoutExercise(
           exerciseId: activeEx.exercise.id,
@@ -79,13 +91,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       }).toList(),
     );
 
-    // Push to Firestore using completed workout under models
+    // Push to Firestore using models/completed_workout
     try {
 
       await DatabaseService().saveWorkout(currentUserId, completedWorkout);
 
       if (mounted) {
         workoutProvider.clearWorkout();
+        timerProvider.stopAndReset();
 
         // Todo change this later just temp feedback
         ScaffoldMessenger.of(context).showSnackBar(
@@ -106,6 +119,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   Widget build(BuildContext context) {
 
     final workoutData = context.watch<WorkoutProvider>();
+    final timerData = context.watch<WorkoutTimerProvider>();
+    bool isRestRemaining = timerData.restSecondsRemaining > 0;
+
     return Scaffold(
       // TODO Change to actual user name
       appBar: const MyAppBar(
@@ -117,6 +133,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: Column(
             children: [
+
+              // Stopwatch
+              const WorkoutTimerCard(),
+
               // Spread operator lets line read from right to left and after each entry has been mapped with its
               // own key value pair the ... lets each container be its own widget so that each of the objects gets mapped
               // and displayed properly
@@ -157,6 +177,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           ),
         ),
       ),
+
+      //Breadcrumb for miniRestTimer
+      bottomNavigationBar: isRestRemaining
+          ? const MiniRestTimer()
+          : const SizedBox.shrink(),
+
     );
   }
 }
