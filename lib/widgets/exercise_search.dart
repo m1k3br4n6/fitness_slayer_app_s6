@@ -70,6 +70,15 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
     });
   }
 
+  // Converts raw muscle group strings, "lower back", to Title Case, "Lower Back"
+  String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return '${word[0].toUpperCase()}${word.substring(1)}';
+    }).join(' ');
+  }
+
   //We pass our filtering through this parm later in the widget tree to keep things clean
   Widget _buildExerciseList(List<Exercise> exercisesToDisplay) {
     return ListView.builder(
@@ -148,26 +157,39 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
                 const SizedBox(width: 8),
                 const Text('Filter by Muscle: ', style: TextStyle(color: Colors.white70, fontSize: 16)),
                 const Spacer(),
-                DropdownButton<String>(
-                  //TODO Change to make look nicer
-                  value: _selectedMuscleGroup,
-                  dropdownColor: Colors.teal[800],
-                  style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16),
-                  underline: Container(height: 2, color: Colors.greenAccent.withValues(alpha: 0.5)),
-                  icon: const Icon(Icons.arrow_drop_down, color: Colors.greenAccent),
-                  items: _muscleGroups.map((String item) {
-                    return DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(item.toUpperCase()),
-                    );
-                  }).toList(),
-                  //On every change we recall the apply filters with its set state
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      _selectedMuscleGroup = newValue;
-                      _applyFilters();
-                    }
-                  },
+                //Using pill-style container matching the search bar rounded aesthetic
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.teal[800],
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.3)),
+                  ),
+                  // DropdownButtonHideUnderline removes legacy underline decoration leaving us with a cleaner pill container look
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedMuscleGroup,
+                      dropdownColor: Colors.teal[800],
+                      borderRadius: BorderRadius.circular(12),
+                      style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 15),
+                      icon: const Icon(Icons.arrow_drop_down, color: Colors.greenAccent),
+                      isDense: true,
+                      items: _muscleGroups.map((String item) {
+                        return DropdownMenuItem<String>(
+                          value: item,
+                          // Uses _capitalize to format to Title Case as mentioned above
+                          child: Text(_capitalize(item)),
+                        );
+                      }).toList(),
+                      //On every change we recall the apply filters with its set state
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          _selectedMuscleGroup = newValue;
+                          _applyFilters();
+                        }
+                      },
+                    ),
+                  ),
                 ),
               ],
             ),
