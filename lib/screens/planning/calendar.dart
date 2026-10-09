@@ -1,14 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 
-class Calendar extends StatelessWidget {
+class Calendar extends StatefulWidget {
   const Calendar({super.key});
 
   @override
+  State<Calendar> createState() => _CalendarState();
+}
+
+class _CalendarState extends State<Calendar> {
+  late DateTime _displayedMonth;
+  late DateTime _today;
+
+  final List<String> _monthNames = const [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  final List<String> _daysOfWeek = const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  @override
+  void initState() {
+    super.initState();
+    _today = DateTime.now();
+    _displayedMonth = DateTime(_today.year, _today.month);
+  }
+
+  void _changeMonth(int increment) {
+    setState(() {
+      _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month + increment);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const totalDays = 30;
-    const startDayOffset = 1; // offset for starting day of the week
+    final year = _displayedMonth.year;
+    final month = _displayedMonth.month;
+
+    // Total days in the displayed month
+    final totalDays = DateTime(year, month + 1, 0).day;
+
+    // Offset for the first day of the month (1 = Monday ... 7 = Sunday) -> 0..6
+    final startDayOffset = DateTime(year, month, 1).weekday - 1;
+
+    final monthTitle = '${_monthNames[month - 1]} $year';
 
     return Scaffold(
       appBar: const MyAppBar(
@@ -25,11 +60,11 @@ class Calendar extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.chevron_left, color: Colors.white),
-                  onPressed: () {},
+                  onPressed: () => _changeMonth(-1),
                 ),
-                const Text(
-                  'September 2026',
-                  style: TextStyle(
+                Text(
+                  monthTitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -37,7 +72,7 @@ class Calendar extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right, color: Colors.white),
-                  onPressed: () {},
+                  onPressed: () => _changeMonth(1),
                 ),
               ],
             ),
@@ -46,7 +81,7 @@ class Calendar extends StatelessWidget {
             // Days of Week Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: daysOfWeek
+              children: _daysOfWeek
                   .map((day) => Text(
                         day,
                         style: const TextStyle(
@@ -73,7 +108,9 @@ class Calendar extends StatelessWidget {
                     return const SizedBox.shrink();
                   }
                   final dayNumber = index - startDayOffset + 1;
-                  final isToday = dayNumber == 30; // highlight current day (e.g. 30th)
+                  final isToday = dayNumber == _today.day &&
+                      month == _today.month &&
+                      year == _today.year;
 
                   return Container(
                     decoration: BoxDecoration(
