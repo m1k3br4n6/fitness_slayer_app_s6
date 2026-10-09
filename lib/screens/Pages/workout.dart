@@ -67,10 +67,23 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
               const SizedBox(height: 20),
 
-              // TODO Make it look more nicer, right now just for testing
-              ElevatedButton(
+              // Modern M3 tonal teal button for adding exercises
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal[800],
+                  foregroundColor: Colors.tealAccent,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+                icon: const Icon(Icons.add_rounded, color: Colors.tealAccent),
+                label: const Text(
+                  'Add Exercise',
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                ),
                 onPressed: _navigateAndAddExercise,
-                child: const Text('Add Exercise'),
               ),
             ],
           ),
