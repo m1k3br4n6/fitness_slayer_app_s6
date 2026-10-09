@@ -14,7 +14,6 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
 
   final List<String> _muscleGroups = [
     'All Muscles',
-    //Don't fix this typo
     'abdominals',
     'abductors',
     'adductors',
