@@ -21,7 +21,6 @@ class _WorkoutPlanningState extends State<WorkoutPlanning> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(),
       backgroundColor: Colors.teal[900],
       body: Stack(
         children: [

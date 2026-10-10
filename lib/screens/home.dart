@@ -30,7 +30,6 @@ class _HomeState extends State<Home> {
     final List<Widget> pages = [
       // workout page
       const WorkoutPlanning(),
-
       // calendar page
       const Calendar(),
 

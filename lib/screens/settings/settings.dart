@@ -7,6 +7,7 @@ class AppSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: MyAppBar(),
       backgroundColor: Colors.teal[900],
       body: Center(
         child: Column(
