@@ -8,23 +8,113 @@ import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/screens/game-features/shop.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 
-class Home extends StatelessWidget {
-  Home({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   final AuthService _auth = AuthService();
+
+  //keeps track of active tab; defaults to Home in the middle
+  int _currentIndex = 2;
 
   @override
   Widget build(BuildContext context) {
+    //Pages ordered with home centred
+    final List<Widget> pages = [
+      // workout page
+      const WorkoutPlanning(),
+
+      // calendar page
+      const Calendar(),
+
+      // main dashboard hub
+      Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text(
+                  'Welcome Home, Great Slayer.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 30),
+
+                // daily challenge button
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal[800],
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SideQuest()),
+                    );
+                  },
+                  child: const Text('Daily Side Quest', style: TextStyle(color: Colors.white, fontSize: 16)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+
+      // store / shop page
+      const Shop(),
+
+      // profile page
+      const Profile(),
+    ];
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Fitness Slayer',
+        title: const Text('Fitness Slayer',
           style: TextStyle(color: Colors.white, fontSize: 20),
         ),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.teal[800],
         elevation: 0.0,
         actions: <Widget>[
+          //notification page icon button
+          IconButton(
+            icon: const Icon(Icons.notifications, color: Colors.white70),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Notifications()),
+              );
+            },
+          ),
+
+          //settings cog wheel icon button in light teal / blue-green tonal style
+          IconButton(
+            icon: Icon(Icons.settings, color: Colors.teal[200]),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Settings()),
+              );
+            },
+          ),
+
+          //logout button
           TextButton.icon(
-            icon: Icon(Icons.person),
-            label: Text('Logout'),
+            icon: const Icon(Icons.person, color: Colors.white70),
+            label: const Text('Logout', style: TextStyle(color: Colors.white70)),
             onPressed: () async {
               await _auth.signOut();
             },
@@ -32,103 +122,59 @@ class Home extends StatelessWidget {
         ],
       ),
       backgroundColor: Colors.teal[900],
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Home Page',
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
 
-            //store page button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Shop()),
-                );
-              },
-              child: const Text('Store', style: TextStyle(fontSize: 18)),
-            ),
+      //IndexedStack keeps state alive so switching tabs doesn't wipe your screen data
+      body: IndexedStack(
+        index: _currentIndex,
+        children: pages,
+      ),
 
-            //profile page button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Profile()),
-                );
-              },
-              child: const Text('My Profile', style: TextStyle(fontSize: 18)),
+      //bottom navbar with Home in the middle (index 2)
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: Colors.teal[800],
+          indicatorColor: Colors.teal[600],
+          labelTextStyle: WidgetStateProperty.all(
+            const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+        ),
+        child: NavigationBar(
+          selectedIndex: _currentIndex,
+          onDestinationSelected: (int index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          destinations: const [
+            // workout tab
+            NavigationDestination(
+              icon: Icon(Icons.fitness_center_outlined, color: Colors.white70),
+              selectedIcon: Icon(Icons.fitness_center, color: Colors.tealAccent),
+              label: 'Workouts',
             ),
-
-            //workout page button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const WorkoutPlanning(),
-                  ),
-                );
-              },
-              child: const Text('My Workouts', style: TextStyle(fontSize: 18)),
+            // calendar tab
+            NavigationDestination(
+              icon: Icon(Icons.calendar_today_outlined, color: Colors.white70),
+              selectedIcon: Icon(Icons.calendar_today, color: Colors.tealAccent),
+              label: 'Calendar',
             ),
-
-            //calendar page button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Calendar(),
-                  ),
-                );
-              },
-              child: const Text('Calendar',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
+            // home tab in middle
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined, color: Colors.white70),
+              selectedIcon: Icon(Icons.home, color: Colors.tealAccent),
+              label: 'Home',
             ),
-
-            //settings page
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Settings()),
-                );
-              },
-              child: const Text('Settings', style: TextStyle(fontSize: 18)),
+            //3. store / shop tab
+            NavigationDestination(
+              icon: Icon(Icons.shopping_bag_outlined, color: Colors.white70),
+              selectedIcon: Icon(Icons.shopping_bag, color: Colors.tealAccent),
+              label: 'Store',
             ),
-
-            //notification page
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Notifications(),
-                  ),
-                );
-              },
-              child: const Text(
-                'Notifications',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-
-            //side quest / daily challenge page
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SideQuest()),
-                );
-              },
-              child: const Text('Side Quest', style: TextStyle(fontSize: 18)),
+            // profile tab
+            NavigationDestination(
+              icon: Icon(Icons.person_outline, color: Colors.white70),
+              selectedIcon: Icon(Icons.person, color: Colors.tealAccent),
+              label: 'Profile',
             ),
           ],
         ),

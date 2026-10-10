@@ -9,12 +9,14 @@ class ExerciseSearchScreen extends StatefulWidget {
 }
 
 class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
+  // Controller for managing search input text and allowing 1-press clear ('X')
+  final TextEditingController _searchController = TextEditingController();
+
   List<Exercise> _allExercises = [];
   List<Exercise> _filteredExercisesList = [];
 
   final List<String> _muscleGroups = [
     'All Muscles',
-    //Don't fix this typo
     'abdominals',
     'abductors',
     'adductors',
@@ -39,6 +41,13 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    // Dispose controller when screen is closed to prevent memory leaks
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -71,6 +80,15 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
     });
   }
 
+  // Converts raw muscle group strings, "lower back", to Title Case, "Lower Back"
+  String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return '${word[0].toUpperCase()}${word.substring(1)}';
+    }).join(' ');
+  }
+
   //We pass our filtering through this parm later in the widget tree to keep things clean
   Widget _buildExerciseList(List<Exercise> exercisesToDisplay) {
     return ListView.builder(
@@ -80,7 +98,8 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
         return ListTile(
           title: Text(exercise.name, style: const TextStyle(color: Colors.white)),
           subtitle: Text(exercise.primaryMuscles.join(', '), style: const TextStyle(color: Colors.white54)),
-          trailing: const Icon(Icons.add_circle_outline, color: Colors.greenAccent),
+          // Desaturated trailing icon color
+          trailing: Icon(Icons.add_circle_outline, color: Colors.teal[200]),
           onTap: () {
             //Goes back to the workout screen only with the context of what the user selected
             Navigator.pop(context, exercise);
@@ -97,7 +116,8 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
       appBar: AppBar(
         title: const Text('Select Exercise', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.teal[800],
-        iconTheme: const IconThemeData(color: Colors.greenAccent),
+        // Softened back arrow icon color
+        iconTheme: IconThemeData(color: Colors.teal[200]),
         elevation: 0,
       ),
       body: Column(
@@ -106,38 +126,45 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
           //TODO Move styles to global styling for more consistency and less bloat
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.teal[800],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: TextFormField(
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                      decoration: const InputDecoration(
-                        hintText: 'Search by name...',
-                        hintStyle: TextStyle(color: Colors.white54),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                        isDense: true,
-                      ),
-                      //On every change we recall the apply filters with its set state
-                      //TODO Maybe later we add a autocomplete?
-                      onChanged: (value) {
-                        _currentSearchQuery = value;
-                        _applyFilters();
-                      },
-                    ),
-                  ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.teal[800],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              alignment: Alignment.center,
+              child: TextFormField(
+                controller: _searchController,
+                textAlign: TextAlign.left,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                decoration: InputDecoration(
+                  hintText: 'Search by name...',
+                  hintStyle: const TextStyle(color: Colors.white54),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  isDense: true,
+                  // As per the controller above I just wanted to add a clear button for a one press clear when users are searching
+                  suffixIcon: _currentSearchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.white70, size: 20),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _currentSearchQuery = '';
+                              _applyFilters();
+                            });
+                          },
+                        )
+                      : const Icon(Icons.search, color: Colors.white54, size: 20),
                 ),
-                const SizedBox(width: 8),
-                const Icon(Icons.search, color: Colors.white70),
-
-              ],
+                //On every change we recall the apply filters with its set state
+                // NOTE: Real-time list filtering used instead of autocomplete overlay.
+                onChanged: (value) {
+                  setState(() {
+                    _currentSearchQuery = value;
+                    _applyFilters();
+                  });
+                },
+              ),
             ),
           ),
 
@@ -149,26 +176,41 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
                 const SizedBox(width: 8),
                 const Text('Filter by Muscle: ', style: TextStyle(color: Colors.white70, fontSize: 16)),
                 const Spacer(),
-                DropdownButton<String>(
-                  //TODO Change to make look nicer
-                  value: _selectedMuscleGroup,
-                  dropdownColor: Colors.teal[800],
-                  style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16),
-                  underline: Container(height: 2, color: Colors.greenAccent.withValues(alpha: 0.5)),
-                  icon: const Icon(Icons.arrow_drop_down, color: Colors.greenAccent),
-                  items: _muscleGroups.map((String item) {
-                    return DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(item.toUpperCase()),
-                    );
-                  }).toList(),
-                  //On every change we recall the apply filters with its set state
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      _selectedMuscleGroup = newValue;
-                      _applyFilters();
-                    }
-                  },
+                //Using pill-style container matching the search bar rounded aesthetic
+                // Muted border color for less visual saturation
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.teal[800],
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  // DropdownButtonHideUnderline removes legacy underline decoration (basically we end up with a cleaner, pill container look)
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedMuscleGroup,
+                      dropdownColor: Colors.teal[800],
+                      borderRadius: BorderRadius.circular(12),
+                      // Softened text and arrow icon color
+                      style: TextStyle(color: Colors.teal[200], fontWeight: FontWeight.bold, fontSize: 15),
+                      icon: Icon(Icons.arrow_drop_down, color: Colors.teal[200]),
+                      isDense: true,
+                      items: _muscleGroups.map((String item) {
+                        return DropdownMenuItem<String>(
+                          value: item,
+                          // Uses _capitalize to format to Title Case as mentioned above
+                          child: Text(_capitalize(item)),
+                        );
+                      }).toList(),
+                      //On every change we recall the apply filters with its set state
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          _selectedMuscleGroup = newValue;
+                          _applyFilters();
+                        }
+                      },
+                    ),
+                  ),
                 ),
               ],
             ),
