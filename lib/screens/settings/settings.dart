@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 
-class Settings extends StatelessWidget {
-  const Settings({super.key});
+class AppSettings extends StatelessWidget {
+  const AppSettings({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(title: 'John Doe Lv.21'),
       backgroundColor: Colors.teal[900],
       body: Center(
         child: Column(

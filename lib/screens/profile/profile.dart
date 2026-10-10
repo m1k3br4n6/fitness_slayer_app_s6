@@ -7,7 +7,7 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(title: 'John Doe Lv.21'),
+      appBar: MyAppBar(),
       backgroundColor: Colors.teal[900],
       body: Center(
         child: Column(

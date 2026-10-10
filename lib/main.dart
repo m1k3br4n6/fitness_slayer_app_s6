@@ -7,13 +7,14 @@ import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   runApp(const MyApp()); //when app starts, runs MyApp()
 }
 
@@ -30,9 +31,23 @@ class MyApp extends StatelessWidget {
           value: AuthService().user, //stream we are going to listen to, accessing 'user' stream in auth class
           initialData: null,
           ),
+
+          // Current user's Firestore document
+          StreamProvider<DocumentSnapshot?>.value(
+            value: FirebaseAuth.instance.authStateChanges().asyncExpand((user) {
+              if (user == null) {
+                return Stream<DocumentSnapshot?>.value(null);
+              }
+
+              return FirebaseFirestore.instance.collection('test_users').doc(user.uid).snapshots()
+                  .map<DocumentSnapshot?>((snapshot) => snapshot);}),
+            initialData: null,
+          ),
+
           ChangeNotifierProvider( //actively listens for Changes in the workout screen
           create: (_) => WorkoutProvider(),
           ),
+
           ChangeNotifierProvider( //
             create: (_) => WorkoutTimerProvider(),
           ),

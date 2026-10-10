@@ -29,9 +29,7 @@ class _RestTimerCardState extends State<RestTimerCard> {
 
     return Scaffold(
       // TODO Change to actual user name
-      appBar: const MyAppBar(
-        title: 'John Doe Lv.21',
-      ),
+      appBar: MyAppBar(),
       backgroundColor: Colors.teal[900],
       body: Center(
         child: Padding(

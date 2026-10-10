@@ -11,9 +11,7 @@ class Calendar extends StatelessWidget {
     const startDayOffset = 1; // offset for starting day of the week
 
     return Scaffold(
-      appBar: const MyAppBar(
-        title: 'John Doe Lv.21',
-      ),
+      appBar: MyAppBar(),
       backgroundColor: Colors.teal[900],
       body: Padding(
         padding: const EdgeInsets.all(16.0),

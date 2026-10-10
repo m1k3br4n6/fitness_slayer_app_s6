@@ -1,5 +1,7 @@
+import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
+import 'package:fitness_slayer_01/widgets/constants.dart';
 
 class Login extends StatefulWidget {
   final Function toggleView;
@@ -12,6 +14,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
+  bool loading = false;
 
   String email = '';
   String password = '';
@@ -19,16 +22,19 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading ? Loading() : Scaffold( //if loading is true, show Loading widget
       backgroundColor: Colors.teal[900],
       appBar: AppBar(
         backgroundColor: Colors.teal,
         elevation: 0.0,
-        title: Text('Sign in'),
+        title: Text('Sign in',  style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+        ),),
         actions: <Widget>[
           TextButton.icon(
-            icon: const Icon(Icons.person),
-            label: const Text('Register'),
+            icon: const Icon(Icons.person, color: Colors.white,),
+            label: const Text('Register', style: TextStyle(color: Colors.white),),
             onPressed: () {
               widget.toggleView();
             },
@@ -43,6 +49,7 @@ class _LoginState extends State<Login> {
             children: <Widget>[
               SizedBox(height: 20.0),
               TextFormField(
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Email'),
                 validator: (val) => val == null || val.isEmpty
                     ? 'Enter an email'
                     : null,
@@ -52,6 +59,7 @@ class _LoginState extends State<Login> {
               ),
               SizedBox(height: 20.0),
               TextFormField(
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Password'),
                 obscureText: true,
                 validator: (val) => val == null || val.length < 6
                     ? 'Enter a password 6+ chars long'
@@ -69,17 +77,14 @@ class _LoginState extends State<Login> {
                 ),
                 child: Text('Sign in', style: TextStyle(color: Colors.white)),
                 onPressed: () async {
-                  if (_formKey.currentState?.validate() ??
-                      false)
+                  if (_formKey.currentState?.validate() ?? false)
                   {
-                    dynamic result = await _auth.signInWithEmailAndPassword(
-                      email,
-                      password,
-                    );
+                    setState(() => loading = true);
+                    dynamic result = await _auth.signInWithEmailAndPassword(email, password,);
                     if (result == null) {
                       setState(() {
-                        error =
-                            'could not sign in with those credentials';
+                        error = 'could not sign in with those credentials';
+                        loading = false;
                       });
                     }
                   }
