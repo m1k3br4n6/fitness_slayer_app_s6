@@ -124,9 +124,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
     return Scaffold(
       // TODO Change to actual user name
-      appBar: const MyAppBar(
-        title: 'John Doe Lv.21',
-      ),
+      appBar: MyAppBar(),
       backgroundColor: Colors.teal[900],
       body: SingleChildScrollView(
         child: Padding(

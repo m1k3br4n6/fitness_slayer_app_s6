@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/screens/Pages/workout.dart';
 
 class WorkoutPlanning extends StatefulWidget {
@@ -20,6 +21,7 @@ class _WorkoutPlanningState extends State<WorkoutPlanning> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: MyAppBar(),
       backgroundColor: Colors.teal[900],
       body: Stack(
         children: [

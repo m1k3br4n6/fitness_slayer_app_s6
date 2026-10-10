@@ -1,5 +1,7 @@
+import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
+import 'package:fitness_slayer_01/widgets/constants.dart';
 
 class Register extends StatefulWidget {
   final Function toggleView;
@@ -12,23 +14,29 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
+  bool loading = false;
 
   String email = '';
   String password = '';
+  String passwordConfirm = '';
+  String username = '';
   String error = '';
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading ? Loading() : Scaffold(
       backgroundColor: Colors.teal[900],
       appBar: AppBar(
         backgroundColor: Colors.teal,
         elevation: 0.0,
-        title: Text('Register'),
+        title: Text('Register', style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+        ),),
         actions: <Widget>[
           TextButton.icon(
-            icon: Icon(Icons.person),
-            label: Text('Log In'),
+            icon: Icon(Icons.person, color: Colors.white,),
+            label: Text('Log In', style: TextStyle(color: Colors.white),),
             onPressed: () {
               widget
                   .toggleView();
@@ -43,16 +51,33 @@ class _RegisterState extends State<Register> {
           child: Column(
             children: <Widget>[
               SizedBox(height: 20.0),
+              //Username input field
               TextFormField(
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Username'),
+                validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 11
+                    ? 'Enter an unique username, between 6 - 11 characters long'
+                    : null,
+                onChanged: (val) {
+                  username = val;
+                },
+              ),
+              SizedBox(height: 20.0),
+              //Email input field
+              TextFormField(
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Email'),
                 validator: (val) => val == null || val.isEmpty
                     ? 'Enter an email'
                     : null,
                 onChanged: (val) {
-                  email = val;
+                  setState(() {
+                    email = val;
+                  });
                 },
               ),
               SizedBox(height: 20.0),
+              //Password input field
               TextFormField(
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Password'),
                 obscureText: true,
                 validator: (val) => val == null || val.length < 6
                     ? 'Enter a password 6+ chars long'
@@ -64,23 +89,35 @@ class _RegisterState extends State<Register> {
                 },
               ),
               SizedBox(height: 20.0),
+              //Confirm password input field
+              TextFormField(
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Confirm Password'),
+                obscureText: true,
+                validator: (val) => val == null || val.length < 6 || val != password
+                    ? 'Must match password'
+                    : null,
+                onChanged: (val) {
+                  setState(() {
+                    passwordConfirm = val;
+                  });
+                },
+              ),
+              SizedBox(height: 20.0),
+              //Register button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink[400],
                 ),
                 child: Text('Register', style: TextStyle(color: Colors.white)),
                 onPressed: () async {
-                  if (_formKey.currentState?.validate() ??
-                      false)
+                  if (_formKey.currentState?.validate() ?? false)
                   {
-                    dynamic result = await _auth.registerWithEmailAndPassword(
-                      email,
-                      password,
-                    );
+                    setState(() => loading = true);
+                    dynamic result = await _auth.registerWithEmailAndPassword(username, email, password,);
                     if (result == null) {
                       setState(() {
-                        error =
-                            'please supply valid email';
+                        error = 'please supply valid email';
+                        loading = false;
                       });
                     }
                   }

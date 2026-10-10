@@ -1,12 +1,15 @@
 import 'package:fitness_slayer_01/screens/notifications/notifications.dart';
 import 'package:fitness_slayer_01/screens/notifications/side-quest.dart';
 import 'package:fitness_slayer_01/screens/planning/calendar.dart';
+import 'package:fitness_slayer_01/screens/settings/settings.dart';
 import 'package:fitness_slayer_01/screens/planning/workout-planning.dart';
 import 'package:fitness_slayer_01/screens/profile/profile.dart';
-import 'package:fitness_slayer_01/screens/settings/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/screens/game-features/shop.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
+import 'package:fitness_slayer_01/services/database.dart';
+import 'package:provider/provider.dart';
+import 'package:fitness_slayer_01/widgets/app_bar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -82,13 +85,8 @@ class _HomeState extends State<Home> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fitness Slayer',
-          style: TextStyle(color: Colors.white, fontSize: 20),
-        ),
-        backgroundColor: Colors.teal[800],
-        elevation: 0.0,
-        actions: <Widget>[
+      appBar: MyAppBar(
+        actions: [
           //notification page icon button
           IconButton(
             icon: const Icon(Icons.notifications, color: Colors.white70),
@@ -106,7 +104,7 @@ class _HomeState extends State<Home> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const Settings()),
+                MaterialPageRoute(builder: (context) => const AppSettings()),
               );
             },
           ),
@@ -121,6 +119,7 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
+
       backgroundColor: Colors.teal[900],
 
       //IndexedStack keeps state alive so switching tabs doesn't wipe your screen data
