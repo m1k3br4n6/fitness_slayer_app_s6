@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
-import 'package:fitness_slayer_01/screens/Pages/exercise_info_screen.dart';
-import 'package:fitness_slayer_01/screens/Pages/rest_timer.dart';
+import 'package:fitness_slayer_01/screens/workout/exercise_info_screen.dart';
+import 'package:fitness_slayer_01/screens/workout/rest_timer.dart';
 
 import '../providers/workout_timer.dart';
 

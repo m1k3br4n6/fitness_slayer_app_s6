@@ -10,6 +10,15 @@ class DatabaseService {
         .collection('workoutsCompleted')
         .add(workout.toMap());
   }
+
+  Future<void> saveRoutine(String userId, Map<String, dynamic> routineData) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('routines')
+        .add(routineData);
+  }
+
 }
 
 
