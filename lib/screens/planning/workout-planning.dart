@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fitness_slayer_01/widgets/app_bar.dart';
-import 'package:fitness_slayer_01/screens/Pages/workout.dart';
+import 'package:fitness_slayer_01/screens/workout/workout.dart';
+import 'package:fitness_slayer_01/screens/routines/create_routine.dart';
+
+import '../routines/select_routine.dart';
 
 class WorkoutPlanning extends StatefulWidget {
   const WorkoutPlanning({super.key});
@@ -65,9 +67,29 @@ class _WorkoutPlanningState extends State<WorkoutPlanning> {
               label: const Text('Select From Routines', style: TextStyle(color: Colors.white, fontSize: 16)),
               onPressed: () {
                 _toggleMenu();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SelectRoutineScreen()),
+                );
               },
             ),
             const SizedBox(height: 16),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal[800],
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: const StadiumBorder(),
+              ),
+              icon: const Icon(Icons.list_alt, color: Colors.tealAccent),
+              label: const Text('Create New Routines', style: TextStyle(color: Colors.white, fontSize: 16)),
+              onPressed: () {
+                _toggleMenu();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CreateRoutineScreen()),
+                );
+              },
+            ),
           ],
           FloatingActionButton(
             backgroundColor: Colors.teal[800],

@@ -61,4 +61,14 @@ class WorkoutProvider extends ChangeNotifier {
     _activeExercises.clear();
     notifyListeners();
   }
+
+  void updateSetWeight(int exerciseIndex, int setIndex, String weight) {
+    activeExercises[exerciseIndex].sets[setIndex].weight = weight;
+    notifyListeners();
+  }
+
+  void updateSetReps(int exerciseIndex, int setIndex, String reps) {
+    activeExercises[exerciseIndex].sets[setIndex].reps = reps;
+    notifyListeners();
+  }
 }
