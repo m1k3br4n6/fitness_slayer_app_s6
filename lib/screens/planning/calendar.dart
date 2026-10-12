@@ -46,7 +46,6 @@ class _CalendarState extends State<Calendar> {
     final monthTitle = '${_monthNames[month - 1]} $year';
 
     return Scaffold(
-      appBar: MyAppBar(),
       backgroundColor: Colors.teal[900],
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -54,8 +54,8 @@ class _RegisterState extends State<Register> {
               //Username input field
               TextFormField(
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Username'),
-                validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 11
-                    ? 'Enter an unique username, between 6 - 11 characters long'
+                validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 18
+                    ? 'Enter an unique username, between 6 - 18 characters long'
                     : null,
                 onChanged: (val) {
                   username = val;
