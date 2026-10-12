@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/widgets/exercise_card.dart';
@@ -6,6 +5,7 @@ import 'package:fitness_slayer_01/widgets/exercise_search.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/routine.dart';
 import '../../services/database_service.dart';
 
 class CreateRoutineScreen extends StatefulWidget {
@@ -73,28 +73,27 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       }
     });
 
-    // Map Provider data into a raw Map for the Routine
-    final Map<String, dynamic> routineData = {
-      'routineName': _routineNameController.text.trim(),
-      'dateCreated': FieldValue.serverTimestamp(),
-      'exercises': workoutProvider.activeExercises.map((activeEx) {
-        return {
-          'exerciseId': activeEx.exercise.id,
-          'exerciseName': activeEx.exercise.name,
-          'targetSets': activeEx.sets.asMap().entries.map((entry) {
-            return {
-              'setNumber': entry.key + 1,
-              'targetWeight': double.tryParse(entry.value.weight) ?? 0.0,
-              'targetReps': int.tryParse(entry.value.reps) ?? 0,
-            };
+    // Map Provider data into the Routine model
+    final newRoutine = Routine(
+      routineName: _routineNameController.text.trim(),
+      exercises: workoutProvider.activeExercises.map((activeEx) {
+        return RoutineExercise(
+          exerciseId: activeEx.exercise.id,
+          exerciseName: activeEx.exercise.name,
+          targetSets: activeEx.sets.asMap().entries.map((entry) {
+            return RoutineSet(
+              setNumber: entry.key + 1,
+              targetWeight: double.tryParse(entry.value.weight) ?? 0.0,
+              targetReps: int.tryParse(entry.value.reps) ?? 0,
+            );
           }).toList(),
-        };
+        );
       }).toList(),
-    };
+    );
 
     try {
 
-      await DatabaseService().saveRoutine(currentUserId, routineData);
+      await DatabaseService().saveRoutine(currentUserId, newRoutine.toMap());
 
       if (mounted) {
         workoutProvider.clearWorkout();

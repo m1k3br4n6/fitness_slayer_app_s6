@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/screens/workout/workout.dart';
 import 'package:fitness_slayer_01/screens/routines/create_routine.dart';
+
+import '../routines/select_routine.dart';
 
 class WorkoutPlanning extends StatefulWidget {
   const WorkoutPlanning({super.key});
@@ -68,7 +69,7 @@ class _WorkoutPlanningState extends State<WorkoutPlanning> {
                 _toggleMenu();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const WorkoutScreen()),
+                  MaterialPageRoute(builder: (context) => const SelectRoutineScreen()),
                 );
               },
             ),
