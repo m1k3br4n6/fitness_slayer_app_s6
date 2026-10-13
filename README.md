@@ -1,17 +1,17 @@
-# fitness_slayer_01
+# fitness_slayer
 
-first version of fitness slayer mobile application.
+This is the first version of our gamified fitness mobile application!
 
-## Getting Started
+## Goal / Purpose
+This project's development is based on the results of a previous module's research project, where we analyzed the correlation between sedentary behavior in university students and the evidently resulting decline in physical health and mental wellness. The aim of this application is to incentivize university student users to participate in daily physical activity whilst remaining flexible and compatible with ever-changing academic and extracurricular schedules.
 
-This project is a starting point for a Flutter application.
+## Functionality
+Allows users to register and sign-in, create and customize their own unique slayer avatar, and complete exercises and challenges to unlock in-game rewards such as experience points (XP) and coins, which they can exchange for customization options in the store. Challenges include daily side-quests, achieving user-set fitness-oriented goals and slaying Boss-enemies!
 
-A few resources to get you started if this is your first Flutter project:
+## Tech Stack
+> Android Studio
+> Flutter (Dart)
+> Firebase Authentication
+> Firebase Firestore
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Online Flutter documentation: (https://docs.flutter.dev/)
