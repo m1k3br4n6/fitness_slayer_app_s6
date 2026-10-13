@@ -14,8 +14,8 @@ class Shop extends StatefulWidget {
 }
 
 class _ShopState extends State<Shop> {
-  StoreCategory? _selectedCategory; // null means show every category
-  String? _buyingItemId; // id of the item currently being bought
+  StoreCategory? _selectedCategory; 
+  String? _buyingItemId;
 
   Future<void> _buy(StoreItem item, String uid) async {
     final confirmed = await showDialog<bool>(
@@ -200,8 +200,8 @@ class _ItemCard extends StatelessWidget {
   final StoreItem item;
   final int coins;
   final bool isOwned;
-  final bool isBuying; // this card is the one being bought right now
-  final bool isBusy; // any purchase is in progress, so block other taps
+  final bool isBuying;
+  final bool isBusy;
   final VoidCallback onBuy;
 
   const _ItemCard({
