@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class Exercise {
@@ -10,6 +11,9 @@ class Exercise {
   final String mechanic;
   final String force;
   final List<String> instructions;
+
+  // Static in-memory cache so exercises.json is loaded and parsed ONLY ONCE
+  static List<Exercise>? _cachedExercises;
 
   Exercise({
     required this.id,
@@ -32,14 +36,27 @@ class Exercise {
       mechanic: json['mechanic'] ?? 'compound',
       force: json['force'] ?? 'pull',
       instructions: List<String>.from(json['instructions'] ?? []),
-
     );
   }
 
-  static Future<List<Exercise>> loadExercises() async {
-    final String response = await rootBundle.loadString('assets/exercises.json');
-    final List<dynamic> data = json.decode(response);
-
+  // Top-level / static function for compute isolate parsing
+  static List<Exercise> _parseExercisesJson(String jsonString) {
+    final List<dynamic> data = json.decode(jsonString);
     return data.map((json) => Exercise.fromJson(json)).toList();
+  }
+
+  static Future<List<Exercise>> loadExercises() async {
+    // 1. If already loaded in memory, return cached list instantly (0ms)
+    if (_cachedExercises != null) {
+      return _cachedExercises!;
+    }
+
+    // 2. Read asset file string
+    final String response = await rootBundle.loadString('assets/exercises.json');
+
+    // 3. Use compute() to parse 22,000+ lines in a background isolate off the UI main thread
+    _cachedExercises = await compute(_parseExercisesJson, response);
+
+    return _cachedExercises!;
   }
 }

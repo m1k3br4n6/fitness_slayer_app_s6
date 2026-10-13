@@ -56,7 +56,7 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
     if (mounted) {
       setState(() {
         _allExercises = exercises;
-        //Recalls each time with the set state so we can keep the function on void
+        // Recalls each time with the set state so we can keep the function on void
         // and reuse for both filtering and can add more filtering later
         _applyFilters();
       });
@@ -89,7 +89,7 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
     }).join(' ');
   }
 
-  //We pass our filtering through this parm later in the widget tree to keep things clean
+  // We pass our filtering through this parm later in the widget tree to keep things clean
   Widget _buildExerciseList(List<Exercise> exercisesToDisplay) {
     return ListView.builder(
       itemCount: exercisesToDisplay.length,
@@ -101,7 +101,7 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
           // Desaturated trailing icon color
           trailing: Icon(Icons.add_circle_outline, color: Colors.teal[200]),
           onTap: () {
-            //Goes back to the workout screen only with the context of what the user selected
+            // Goes back to the workout screen only with the context of what the user selected
             Navigator.pop(context, exercise);
           },
         );
@@ -122,7 +122,7 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
       ),
       body: Column(
         children: [
-          // SEARCH BAR ROW
+          // Search bar row
           //TODO Move styles to global styling for more consistency and less bloat
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -156,7 +156,7 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
                         )
                       : const Icon(Icons.search, color: Colors.white54, size: 20),
                 ),
-                //On every change we recall the apply filters with its set state
+                // On every change we recall the apply filters with its set state
                 // NOTE: Real-time list filtering used instead of autocomplete overlay.
                 onChanged: (value) {
                   setState(() {
@@ -168,7 +168,7 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
             ),
           ),
 
-          // DROPDOWN FILTER ROW
+          // Dropdown filter row
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -176,7 +176,7 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
                 const SizedBox(width: 8),
                 const Text('Filter by Muscle: ', style: TextStyle(color: Colors.white70, fontSize: 16)),
                 const Spacer(),
-                //Using pill-style container matching the search bar rounded aesthetic
+                // Using pill-style container matching the search bar rounded aesthetic
                 // Muted border color for less visual saturation
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -202,7 +202,7 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
                           child: Text(_capitalize(item)),
                         );
                       }).toList(),
-                      //On every change we recall the apply filters with its set state
+                      // On every change we recall the apply filters with its set state
                       onChanged: (String? newValue) {
                         if (newValue != null) {
                           _selectedMuscleGroup = newValue;
@@ -218,7 +218,7 @@ class _ExerciseSearchScreenState extends State<ExerciseSearchScreen> {
 
           const Divider(color: Colors.white24, height: 24),
 
-          // LIST OF EXERCISES
+          // List of exercises
           Expanded(
             child: _buildExerciseList(_filteredExercisesList),
           ),

@@ -7,8 +7,6 @@ import 'package:fitness_slayer_01/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/screens/game-features/shop.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
-import 'package:fitness_slayer_01/services/database.dart';
-import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 
 class Home extends StatefulWidget {
@@ -34,45 +32,56 @@ class _HomeState extends State<Home> {
       const Calendar(),
 
       // main dashboard hub
-      SingleChildScrollView(
-        child: Container(
-          width: double.infinity, // Forces full width so Column aligns perfectly horizontally
-          padding: const EdgeInsets.only(top: 60.0, left: 20.0, right: 20.0, bottom: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text(
-                'Welcome Home, Great Slayer.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 48), // Increased spacing to separate button from top welcome text
+      LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.only(top: 40.0, left: 20.0, right: 20.0, bottom: 24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Welcome Home, Great Slayer.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
 
-              // daily challenge button
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal[800],
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                      // Empty spacer area for future campfire scenes, assets, GIFs, videos, or widgets
+                      const Spacer(),
+
+                      // daily challenge button anchored at the bottom
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal[800],
+                          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SideQuest()),
+                          );
+                        },
+                        child: const Text('Daily Side Quest', style: TextStyle(color: Colors.white, fontSize: 16)),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                   ),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const SideQuest()),
-                  );
-                },
-                child: const Text('Daily Side Quest', style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
 
       // store / shop page
