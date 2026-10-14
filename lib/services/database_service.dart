@@ -22,6 +22,15 @@ class DatabaseService {
         .add(routineData);
   }
 
+  Future<void> updateRoutine(String userId, String routineId, Map<String, dynamic> routineData) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('routines')
+        .doc(routineId)
+        .set(routineData, SetOptions(merge: true));
+  }
+
   // Fetches from: users / {userId} / routines / {auto-generated-doc-id}
   Stream<List<Routine>> getUserRoutines(String userId) {
     return FirebaseFirestore.instance
@@ -42,7 +51,4 @@ class DatabaseService {
         .doc(routineId)
         .delete();
   }
-
 }
-
-

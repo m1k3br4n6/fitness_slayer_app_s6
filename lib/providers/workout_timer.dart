@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class WorkoutTimerProvider extends ChangeNotifier {
 
-  //WORKOUT TIMER
+  // WORKOUT TIMER
   final Stopwatch _stopwatch = Stopwatch();
   Timer? _workoutTimer;
 
@@ -30,6 +30,7 @@ class WorkoutTimerProvider extends ChangeNotifier {
     if (_stopwatch.isRunning) return;
 
     _stopwatch.start();
+    _workoutTimer?.cancel();
     _workoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       notifyListeners();
     });
@@ -43,7 +44,7 @@ class WorkoutTimerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  //REST TIMER
+  // REST TIMER
 
   int _restSecondsRemaining = 0;
   Timer? _restTimer;
@@ -56,12 +57,15 @@ class WorkoutTimerProvider extends ChangeNotifier {
 
   // Formats rest time nicely as MM:SS
   String get formattedRestTime {
+    if (_restSecondsRemaining <= 0) return "00:00";
     int minutes = (_restSecondsRemaining ~/ 60) % 60;
     int seconds = _restSecondsRemaining % 60;
     return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
   }
 
   void startRest(int seconds) {
+    // Cleanly cancel any existing rest timer to prevent duplicate ticking loops
+    _restTimer?.cancel();
     _restSecondsRemaining = seconds;
     _isRestRunning = true;
     _isRestPaused = false;
@@ -70,8 +74,20 @@ class WorkoutTimerProvider extends ChangeNotifier {
     _startTimerLoop();
   }
 
+  void addRestSeconds(int seconds) {
+    if (!_isRestRunning && _restSecondsRemaining <= 0) return;
+
+    _restSecondsRemaining += seconds;
+    if (_restSecondsRemaining <= 0) {
+      stopRest();
+    } else {
+      notifyListeners();
+    }
+  }
+
   // Private helper to handle the ticking loop
   void _startTimerLoop() {
+    _restTimer?.cancel();
     _restTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_restSecondsRemaining > 0) {
         _restSecondsRemaining--;
@@ -102,10 +118,7 @@ class WorkoutTimerProvider extends ChangeNotifier {
 
   // RESTART METHOD
   void restartRest(int seconds) {
-    _restTimer?.cancel();
-    _isRestRunning = false;
-    _isRestPaused = false;
-
+    stopRest();
     startRest(seconds);
   }
 
@@ -117,8 +130,6 @@ class WorkoutTimerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
   @override
   void dispose() {
     _workoutTimer?.cancel();
@@ -126,4 +137,3 @@ class WorkoutTimerProvider extends ChangeNotifier {
     super.dispose();
   }
 }
-

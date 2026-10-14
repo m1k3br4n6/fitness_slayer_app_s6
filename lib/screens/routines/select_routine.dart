@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/models/routine.dart';
 import '../../services/database_service.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
@@ -9,7 +12,8 @@ class SelectRoutineScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String currentUserId = 'Bernard'; // TODO: AUTH TEAM
+    final user = Provider.of<myUser?>(context);
+    final String currentUserId = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
 
     return Scaffold(
       appBar: const MyAppBar(),
@@ -17,7 +21,9 @@ class SelectRoutineScreen extends StatelessWidget {
 
       // StreamBuilder listens to Firestore and rebuilds when data changes
       body: StreamBuilder<List<Routine>>(
-        stream: DatabaseService().getUserRoutines(currentUserId),
+        stream: currentUserId.isNotEmpty
+            ? DatabaseService().getUserRoutines(currentUserId)
+            : const Stream.empty(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: Colors.greenAccent));

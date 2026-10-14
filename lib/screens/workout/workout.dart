@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/widgets/exercise_card.dart';
 import 'package:fitness_slayer_01/widgets/exercise_search.dart';
@@ -10,23 +12,26 @@ import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/widgets/workout_timer_card.dart';
 import 'package:fitness_slayer_01/widgets/mini_rest_timer.dart';
 
-class WorkoutScreen extends StatefulWidget {
-  const WorkoutScreen({super.key});
+class WorkoutView extends StatefulWidget {
+  final VoidCallback? onWorkoutFinished;
+
+  const WorkoutView({super.key, this.onWorkoutFinished});
 
   @override
-  State<WorkoutScreen> createState() => _WorkoutScreenState();
+  State<WorkoutView> createState() => _WorkoutViewState();
 }
 
-class _WorkoutScreenState extends State<WorkoutScreen> {
-
-  bool _isSubmitting = false; //For disabling finish workout button after submit
+class _WorkoutViewState extends State<WorkoutView> {
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    // timer provider init as screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WorkoutTimerProvider>().start();
+      final timerProvider = context.read<WorkoutTimerProvider>();
+      if (!timerProvider.isRunning) {
+        timerProvider.start();
+      }
     });
   }
 
@@ -34,11 +39,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     final selectedExercise = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const ExerciseSearchScreen(), //widgets/exercise_search
+        builder: (context) => const ExerciseSearchScreen(),
       ),
     );
 
-    // If the user picked an exercise add it
     if (selectedExercise != null && mounted) {
       setState(() {
         context.read<WorkoutProvider>().addExercise(selectedExercise);
@@ -46,12 +50,49 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     }
   }
 
+  Future<void> _cancelWorkout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.teal[800],
+        title: const Text('Cancel Workout?', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Are you sure you want to cancel? Progress for this session will be lost.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('NO', style: TextStyle(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('CANCEL WORKOUT', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      context.read<WorkoutProvider>().clearWorkout();
+      context.read<WorkoutTimerProvider>().stopAndReset();
+      widget.onWorkoutFinished?.call();
+    }
+  }
+
   Future<void> _finishWorkout() async {
     final workoutProvider = context.read<WorkoutProvider>();
     final timerProvider = context.read<WorkoutTimerProvider>();
 
-    // TODO: AUTH TEAM - Remove hardcoded ID once login is fully ready please.
-    const String currentUserId = 'Bernard';
+    final user = context.read<myUser?>();
+    final String currentUserId = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    if (currentUserId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please sign in to save your workout.')),
+      );
+      return;
+    }
 
     if (workoutProvider.activeExercises.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -64,18 +105,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       _isSubmitting = true;
     });
 
-    Future.delayed(const Duration(seconds: 10), () {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-      }
-    });
-
-    // NEW: Map Provider data into Database Models
     final completedWorkout = CompletedWorkout(
       dateCompleted: DateTime.now(),
-      durationMinutes: timerProvider.elapsedMinutes, // TODO: Add real timer later
+      durationMinutes: timerProvider.elapsedMinutes,
       exercises: workoutProvider.activeExercises.map((activeEx) {
         return WorkoutExercise(
           exerciseId: activeEx.exercise.id,
@@ -91,23 +123,26 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       }).toList(),
     );
 
-    // Push to Firestore using models/completed_workout
     try {
-
       await DatabaseService().saveWorkout(currentUserId, completedWorkout);
 
       if (mounted) {
         workoutProvider.clearWorkout();
         timerProvider.stopAndReset();
 
-        // Todo change this later just temp feedback
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Workout Saved Successfully!', style: TextStyle(color: Colors.greenAccent))),
+          const SnackBar(
+            content: Text('Workout Saved Successfully!', style: TextStyle(color: Colors.greenAccent)),
+          ),
         );
-        Navigator.pop(context);
+
+        widget.onWorkoutFinished?.call();
       }
     } catch (e) {
       if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to save: $e', style: const TextStyle(color: Colors.redAccent))),
         );
@@ -117,83 +152,131 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final workoutData = context.watch<WorkoutProvider>();
     final timerData = context.watch<WorkoutTimerProvider>();
     bool isRestRemaining = timerData.restSecondsRemaining > 0;
 
-    return Scaffold(
-      // TODO Change to actual user name
-      appBar: MyAppBar(),
-      backgroundColor: Colors.teal[900],
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: Column(
-            children: [
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Column(
+                children: [
+                  const WorkoutTimerCard(),
 
-              // Stopwatch
-              const WorkoutTimerCard(),
+                  ...workoutData.activeExercises.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    ActiveExercise activeEx = entry.value;
 
-              // Spread operator lets line read from right to left and after each entry has been mapped with its
-              // own key value pair the ... lets each container be its own widget so that each of the objects gets mapped
-              // and displayed properly
-              ...workoutData.activeExercises.asMap().entries.map((entry) {
-                int index = entry.key;
-                ActiveExercise activeEx = entry.value;
+                    return ExerciseCard(
+                      exerciseIndex: index,
+                      exerciseId: activeEx.exercise.id,
+                      exerciseName: activeEx.exercise.name,
+                      primaryMuscles: activeEx.exercise.primaryMuscles,
+                      mechanic: activeEx.exercise.mechanic,
+                      force: activeEx.exercise.force,
+                      instructions: activeEx.exercise.instructions,
+                      onDelete: () {
+                        context.read<WorkoutProvider>().removeExercise(index);
+                      },
+                    );
+                  }),
 
-                return ExerciseCard(
-                  exerciseIndex: index,
-                  exerciseId: activeEx.exercise.id,
-                  exerciseName: activeEx.exercise.name,
-                  primaryMuscles: activeEx.exercise.primaryMuscles,
-                  mechanic: activeEx.exercise.mechanic,
-                  force: activeEx.exercise.force,
-                  instructions: activeEx.exercise.instructions,
+                  const SizedBox(height: 20),
 
-                  onDelete: () {
-                    context.read<WorkoutProvider>().removeExercise(index);
-                  },
-                );
-              }),
-
-              const SizedBox(height: 20),
-
-              // Modern M3 tonal teal button for adding exercises
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal[800],
-                  foregroundColor: Colors.tealAccent,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal[800],
+                      foregroundColor: Colors.tealAccent,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
+                    icon: const Icon(Icons.add_rounded, color: Colors.tealAccent),
+                    label: const Text(
+                      'Add Exercise',
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                    onPressed: _navigateAndAddExercise,
                   ),
-                  elevation: 2,
-                ),
-                icon: const Icon(Icons.add_rounded, color: Colors.tealAccent),
-                label: const Text(
-                  'Add Exercise',
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                onPressed: _navigateAndAddExercise,
-              ),
 
-              const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
-              ElevatedButton(
-                onPressed: _isSubmitting ? null : _finishWorkout,
-                child: const Text('FINISH WORKOUT'),
+                  // Finish Workout button
+                  SizedBox(
+                    width: 260,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[800],
+                        foregroundColor: Colors.tealAccent,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                      icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.tealAccent, size: 24),
+                      label: const Text(
+                        'Finish Workout',
+                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: _isSubmitting ? null : _finishWorkout,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Cancel Workout button below Finish
+                  SizedBox(
+                    width: 260,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[800],
+                        foregroundColor: Colors.redAccent,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                      icon: const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 24),
+                      label: const Text(
+                        'Cancel Workout',
+                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: _cancelWorkout,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                ],
               ),
-            ],
+            ),
           ),
         ),
+        if (isRestRemaining) const MiniRestTimer(),
+      ],
+    );
+  }
+}
+
+class WorkoutScreen extends StatelessWidget {
+  const WorkoutScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const MyAppBar(),
+      backgroundColor: Colors.teal[900],
+      body: WorkoutView(
+        onWorkoutFinished: () {
+          Navigator.pop(context);
+        },
       ),
-
-      //Breadcrumb for miniRestTimer
-      bottomNavigationBar: isRestRemaining
-          ? const MiniRestTimer()
-          : const SizedBox.shrink(),
-
     );
   }
 }

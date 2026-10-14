@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/models/routine.dart';
 import 'package:fitness_slayer_01/models/exercises.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
-import 'package:fitness_slayer_01/screens/workout/workout.dart';
+import 'package:fitness_slayer_01/screens/routines/create_routine.dart';
 import '../../services/database_service.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'dart:convert';
@@ -16,7 +18,17 @@ class RoutineDetailScreen extends StatelessWidget {
   const RoutineDetailScreen({super.key, required this.routine});
 
   Future<void> _deleteRoutine(BuildContext context) async {
-    const String currentUserId = 'Bernard'; // TODO: AUTH TEAM
+    final user = Provider.of<myUser?>(context, listen: false);
+    final String currentUserId = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    if (currentUserId.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please sign in to delete a routine.')),
+        );
+      }
+      return;
+    }
 
     try {
       await DatabaseService().deleteRoutine(currentUserId, routine.id);
@@ -81,12 +93,8 @@ class RoutineDetailScreen extends StatelessWidget {
       if (context.mounted) {
         timerProvider.start();
 
-        // Use pushReplacement so screen is removed from the navigation stack prevents
-        // accidentally swiping out of an active workout into setup screen.
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const WorkoutScreen()),
-        );
+        // Pop back to home screen so WorkoutPlanning displays the active workout in place
+        Navigator.popUntil(context, (route) => route.isFirst);
       }
     } catch (e) {
       if (context.mounted) {
@@ -118,7 +126,23 @@ class RoutineDetailScreen extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 32),
+                  icon: const Icon(Icons.edit_outlined, color: Colors.tealAccent, size: 28),
+                  tooltip: 'Edit Routine',
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateRoutineScreen(initialRoutine: routine),
+                      ),
+                    );
+                    if (result == true && context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 28),
+                  tooltip: 'Delete Routine',
                   onPressed: () {
                     showDialog(
                       context: context,
@@ -142,7 +166,7 @@ class RoutineDetailScreen extends StatelessWidget {
                       ),
                     );
                   },
-                )
+                ),
               ],
             ),
           ),
