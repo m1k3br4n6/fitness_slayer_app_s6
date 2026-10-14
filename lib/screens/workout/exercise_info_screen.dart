@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:muscle_mapper/muscle_mapper.dart';
+import 'exercise_demo_screen.dart';
 
 class ExerciseInfoScreen extends StatelessWidget {
   final String exerciseId;
@@ -77,7 +78,6 @@ class ExerciseInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Calculated ONCE per build phase to eliminate redundant loop evaluations
     final Set<Muscle> activeMuscles = _getActiveMuscles();
 
     return Scaffold(
@@ -87,6 +87,23 @@ class ExerciseInfoScreen extends StatelessWidget {
         backgroundColor: Colors.teal[800],
         iconTheme: IconThemeData(color: Colors.teal[200]),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline_rounded, color: Colors.greenAccent),
+            tooltip: 'View Exercise Demo',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ExerciseDemoScreen(
+                    exerciseId: exerciseId,
+                    exerciseName: exerciseName,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -94,22 +111,21 @@ class ExerciseInfoScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Muscle highlighter
-              // Resolved: High contrast base color and desaturated teal highlight color for active muscles
+              // Muscle highlighter with high-contrast crisp body lines and vibrant active muscle highlight
               Container(
                 width: 320,
                 height: 320,
                 decoration: BoxDecoration(
-                    color: Colors.grey[900],
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.teal[300]!.withValues(alpha: 0.3), width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        blurRadius: 12,
-                        spreadRadius: 2,
-                      )
-                    ]
+                  color: Colors.teal[950],
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.5), width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      blurRadius: 16,
+                      spreadRadius: 2,
+                    ),
+                  ],
                 ),
                 padding: const EdgeInsets.all(20),
                 child: MuscleMapper(
@@ -117,16 +133,15 @@ class ExerciseInfoScreen extends StatelessWidget {
                   assetProvider: const DefaultAnatomyProvider(),
                   activeMuscles: activeMuscles,
                   muscleColors: {
-                    for (var muscle in activeMuscles) muscle: Colors.teal[300]!,
+                    for (var muscle in activeMuscles) muscle: Colors.greenAccent,
                   },
-                  baseColor: Colors.white24,
+                  baseColor: Colors.white60,
                 ),
               ),
 
               const SizedBox(height: 32),
 
               // Exercise information & instructions container
-              // Resolved: Formatted dumped text into badges, key-value pills, and a numbered step-by-step list
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -213,9 +228,49 @@ class ExerciseInfoScreen extends StatelessWidget {
                     const Divider(color: Colors.white12),
                     const SizedBox(height: 12),
 
-                    // Numbered Instructions
-                    const Text('Instructions:',
-                        style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                    // Instructions Header with Visual Demo button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Instructions:',
+                          style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ExerciseDemoScreen(
+                                  exerciseId: exerciseId,
+                                  exerciseName: exerciseName,
+                                ),
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.teal[700],
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.teal[200]!.withValues(alpha: 0.3)),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.help_outline_rounded, color: Colors.greenAccent, size: 16),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Visual Demo',
+                                  style: TextStyle(color: Colors.greenAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 12),
 
                     if (instructions.isEmpty)
@@ -238,8 +293,10 @@ class ExerciseInfoScreen extends StatelessWidget {
                                   color: Colors.teal[700],
                                   shape: BoxShape.circle,
                                 ),
-                                child: Text('$stepNum',
-                                    style: TextStyle(color: Colors.teal[200], fontWeight: FontWeight.bold, fontSize: 11)),
+                                child: Text(
+                                  '$stepNum',
+                                  style: TextStyle(color: Colors.teal[200], fontWeight: FontWeight.bold, fontSize: 11),
+                                ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -255,65 +312,6 @@ class ExerciseInfoScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
-              const SizedBox(height: 40),
-
-              // Exercise demonstration images
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/$exerciseId/0.jpg',
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            height: 150,
-                            color: Colors.teal[800],
-                            child: const Center(child: CircularProgressIndicator(color: Colors.tealAccent)),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 150,
-                            color: Colors.teal[800],
-                            child: const Icon(Icons.broken_image_outlined, color: Colors.white38, size: 40),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/$exerciseId/1.jpg',
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            height: 150,
-                            color: Colors.teal[800],
-                            child: const Center(child: CircularProgressIndicator(color: Colors.tealAccent)),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 150,
-                            color: Colors.teal[800],
-                            child: const Icon(Icons.broken_image_outlined, color: Colors.white38, size: 40),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
             ],
           ),
         ),

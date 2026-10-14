@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:fitness_slayer_01/screens/workout/exercise_info_screen.dart';
-import 'package:fitness_slayer_01/screens/workout/rest_timer.dart';
 
 import '../providers/workout_timer.dart';
 
@@ -207,12 +206,6 @@ class _ExerciseCardState extends State<ExerciseCard> {
                     // Start rest timer
                     if (!currentSet.isCompleted) {
                       context.read<WorkoutTimerProvider>().startRest(120);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RestTimerCard(), // Pages/rest_timer
-                        ),
-                      );
                     }
 
                     // toggle state
