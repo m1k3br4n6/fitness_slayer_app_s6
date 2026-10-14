@@ -22,6 +22,17 @@ class _HomeState extends State<Home> {
   //keeps track of active tab; defaults to Home in the middle
   int _currentIndex = 2;
 
+  // Custom pixel art icon
+  Widget pixelIcon(String path, {bool selected = false}) {
+    return Image.asset(
+      path,
+      width: 64,
+      height: 64,
+      filterQuality: FilterQuality.none,
+      isAntiAlias: false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     //Pages ordered with home centred
@@ -30,6 +41,8 @@ class _HomeState extends State<Home> {
       const WorkoutPlanning(),
       // calendar page
       const Calendar(),
+
+
 
       // main dashboard hub
       LayoutBuilder(
@@ -151,35 +164,54 @@ class _HomeState extends State<Home> {
               _currentIndex = index;
             });
           },
-          destinations: const [
-            // workout tab
+          destinations:  [
+            // workouts tab
             NavigationDestination(
-              icon: Icon(Icons.fitness_center_outlined, color: Colors.white70),
-              selectedIcon: Icon(Icons.fitness_center, color: Colors.tealAccent),
+              icon: pixelIcon('assets/icons/workouts.png'),
+              selectedIcon: pixelIcon(
+                'assets/icons/workouts.png',
+                selected: true,
+              ),
               label: 'Workouts',
             ),
+
             // calendar tab
             NavigationDestination(
-              icon: Icon(Icons.calendar_today_outlined, color: Colors.white70),
-              selectedIcon: Icon(Icons.calendar_today, color: Colors.tealAccent),
+              icon: pixelIcon('assets/icons/calendar.png'),
+              selectedIcon: pixelIcon(
+                'assets/icons/calendar.png',
+                selected: true,
+              ),
               label: 'Calendar',
             ),
+
             // home tab in middle
             NavigationDestination(
-              icon: Icon(Icons.home_outlined, color: Colors.white70),
-              selectedIcon: Icon(Icons.home, color: Colors.tealAccent),
+              icon: pixelIcon('assets/icons/home.png'),
+              selectedIcon: pixelIcon(
+                'assets/icons/home.png',
+                selected: true,
+              ),
               label: 'Home',
             ),
+
             // store / shop tab
             NavigationDestination(
-              icon: Icon(Icons.shopping_bag_outlined, color: Colors.white70),
-              selectedIcon: Icon(Icons.shopping_bag, color: Colors.tealAccent),
+              icon: pixelIcon('assets/icons/store.png'),
+              selectedIcon: pixelIcon(
+                'assets/icons/store.png',
+                selected: true,
+              ),
               label: 'Store',
             ),
-            // profile tab
+
+            // profile
             NavigationDestination(
-              icon: Icon(Icons.person_outline, color: Colors.white70),
-              selectedIcon: Icon(Icons.person, color: Colors.tealAccent),
+              icon: pixelIcon('assets/icons/profile.png'),
+              selectedIcon: pixelIcon(
+                'assets/icons/profile.png',
+                selected: true,
+              ),
               label: 'Profile',
             ),
           ],
