@@ -13,6 +13,17 @@ class DatabaseService {
         .add(workout.toMap());
   }
 
+  Stream<List<CompletedWorkout>> getUserCompletedWorkouts(String userId) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('workoutsCompleted')
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => CompletedWorkout.fromMap(doc.data(), doc.id))
+            .toList());
+  }
+
   Future<void> saveRoutine(String userId, Map<String, dynamic> routineData) async {
     // Navigates to: users / {userId} / routines / {auto-generated-doc-id}
     await FirebaseFirestore.instance
