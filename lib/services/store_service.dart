@@ -10,7 +10,7 @@ class StoreService {
   StoreService({required this.uid});
 
   final CollectionReference<Map<String, dynamic>> _userCollection =
-      FirebaseFirestore.instance.collection('test_users');
+      FirebaseFirestore.instance.collection('users');
 
   // Removes the coins the user has, and adds item to their inventory
   Future<PurchaseResult> purchase(StoreItem item) async {

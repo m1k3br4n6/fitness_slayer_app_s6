@@ -9,7 +9,7 @@ class DatabaseService {
   DatabaseService({ required this.uid });
 
   //collection reference
-  final CollectionReference userCollection = FirebaseFirestore.instance.collection('test_users');
+  final CollectionReference userCollection = FirebaseFirestore.instance.collection('users');
 
   Future updateUserData(String username, int coin, int streak, int xp, int level) async {
     //create user document
@@ -23,7 +23,7 @@ class DatabaseService {
   }
 
   //get stream
-  Stream<DocumentSnapshot> get testUsers {
+  Stream<DocumentSnapshot> get users {
     return userCollection.doc(uid).snapshots(); //uid returns only currently active user's document
   }
 }

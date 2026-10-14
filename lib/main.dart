@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
                 return Stream<DocumentSnapshot?>.value(null);
               }
 
-              return FirebaseFirestore.instance.collection('test_users').doc(user.uid).snapshots()
+              return FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots()
                   .map<DocumentSnapshot?>((snapshot) => snapshot);}),
             initialData: null,
           ),
