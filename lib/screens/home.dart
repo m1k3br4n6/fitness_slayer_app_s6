@@ -170,7 +170,7 @@ class _HomeState extends State<Home> {
               selectedIcon: Icon(Icons.home, color: Colors.tealAccent),
               label: 'Home',
             ),
-            //3. store / shop tab
+            // store / shop tab
             NavigationDestination(
               icon: Icon(Icons.shopping_bag_outlined, color: Colors.white70),
               selectedIcon: Icon(Icons.shopping_bag, color: Colors.tealAccent),
