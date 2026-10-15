@@ -23,15 +23,22 @@ class _HomeState extends State<Home> {
   int _currentIndex = 2;
 
   // Custom pixel art icon
-  Widget pixelIcon(String path, {bool selected = false}) {
+  Widget pixelIcon(
+      String path, {
+        bool selected = false,
+        double size = 57,
+      }) {
+    //u can customize the sizes here without touching the pixel size
     return Image.asset(
       path,
-      width: 64,
-      height: 64,
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
       filterQuality: FilterQuality.none,
       isAntiAlias: false,
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -107,24 +114,41 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: MyAppBar(
         actions: [
-          //notification page icon button
+
+          // Notifications button with pixel art
           IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.white70),
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 40,
+            ),
+            padding: EdgeInsets.zero,
+            icon: pixelIcon('assets/icons/notifications.png'),
+            iconSize: 24,
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const Notifications()),
+                MaterialPageRoute(
+                  builder: (context) => const Notifications(),
+                ),
               );
             },
           ),
 
-          //settings cog wheel icon button in light teal / blue-green tonal style
+          // Settings button with pixel art
           IconButton(
-            icon: Icon(Icons.settings, color: Colors.teal[200]),
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 40,
+            ),
+            padding: EdgeInsets.zero,
+            icon: pixelIcon('assets/icons/settings.png'),
+            iconSize: 24,
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AppSettings()),
+                MaterialPageRoute(
+                  builder: (context) => const AppSettings(),
+                ),
               );
             },
           ),
