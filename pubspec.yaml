@@ -66,13 +66,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/icons/profile.png
-    - assets/icons/calendar.png
-    - assets/icons/store.png
-    - assets/icons/home.png
-    - assets/icons/workouts.png
-    - assets/icons/notifications.png
-    - assets/icons/settings.png
+    - assets/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

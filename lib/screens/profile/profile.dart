@@ -7,8 +7,8 @@ import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-
-int _xpForNextLevel(int level) => (level < 1 ? 1 : level) * 100;
+// Fixed 100 XP required per level up
+const int _xpNeededPerLevel = 100;
 
 int _intField(Map<String, dynamic> data, String key) => (data[key] as num?)?.toInt() ?? 0;
 
@@ -28,13 +28,18 @@ class Profile extends StatelessWidget {
         ? (userDoc.data() as Map<String, dynamic>? ?? <String, dynamic>{})
         : <String, dynamic>{};
     final username = (data['username'] as String?) ?? 'Slayer';
-    final level = _intField(data, 'level');
-    final xp = _intField(data, 'xp');
+
+    final rawLevel = _intField(data, 'level') < 1 ? 1 : _intField(data, 'level');
+    final rawXp = _intField(data, 'xp');
+
+    // Calculate effective level and current level XP progress
+    final level = rawLevel + (rawXp ~/ _xpNeededPerLevel);
+    final xp = rawXp % _xpNeededPerLevel;
+
     final coins = _intField(data, 'coin');
     final streak = _intField(data, 'streak');
 
-    final xpNeeded = _xpForNextLevel(level);
-    final xpProgress = (xp / xpNeeded).clamp(0.0, 1.0).toDouble();
+    final xpProgress = (xp / _xpNeededPerLevel).clamp(0.0, 1.0).toDouble();
     final initial = username.isNotEmpty ? username[0].toUpperCase() : '?';
 
     return Scaffold(
@@ -98,7 +103,7 @@ class Profile extends StatelessWidget {
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                       ),
                       Text(
-                        '$xp / $xpNeeded XP',
+                        '$xp / $_xpNeededPerLevel XP',
                         style: const TextStyle(color: Colors.white70),
                       ),
                     ],

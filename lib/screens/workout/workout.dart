@@ -126,13 +126,18 @@ class _WorkoutViewState extends State<WorkoutView> {
     try {
       await DatabaseService().saveWorkout(currentUserId, completedWorkout);
 
+      // Updates user's XP and Level in Firestore and returns earned XP
+      final int earnedXp = await DatabaseService().updateUserXpForWorkout(currentUserId, completedWorkout);
+
       if (mounted) {
         workoutProvider.clearWorkout();
         timerProvider.stopAndReset();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Workout Saved Successfully!', style: TextStyle(color: Colors.greenAccent)),
+          SnackBar(
+            //TODO Change to proper level up screen
+            content: Text('Workout Saved! +$earnedXp XP Earned!', style: const TextStyle(color: Colors.greenAccent)),
+            duration: const Duration(seconds: 4),
           ),
         );
 

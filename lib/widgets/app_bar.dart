@@ -12,12 +12,16 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     final userData = Provider.of<DocumentSnapshot?>(context);
 
     String username = '';
-    int level = 0;
+    int level = 1;
 
     if (userData != null && userData.exists) {
       final data = userData.data() as Map<String, dynamic>;
-      username = data['username'] ?? '[user_not_found]';
-      level = data['level'] ?? 0;
+      username = data['username'] ?? 'Slayer';
+      int rawLevel = (data['level'] as num?)?.toInt() ?? 1;
+      int rawXp = (data['xp'] as num?)?.toInt() ?? 0;
+      
+      // Calculate effective level based on 100 XP per level
+      level = (rawLevel < 1 ? 1 : rawLevel) + (rawXp ~/ 100);
     }
 
     String appBarText = '$username  (Lv. $level)';
@@ -32,7 +36,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       backgroundColor: Colors.teal,
       elevation: 0.0,
-      actions: actions, //displays custom action buttons
+      actions: actions, // displays custom action buttons
     );
   }
 
