@@ -1,4 +1,5 @@
 import 'package:fitness_slayer_01/screens/wrapper.dart';
+import 'package:fitness_slayer_01/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -15,6 +16,11 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  final notificationService = NotificationService();
+  await notificationService.init();
+  await notificationService.requestPermissions();
+
   runApp(const MyApp()); //when app starts, runs MyApp()
 }
 

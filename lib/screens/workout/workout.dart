@@ -13,6 +13,8 @@ import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/widgets/workout_timer_card.dart';
 import 'package:fitness_slayer_01/widgets/mini_rest_timer.dart';
 
+import '../../services/notification_service.dart';
+
 class WorkoutView extends StatefulWidget {
   final VoidCallback? onWorkoutFinished;
 
@@ -129,6 +131,8 @@ class _WorkoutViewState extends State<WorkoutView> {
 
       // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore
       final UserStatsResult stats = await DatabaseService().updateUserStatsForWorkout(currentUserId, completedWorkout);
+
+      await NotificationService().scheduleStreakReminder(hoursDelay: 48);
 
       if (mounted) {
         workoutProvider.clearWorkout();
