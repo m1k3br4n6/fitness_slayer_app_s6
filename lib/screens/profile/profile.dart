@@ -4,9 +4,9 @@ import 'package:fitness_slayer_01/screens/profile/badges.dart';
 import 'package:fitness_slayer_01/screens/profile/fitness-stats.dart';
 import 'package:fitness_slayer_01/screens/social/friends.dart';
 import 'package:fitness_slayer_01/widgets/loading.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 
 int _xpForNextLevel(int level) => (level < 1 ? 1 : level) * 100;
 
@@ -21,7 +21,7 @@ class Profile extends StatelessWidget {
     final user = Provider.of<myUser?>(context);
 
     if (userDoc == null || user == null) {
-      return Scaffold(backgroundColor: Colors.teal[900], body: Loading());
+      return Scaffold(backgroundColor: AppColors.obsidianBlack, body: Loading());
     }
 
     final data = userDoc.exists
@@ -38,7 +38,7 @@ class Profile extends StatelessWidget {
     final initial = username.isNotEmpty ? username[0].toUpperCase() : '?';
 
     return Scaffold(
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.obsidianBlack,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -50,15 +50,15 @@ class Profile extends StatelessWidget {
               padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.tealAccent, width: 2),
+                border: Border.all(color: AppColors.questGold, width: 2),
               ),
               child: CircleAvatar(
                 radius: 48,
-                backgroundColor: Colors.teal[600],
+                backgroundColor: AppColors.forgeSlate,
                 child: Text(
                   initial,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.warmIvory,
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
                   ),
@@ -69,7 +69,7 @@ class Profile extends StatelessWidget {
             Text(
               username,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppColors.warmIvory,
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
               ),
@@ -77,7 +77,7 @@ class Profile extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               'Level $level Slayer',
-              style: const TextStyle(color: Colors.tealAccent, fontSize: 16),
+              style: const TextStyle(color: AppColors.questGold, fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
 
@@ -85,8 +85,9 @@ class Profile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.teal[800],
+                color: AppColors.forgeSlate,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.hearthBorder),
               ),
               child: Column(
                 children: [
@@ -95,11 +96,11 @@ class Profile extends StatelessWidget {
                     children: [
                       const Text(
                         'Experience',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                        style: TextStyle(color: AppColors.warmIvory, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         '$xp / $xpNeeded XP',
-                        style: const TextStyle(color: Colors.white70),
+                        style: const TextStyle(color: AppColors.parchmentBeige),
                       ),
                     ],
                   ),
@@ -109,8 +110,8 @@ class Profile extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: xpProgress,
                       minHeight: 12,
-                      backgroundColor: Colors.teal[900],
-                      color: Colors.tealAccent,
+                      backgroundColor: AppColors.hearthStone,
+                      color: AppColors.emberOrange,
                     ),
                   ),
                 ],
@@ -124,7 +125,7 @@ class Profile extends StatelessWidget {
                 Expanded(
                   child: _StatTile(
                     icon: Icons.local_fire_department,
-                    color: Colors.orangeAccent,
+                    color: AppColors.emberOrange,
                     value: '$streak',
                     label: 'Day streak',
                   ),
@@ -133,7 +134,7 @@ class Profile extends StatelessWidget {
                 Expanded(
                   child: _StatTile(
                     icon: Icons.monetization_on,
-                    color: Colors.amber,
+                    color: AppColors.questGold,
                     value: '$coins',
                     label: 'Coins',
                   ),
@@ -178,7 +179,6 @@ class Profile extends StatelessWidget {
   }
 }
 
-
 class _StatTile extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -197,8 +197,9 @@ class _StatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.teal[800],
+        color: AppColors.forgeSlate,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.hearthBorder),
       ),
       child: Column(
         children: [
@@ -207,12 +208,12 @@ class _StatTile extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              color: Colors.white,
+              color: AppColors.warmIvory,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(label, style: const TextStyle(color: AppColors.parchmentBeige, fontSize: 12)),
         ],
       ),
     );
@@ -260,7 +261,7 @@ class _WorkoutCountTileState extends State<_WorkoutCountTile> {
         final count = snapshot.hasData ? '${snapshot.data!.docs.length}' : '-';
         return _StatTile(
           icon: Icons.fitness_center,
-          color: Colors.tealAccent,
+          color: AppColors.questGold,
           value: count,
           label: 'Workouts',
         );
@@ -268,6 +269,7 @@ class _WorkoutCountTileState extends State<_WorkoutCountTile> {
     );
   }
 }
+
 class _ShortcutTile extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -278,13 +280,13 @@ class _ShortcutTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.teal[800],
+      color: AppColors.forgeSlate,
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: ListTile(
-        leading: Icon(icon, color: Colors.tealAccent),
-        title: Text(label, style: const TextStyle(color: Colors.white)),
-        trailing: const Icon(Icons.chevron_right, color: Colors.white54),
+        leading: Icon(icon, color: AppColors.emberOrange),
+        title: Text(label, style: const TextStyle(color: AppColors.warmIvory)),
+        trailing: const Icon(Icons.chevron_right, color: AppColors.parchmentBeige),
         onTap: onTap,
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
@@ -25,12 +26,12 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(
         appBarText,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: AppColors.parchmentWhite,
           fontSize: 20,
         ),
       ),
-      backgroundColor: Colors.teal,
+      backgroundColor: AppColors.darkTavernGreen,
       elevation: 0.0,
       actions: actions, //displays custom action buttons
     );

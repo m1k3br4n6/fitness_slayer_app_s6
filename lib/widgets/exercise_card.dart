@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:fitness_slayer_01/screens/workout/exercise_info_screen.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 import '../providers/workout_timer.dart';
 
@@ -53,11 +54,11 @@ class _ExerciseCardState extends State<ExerciseCard> {
   @override
   Widget build(BuildContext context) {
 
-    final Color cardColor = Colors.teal[800]!;
-    final Color inputColor = Colors.teal[900]!;
-    final Color completedColor = Colors.green[800]!;
-    final Color activeIconColor = Colors.greenAccent;
-    final Color textColor = Colors.white70;
+    const Color cardColor = AppColors.forgeSlate;
+    const Color inputColor = AppColors.hearthStone;
+    const Color completedColor = AppColors.crimsonWine;
+    const Color activeIconColor = AppColors.emberOrange;
+    const Color textColor = AppColors.parchmentBeige;
 
     // Listens for updates
     final provider = context.watch<WorkoutProvider>();

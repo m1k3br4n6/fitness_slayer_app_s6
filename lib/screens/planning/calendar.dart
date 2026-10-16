@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fitness_slayer_01/widgets/app_bar.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 class Calendar extends StatefulWidget {
   const Calendar({super.key});
@@ -37,16 +37,12 @@ class _CalendarState extends State<Calendar> {
     final year = _displayedMonth.year;
     final month = _displayedMonth.month;
 
-    // Total days in the displayed month
     final totalDays = DateTime(year, month + 1, 0).day;
-
-    // Offset for the first day of the month (1 = Monday ... 7 = Sunday) -> 0..6
     final startDayOffset = DateTime(year, month, 1).weekday - 1;
-
     final monthTitle = '${_monthNames[month - 1]} $year';
 
     return Scaffold(
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.background,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -56,19 +52,19 @@ class _CalendarState extends State<Calendar> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.chevron_left, color: Colors.white),
+                  icon: const Icon(Icons.chevron_left, color: AppColors.textPrimary),
                   onPressed: () => _changeMonth(-1),
                 ),
                 Text(
                   monthTitle,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.chevron_right, color: Colors.white),
+                  icon: const Icon(Icons.chevron_right, color: AppColors.textPrimary),
                   onPressed: () => _changeMonth(1),
                 ),
               ],
@@ -82,7 +78,7 @@ class _CalendarState extends State<Calendar> {
                   .map((day) => Text(
                         day,
                         style: const TextStyle(
-                          color: Colors.white70,
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -111,10 +107,10 @@ class _CalendarState extends State<Calendar> {
 
                   return Container(
                     decoration: BoxDecoration(
-                      color: isToday ? Colors.tealAccent[700] : Colors.teal[800],
+                      color: isToday ? AppColors.primary : AppColors.surface,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isToday ? Colors.white : Colors.teal[700]!,
+                        color: isToday ? AppColors.gold : AppColors.border,
                         width: isToday ? 2 : 1,
                       ),
                     ),
@@ -122,7 +118,7 @@ class _CalendarState extends State<Calendar> {
                     child: Text(
                       '$dayNumber',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                         fontSize: 16,
                       ),
