@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 import 'package:fitness_slayer_01/services/user_stats.dart';
+import 'package:fitness_slayer_01/services/streak_service.dart';
 
 import '../models/routine.dart';
 
@@ -14,8 +15,35 @@ class DatabaseService {
         .add(workout.toMap());
   }
 
-  // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore after completing a workout, returning earned XP
-  Future<int> updateUserXpForWorkout(String userId, CompletedWorkout workout) async {
+  // Checks on app launch if the user's streak has expired (3+ days skipped) and resets streak to 0 in Firestore if expired
+  Future<void> checkAndUpdateStreakOnLaunch(String userId) async {
+    if (userId.isEmpty) return;
+
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final docSnap = await userRef.get();
+
+    if (!docSnap.exists) return;
+
+    final data = docSnap.data() ?? {};
+    int currentStreak = (data['streak'] as num?)?.toInt() ?? 0;
+    DateTime? lastWorkoutDate;
+
+    final rawLastDate = data['lastWorkoutDate'];
+    if (rawLastDate is Timestamp) {
+      lastWorkoutDate = rawLastDate.toDate();
+    } else if (rawLastDate is DateTime) {
+      lastWorkoutDate = rawLastDate;
+    }
+
+    if (currentStreak > 0 && StreakService.isStreakExpired(lastWorkoutDate, DateTime.now())) {
+      await userRef.set({
+        'streak': 0,
+      }, SetOptions(merge: true));
+    }
+  }
+
+  // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore after completing a workout, returning UserStatsResult
+  Future<UserStatsResult> updateUserStatsForWorkout(String userId, CompletedWorkout workout) async {
     int xpEarned = calculateWorkoutXp(workout);
 
     final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
@@ -31,12 +59,29 @@ class DatabaseService {
       currentXp = (data['xp'] as num?)?.toInt() ?? 0;
       currentLevel = (data['level'] as num?)?.toInt() ?? 1;
       currentStreak = (data['streak'] as num?)?.toInt() ?? 0;
+    }
 
-      final rawLastDate = data['lastWorkoutDate'];
-      if (rawLastDate is Timestamp) {
-        lastWorkoutDate = rawLastDate.toDate();
-      } else if (rawLastDate is DateTime) {
-        lastWorkoutDate = rawLastDate;
+    // Query most recent previous completed workout from workoutsCompleted subcollection
+    final previousWorkoutsSnap = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('workoutsCompleted')
+        .orderBy('dateCompleted', descending: true)
+        .get();
+
+    for (var doc in previousWorkoutsSnap.docs) {
+      final rawDate = doc.data()['dateCompleted'];
+      DateTime? d;
+      if (rawDate is Timestamp) {
+        d = rawDate.toDate();
+      } else if (rawDate is DateTime) {
+        d = rawDate;
+      }
+
+      // Find the most recent workout that occurred BEFORE the current workout being submitted
+      if (d != null && d.isBefore(workout.dateCompleted.subtract(const Duration(milliseconds: 10)))) {
+        lastWorkoutDate = d;
+        break;
       }
     }
 
@@ -54,7 +99,10 @@ class DatabaseService {
       'lastWorkoutDate': workout.dateCompleted,
     }, SetOptions(merge: true));
 
-    return xpEarned;
+    return UserStatsResult(
+      earnedXp: xpEarned,
+      newStreak: newStreak,
+    );
   }
 
   Stream<List<CompletedWorkout>> getUserCompletedWorkouts(String userId) {

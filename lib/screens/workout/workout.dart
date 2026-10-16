@@ -8,9 +8,12 @@ import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 import '../../services/database_service.dart';
+import 'package:fitness_slayer_01/services/user_stats.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/widgets/workout_timer_card.dart';
 import 'package:fitness_slayer_01/widgets/mini_rest_timer.dart';
+
+import '../../services/notification_service.dart';
 
 class WorkoutView extends StatefulWidget {
   final VoidCallback? onWorkoutFinished;
@@ -126,8 +129,10 @@ class _WorkoutViewState extends State<WorkoutView> {
     try {
       await DatabaseService().saveWorkout(currentUserId, completedWorkout);
 
-      // Updates user's XP and Level in Firestore and returns earned XP
-      final int earnedXp = await DatabaseService().updateUserXpForWorkout(currentUserId, completedWorkout);
+      // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore
+      final UserStatsResult stats = await DatabaseService().updateUserStatsForWorkout(currentUserId, completedWorkout);
+
+      await NotificationService().scheduleStreakReminder(hoursDelay: 48);
 
       if (mounted) {
         workoutProvider.clearWorkout();
@@ -135,8 +140,10 @@ class _WorkoutViewState extends State<WorkoutView> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            //TODO Change to proper level up screen
-            content: Text('Workout Saved! +$earnedXp XP Earned!', style: const TextStyle(color: Colors.greenAccent)),
+            content: Text(
+              'Workout Saved! +${stats.earnedXp} XP Earned!  Day Streak: ${stats.newStreak}',
+              style: const TextStyle(color: Colors.greenAccent),
+            ),
             duration: const Duration(seconds: 4),
           ),
         );
