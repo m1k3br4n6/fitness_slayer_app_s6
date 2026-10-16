@@ -1,5 +1,15 @@
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 
+class UserStatsResult {
+  final int earnedXp;
+  final int newStreak;
+
+  const UserStatsResult({
+    required this.earnedXp,
+    required this.newStreak,
+  });
+}
+
 // Calculates XP earned for a completed workout
 int calculateWorkoutXp(CompletedWorkout workout) {
   int totalExercises = workout.exercises.length;

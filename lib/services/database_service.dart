@@ -14,8 +14,8 @@ class DatabaseService {
         .add(workout.toMap());
   }
 
-  // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore after completing a workout, returning earned XP
-  Future<int> updateUserXpForWorkout(String userId, CompletedWorkout workout) async {
+  // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore after completing a workout, returning UserStatsResult
+  Future<UserStatsResult> updateUserStatsForWorkout(String userId, CompletedWorkout workout) async {
     int xpEarned = calculateWorkoutXp(workout);
 
     final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
@@ -54,7 +54,10 @@ class DatabaseService {
       'lastWorkoutDate': workout.dateCompleted,
     }, SetOptions(merge: true));
 
-    return xpEarned;
+    return UserStatsResult(
+      earnedXp: xpEarned,
+      newStreak: newStreak,
+    );
   }
 
   Stream<List<CompletedWorkout>> getUserCompletedWorkouts(String userId) {
