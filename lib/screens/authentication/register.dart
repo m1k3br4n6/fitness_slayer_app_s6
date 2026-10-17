@@ -1,7 +1,7 @@
 import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
-import 'package:fitness_slayer_01/widgets/constants.dart';
+import 'package:fitness_slayer_01/theme/constants.dart';
 
 class Register extends StatefulWidget {
   final Function toggleView;

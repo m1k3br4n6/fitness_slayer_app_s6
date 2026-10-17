@@ -23,18 +23,26 @@ class Exercise {
     required this.category,
     required this.mechanic,
     required this.force,
-    required this.instructions
+    required this.instructions,
   });
 
   factory Exercise.fromJson(Map<String, dynamic> json) {
     return Exercise(
-      id: json['id'] ?? '',
-      name: json['name'] ?? 'Unknown',
-      equipment: json['equipment'] ?? 'body only',
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? 'Unknown',
+      equipment: (json['equipment'] == null || json['equipment'].toString().trim().isEmpty)
+          ? 'N/A'
+          : json['equipment'].toString().trim(),
       primaryMuscles: List<String>.from(json['primaryMuscles'] ?? []),
-      category: json['category'] ?? 'strength',
-      mechanic: json['mechanic'] ?? 'compound',
-      force: json['force'] ?? 'pull',
+      category: (json['category'] == null || json['category'].toString().trim().isEmpty)
+          ? 'N/A'
+          : json['category'].toString().trim(),
+      mechanic: (json['mechanic'] == null || json['mechanic'].toString().trim().isEmpty)
+          ? 'N/A'
+          : json['mechanic'].toString().trim(),
+      force: (json['force'] == null || json['force'].toString().trim().isEmpty)
+          ? 'N/A'
+          : json['force'].toString().trim(),
       instructions: List<String>.from(json['instructions'] ?? []),
     );
   }

@@ -1,10 +1,14 @@
 import 'package:fitness_slayer_01/screens/notifications/notifications.dart';
-import 'package:fitness_slayer_01/screens/notifications/side-quest.dart';
+import 'package:fitness_slayer_01/screens/notifications/side_quest.dart';
 import 'package:fitness_slayer_01/screens/planning/calendar.dart';
 import 'package:fitness_slayer_01/screens/settings/settings.dart';
-import 'package:fitness_slayer_01/screens/planning/workout-planning.dart';
+import 'package:fitness_slayer_01/screens/planning/workout_planning.dart';
 import 'package:fitness_slayer_01/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_slayer_01/models/my_user.dart';
+import 'package:fitness_slayer_01/services/database_service.dart';
 import 'package:fitness_slayer_01/screens/game-features/shop.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
@@ -22,6 +26,20 @@ class _HomeState extends State<Home> {
 
   //keeps track of active tab; defaults to Home in the middle
   int _currentIndex = 2;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Checks users streak if needs reset
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<myUser?>();
+      final String uid = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+      if (uid.isNotEmpty) {
+        DatabaseService().checkAndUpdateStreakOnLaunch(uid);
+      }
+    });
+  }
 
   // Custom pixel art icon
   Widget pixelIcon(

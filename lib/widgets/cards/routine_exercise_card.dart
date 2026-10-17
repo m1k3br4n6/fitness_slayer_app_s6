@@ -68,6 +68,7 @@ class _RoutineExerciseCardState extends State<RoutineExerciseCard> {
 
     final exercise = widget.routineExercise.exercise;
     final sets = widget.routineExercise.sets;
+    final bool isCardio = exercise.category.toLowerCase() == 'cardio';
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -105,6 +106,8 @@ class _RoutineExerciseCardState extends State<RoutineExerciseCard> {
                             exerciseId: exercise.id,
                             mechanic: exercise.mechanic,
                             force: exercise.force,
+                            category: exercise.category,
+                            equipment: exercise.equipment,
                             instructions: exercise.instructions,
                             exerciseName: exercise.name,
                             primaryMuscles: exercise.primaryMuscles,
@@ -162,8 +165,22 @@ class _RoutineExerciseCardState extends State<RoutineExerciseCard> {
               child: Row(
                 children: [
                   Expanded(flex: 1, child: Text('SET', style: TextStyle(color: textColor, fontSize: 12))),
-                  Expanded(flex: 2, child: Text('TARGET KG', textAlign: TextAlign.center, style: TextStyle(color: textColor, fontSize: 12))),
-                  Expanded(flex: 2, child: Text('TARGET REPS', textAlign: TextAlign.center, style: TextStyle(color: textColor, fontSize: 12))),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      isCardio ? 'TARGET KM' : 'TARGET KG',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: textColor, fontSize: 12),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      isCardio ? 'TARGET TIME' : 'TARGET REPS',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: textColor, fontSize: 12),
+                    ),
+                  ),
                   const Expanded(flex: 1, child: SizedBox()),
                 ],
               ),
@@ -260,7 +277,7 @@ class RoutineSetInputRow extends StatelessWidget {
             ),
           ),
 
-          // WEIGHT INPUT
+          // WEIGHT / DISTANCE INPUT
           Expanded(
             flex: 2,
             child: Container(
@@ -293,7 +310,7 @@ class RoutineSetInputRow extends StatelessWidget {
             ),
           ),
 
-          // REPS INPUT
+          // REPS / TIME INPUT
           Expanded(
             flex: 2,
             child: Container(
