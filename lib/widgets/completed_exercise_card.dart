@@ -23,6 +23,7 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
     final Color textColor = Colors.white70;
 
     final exercise = widget.workoutExercise;
+    final bool isCardio = exercise.category.toLowerCase() == 'cardio';
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6.0),
@@ -44,7 +45,11 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
                     color: Colors.grey[900],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.fitness_center, color: Colors.greenAccent, size: 22),
+                  child: Icon(
+                    isCardio ? Icons.directions_run : Icons.fitness_center,
+                    color: Colors.greenAccent,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 12),
 
@@ -81,8 +86,22 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
               child: Row(
                 children: [
                   Expanded(flex: 1, child: Text('SET', style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold))),
-                  Expanded(flex: 2, child: Text('KG', textAlign: TextAlign.center, style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold))),
-                  Expanded(flex: 2, child: Text('REPS', textAlign: TextAlign.center, style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold))),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      isCardio ? 'KM' : 'KG',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      isCardio ? 'TIME' : 'REPS',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -116,7 +135,9 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
                       Expanded(
                         flex: 2,
                         child: Text(
-                          '${set.weight.toStringAsFixed(set.weight.truncateToDouble() == set.weight ? 0 : 1)} kg',
+                          isCardio
+                              ? '${set.weight.toStringAsFixed(set.weight.truncateToDouble() == set.weight ? 0 : 1)} km'
+                              : '${set.weight.toStringAsFixed(set.weight.truncateToDouble() == set.weight ? 0 : 1)} kg',
                           textAlign: TextAlign.center,
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                         ),
@@ -124,7 +145,7 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
                       Expanded(
                         flex: 2,
                         child: Text(
-                          '${set.reps} reps',
+                          isCardio ? '${set.reps} min' : '${set.reps} reps',
                           textAlign: TextAlign.center,
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                         ),

@@ -31,11 +31,13 @@ class WorkoutSet {
 class WorkoutExercise {
   final String exerciseId;
   final String exerciseName;
+  final String category;
   final List<WorkoutSet> sets;
 
   WorkoutExercise({
     required this.exerciseId,
     required this.exerciseName,
+    this.category = 'strength',
     required this.sets,
   });
 
@@ -43,6 +45,7 @@ class WorkoutExercise {
     return {
       'exerciseId': exerciseId,
       'exerciseName': exerciseName,
+      'category': category,
       'sets': sets.map((s) => s.toMap()).toList(),
     };
   }
@@ -51,6 +54,7 @@ class WorkoutExercise {
     return WorkoutExercise(
       exerciseId: map['exerciseId'] as String? ?? '',
       exerciseName: map['exerciseName'] as String? ?? '',
+      category: map['category'] as String? ?? 'strength',
       sets: (map['sets'] as List<dynamic>?)
               ?.map((s) => WorkoutSet.fromMap(s as Map<String, dynamic>))
               .toList() ??

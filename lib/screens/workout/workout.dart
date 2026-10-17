@@ -13,8 +13,6 @@ import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/widgets/workout_timer_card.dart';
 import 'package:fitness_slayer_01/widgets/mini_rest_timer.dart';
 
-import '../../services/notification_service.dart';
-
 class WorkoutView extends StatefulWidget {
   final VoidCallback? onWorkoutFinished;
 
@@ -115,6 +113,7 @@ class _WorkoutViewState extends State<WorkoutView> {
         return WorkoutExercise(
           exerciseId: activeEx.exercise.id,
           exerciseName: activeEx.exercise.name,
+          category: activeEx.exercise.category,
           sets: activeEx.sets.asMap().entries.map((entry) {
             return WorkoutSet(
               setNumber: entry.key + 1,
@@ -131,8 +130,6 @@ class _WorkoutViewState extends State<WorkoutView> {
 
       // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore
       final UserStatsResult stats = await DatabaseService().updateUserStatsForWorkout(currentUserId, completedWorkout);
-
-      await NotificationService().scheduleStreakReminder(hoursDelay: 48);
 
       if (mounted) {
         workoutProvider.clearWorkout();
@@ -189,6 +186,8 @@ class _WorkoutViewState extends State<WorkoutView> {
                       primaryMuscles: activeEx.exercise.primaryMuscles,
                       mechanic: activeEx.exercise.mechanic,
                       force: activeEx.exercise.force,
+                      category: activeEx.exercise.category,
+                      equipment: activeEx.exercise.equipment,
                       instructions: activeEx.exercise.instructions,
                       onDelete: () {
                         context.read<WorkoutProvider>().removeExercise(index);

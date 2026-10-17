@@ -8,6 +8,8 @@ class ExerciseInfoScreen extends StatelessWidget {
   final List<String> primaryMuscles;
   final String mechanic;
   final String force;
+  final String category;
+  final String equipment;
   final List<String> instructions;
 
   const ExerciseInfoScreen({
@@ -17,6 +19,8 @@ class ExerciseInfoScreen extends StatelessWidget {
     required this.primaryMuscles,
     required this.mechanic,
     required this.force,
+    this.category = 'N/A',
+    this.equipment = 'N/A',
     required this.instructions,
   });
 
@@ -67,10 +71,11 @@ class ExerciseInfoScreen extends StatelessWidget {
     return AnatomyView.front;
   }
 
-  // Converts raw muscle strings, "lower back", to Title Case, "Lower Back"
-  String _capitalize(String text) {
-    if (text.isEmpty) return text;
-    return text.split(' ').map((word) {
+  // Converts raw strings to Title Case with 'N/A' fallback
+  String _capitalize(String? text) {
+    if (text == null || text.trim().isEmpty) return 'N/A';
+    final trimmed = text.trim();
+    return trimmed.split(' ').map((word) {
       if (word.isEmpty) return word;
       return '${word[0].toUpperCase()}${word.substring(1)}';
     }).join(' ');
@@ -184,43 +189,84 @@ class ExerciseInfoScreen extends StatelessWidget {
                     // Mechanic & Force Row
                     Row(
                       children: [
-                        if (mechanic.isNotEmpty)
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.teal[900]?.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Mechanic', style: TextStyle(color: Colors.white54, fontSize: 11)),
-                                  const SizedBox(height: 2),
-                                  Text(_capitalize(mechanic), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                                ],
-                              ),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.teal[900]?.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Mechanic', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                                const SizedBox(height: 2),
+                                Text(_capitalize(mechanic), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              ],
                             ),
                           ),
-                        if (mechanic.isNotEmpty && force.isNotEmpty) const SizedBox(width: 12),
-                        if (force.isNotEmpty)
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.teal[900]?.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Force', style: TextStyle(color: Colors.white54, fontSize: 11)),
-                                  const SizedBox(height: 2),
-                                  Text(_capitalize(force), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                                ],
-                              ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.teal[900]?.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Force', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                                const SizedBox(height: 2),
+                                Text(_capitalize(force), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              ],
                             ),
                           ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Category & Equipment Row
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.teal[900]?.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Category', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                                const SizedBox(height: 2),
+                                Text(_capitalize(category), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.teal[900]?.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Equipment', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                                const SizedBox(height: 2),
+                                Text(_capitalize(equipment), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
 
