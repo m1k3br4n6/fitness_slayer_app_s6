@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
-import 'package:fitness_slayer_01/services/database.dart';
+import 'package:fitness_slayer_01/services/database_service.dart';
 
 //methods that interact with firebase auth
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance; //get firebase auth instance
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   myUser? _userFromFirebaseUser(User? user) {
     return user != null ? myUser(uid: user.uid) : null;
@@ -24,7 +24,6 @@ class AuthService {
       // Convert Firebase User into our custom myUser
       return _userFromFirebaseUser(user);
     } catch (e) {
-      print(e.toString());
       return null;
     }
   }
@@ -32,15 +31,16 @@ class AuthService {
   //2. register with email & password
   Future registerWithEmailAndPassword(String username, String email, String password) async {
     try {
-      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password,);
+      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User? user = result.user;
 
       //create a new document for the user with uid
-      await DatabaseService(uid: user!.uid).updateUserData(username, 0, 0, 0, 1);
+      if (user != null) {
+        await DatabaseService().updateUserData(user.uid, username, 0, 0, 0, 1);
+      }
 
       return _userFromFirebaseUser(user);
     } catch (e) {
-      print(e.toString());
       return null;
     }
   }
@@ -55,7 +55,6 @@ class AuthService {
       User? user = result.user;
       return _userFromFirebaseUser(user);
     } catch (e) {
-      print(e.toString());
       return null;
     }
   }
@@ -65,7 +64,6 @@ class AuthService {
     try {
       return await _auth.signOut();
     } catch (e) {
-      print(e.toString());
       return null;
     }
   }

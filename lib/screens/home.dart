@@ -1,8 +1,8 @@
 import 'package:fitness_slayer_01/screens/notifications/notifications.dart';
-import 'package:fitness_slayer_01/screens/notifications/side-quest.dart';
+import 'package:fitness_slayer_01/screens/notifications/side_quest.dart';
 import 'package:fitness_slayer_01/screens/planning/calendar.dart';
 import 'package:fitness_slayer_01/screens/settings/settings.dart';
-import 'package:fitness_slayer_01/screens/planning/workout-planning.dart';
+import 'package:fitness_slayer_01/screens/planning/workout_planning.dart';
 import 'package:fitness_slayer_01/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

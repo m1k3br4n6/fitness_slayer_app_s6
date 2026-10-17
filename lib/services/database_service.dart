@@ -6,6 +6,16 @@ import 'package:fitness_slayer_01/services/streak_service.dart';
 import '../models/routine.dart';
 
 class DatabaseService {
+  Future<void> updateUserData(String userId, String username, int coin, int streak, int xp, int level) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).set({
+      'username': username,
+      'coin': coin,
+      'streak': streak,
+      'xp': xp,
+      'level': level,
+    }, SetOptions(merge: true));
+  }
+
   Future<void> saveWorkout(String userId, CompletedWorkout workout) async {
     // Navigates to: users / {userId} / workoutsCompleted / {auto-generated-doc-id}
     await FirebaseFirestore.instance

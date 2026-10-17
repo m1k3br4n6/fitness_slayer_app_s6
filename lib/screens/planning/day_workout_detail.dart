@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
-import 'package:fitness_slayer_01/widgets/completed_exercise_card.dart';
+import 'package:fitness_slayer_01/widgets/cards/completed_exercise_card.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 
 class DayWorkoutDetailScreen extends StatelessWidget {

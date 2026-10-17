@@ -7,7 +7,7 @@ import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/models/exercises.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/widgets/exercise_search.dart';
-import 'package:fitness_slayer_01/widgets/routine_exercise_card.dart';
+import 'package:fitness_slayer_01/widgets/cards/routine_exercise_card.dart';
 
 import '../../models/routine.dart';
 import '../../services/database_service.dart';

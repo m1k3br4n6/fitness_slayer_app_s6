@@ -8,14 +8,13 @@ class MiniRestTimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timerData = context.watch<WorkoutTimerProvider>(); // From providers/workout_timer
+    final timerData = context.watch<WorkoutTimerProvider>();
 
     return SafeArea(
       top: false,
       child: Padding(
         padding: const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 12.0, top: 4.0),
         child: GestureDetector(
-          // opens the full timer screen on tap
           onTap: () {
             Navigator.push(
               context,
@@ -56,7 +55,6 @@ class MiniRestTimer extends StatelessWidget {
 
                   const Spacer(),
 
-                  // Play and Pause Button
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.teal[900],
