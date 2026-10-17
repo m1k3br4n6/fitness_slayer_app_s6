@@ -5,7 +5,7 @@ import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:fitness_slayer_01/screens/workout/exercise_info_screen.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 
-import '../providers/workout_timer.dart';
+import '../../providers/workout_timer.dart';
 
 class ExerciseCard extends StatefulWidget {
   final int exerciseIndex;

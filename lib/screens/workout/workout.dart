@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
-import 'package:fitness_slayer_01/widgets/exercise_card.dart';
+import 'package:fitness_slayer_01/widgets/cards/exercise_card.dart';
 import 'package:fitness_slayer_01/widgets/exercise_search.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 import '../../services/database_service.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
-import 'package:fitness_slayer_01/widgets/workout_timer_card.dart';
-import 'package:fitness_slayer_01/widgets/mini_rest_timer.dart';
+import 'package:fitness_slayer_01/widgets/cards/workout_timer_card.dart';
+import 'package:fitness_slayer_01/widgets/timers/mini_rest_timer.dart';
 
 class WorkoutView extends StatefulWidget {
   final VoidCallback? onWorkoutFinished;

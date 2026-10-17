@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/screens/profile/badges.dart';
-import 'package:fitness_slayer_01/screens/profile/fitness-stats.dart';
+import 'package:fitness_slayer_01/screens/profile/fitness_stats.dart';
 import 'package:fitness_slayer_01/screens/social/friends.dart';
 import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
