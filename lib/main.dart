@@ -10,6 +10,7 @@ import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitness_slayer_01/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,7 +60,8 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: MaterialApp(
-          home: Wrapper(), //wrapper should be the home/main screen
+          theme: AppTheme.darkForgeTheme,
+          home: const Wrapper(), //wrapper should be the home/main screen
          ),
     ) ;
 

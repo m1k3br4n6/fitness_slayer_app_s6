@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
-import 'package:fitness_slayer_01/widgets/cards/exercise_card.dart';
+import 'package:fitness_slayer_01/widgets/exercise_card.dart';
 import 'package:fitness_slayer_01/widgets/exercise_search.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 import '../../services/database_service.dart';
-import 'package:fitness_slayer_01/services/user_stats.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
-import 'package:fitness_slayer_01/widgets/cards/workout_timer_card.dart';
-import 'package:fitness_slayer_01/widgets/timers/mini_rest_timer.dart';
+import 'package:fitness_slayer_01/widgets/workout_timer_card.dart';
+import 'package:fitness_slayer_01/widgets/mini_rest_timer.dart';
 
 class WorkoutView extends StatefulWidget {
   final VoidCallback? onWorkoutFinished;
@@ -55,20 +55,20 @@ class _WorkoutViewState extends State<WorkoutView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.teal[800],
-        title: const Text('Cancel Workout?', style: TextStyle(color: Colors.white)),
+        backgroundColor: AppColors.forgeSlate,
+        title: const Text('Cancel Workout?', style: TextStyle(color: AppColors.warmIvory)),
         content: const Text(
           'Are you sure you want to cancel? Progress for this session will be lost.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: AppColors.parchmentBeige),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('NO', style: TextStyle(color: Colors.white54)),
+            child: const Text('NO', style: TextStyle(color: AppColors.parchmentBeige)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('CANCEL WORKOUT', style: TextStyle(color: Colors.redAccent)),
+            child: const Text('CANCEL WORKOUT', style: TextStyle(color: AppColors.crimsonWine, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -113,7 +113,6 @@ class _WorkoutViewState extends State<WorkoutView> {
         return WorkoutExercise(
           exerciseId: activeEx.exercise.id,
           exerciseName: activeEx.exercise.name,
-          category: activeEx.exercise.category,
           sets: activeEx.sets.asMap().entries.map((entry) {
             return WorkoutSet(
               setNumber: entry.key + 1,
@@ -128,20 +127,13 @@ class _WorkoutViewState extends State<WorkoutView> {
     try {
       await DatabaseService().saveWorkout(currentUserId, completedWorkout);
 
-      // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore
-      final UserStatsResult stats = await DatabaseService().updateUserStatsForWorkout(currentUserId, completedWorkout);
-
       if (mounted) {
         workoutProvider.clearWorkout();
         timerProvider.stopAndReset();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Workout Saved! +${stats.earnedXp} XP Earned!  Day Streak: ${stats.newStreak}',
-              style: const TextStyle(color: Colors.greenAccent),
-            ),
-            duration: const Duration(seconds: 4),
+          const SnackBar(
+            content: Text('Workout Saved Successfully!', style: TextStyle(color: AppColors.warmIvory)),
           ),
         );
 
@@ -153,7 +145,7 @@ class _WorkoutViewState extends State<WorkoutView> {
           _isSubmitting = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save: $e', style: const TextStyle(color: Colors.redAccent))),
+          SnackBar(content: Text('Failed to save: $e', style: const TextStyle(color: AppColors.crimsonWine))),
         );
       }
     }
@@ -186,8 +178,6 @@ class _WorkoutViewState extends State<WorkoutView> {
                       primaryMuscles: activeEx.exercise.primaryMuscles,
                       mechanic: activeEx.exercise.mechanic,
                       force: activeEx.exercise.force,
-                      category: activeEx.exercise.category,
-                      equipment: activeEx.exercise.equipment,
                       instructions: activeEx.exercise.instructions,
                       onDelete: () {
                         context.read<WorkoutProvider>().removeExercise(index);
@@ -199,18 +189,19 @@ class _WorkoutViewState extends State<WorkoutView> {
 
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal[800],
-                      foregroundColor: Colors.tealAccent,
+                      backgroundColor: AppColors.forgeSlate,
+                      foregroundColor: AppColors.warmIvory,
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: AppColors.hearthBorder),
                       ),
                       elevation: 2,
                     ),
-                    icon: const Icon(Icons.add_rounded, color: Colors.tealAccent),
+                    icon: const Icon(Icons.add_rounded, color: AppColors.emberOrange),
                     label: const Text(
                       'Add Exercise',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                      style: TextStyle(color: AppColors.warmIvory, fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     onPressed: _navigateAndAddExercise,
                   ),
@@ -222,18 +213,18 @@ class _WorkoutViewState extends State<WorkoutView> {
                     width: 260,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal[800],
-                        foregroundColor: Colors.tealAccent,
+                        backgroundColor: AppColors.emberOrange,
+                        foregroundColor: AppColors.warmIvory,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         elevation: 2,
                       ),
-                      icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.tealAccent, size: 24),
+                      icon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.warmIvory, size: 24),
                       label: const Text(
                         'Finish Workout',
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       onPressed: _isSubmitting ? null : _finishWorkout,
                     ),
@@ -246,18 +237,18 @@ class _WorkoutViewState extends State<WorkoutView> {
                     width: 260,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal[800],
-                        foregroundColor: Colors.redAccent,
+                        backgroundColor: AppColors.crimsonWine,
+                        foregroundColor: AppColors.warmIvory,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         elevation: 2,
                       ),
-                      icon: const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 24),
+                      icon: const Icon(Icons.cancel_outlined, color: AppColors.warmIvory, size: 24),
                       label: const Text(
                         'Cancel Workout',
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       onPressed: _cancelWorkout,
                     ),
@@ -282,7 +273,7 @@ class WorkoutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const MyAppBar(),
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.obsidianBlack,
       body: WorkoutView(
         onWorkoutFinished: () {
           Navigator.pop(context);

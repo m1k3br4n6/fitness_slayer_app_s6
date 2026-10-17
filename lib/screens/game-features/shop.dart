@@ -3,6 +3,7 @@ import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/models/store_item.dart';
 import 'package:fitness_slayer_01/services/store_service.dart';
 import 'package:fitness_slayer_01/widgets/loading.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,20 +22,20 @@ class _ShopState extends State<Shop> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: Colors.teal[800],
-        title: const Text('Buy this item?', style: TextStyle(color: Colors.white)),
+        backgroundColor: AppColors.surface,
+        title: const Text('Buy this item?', style: TextStyle(color: AppColors.textPrimary)),
         content: Text(
           '${item.name} costs ${item.price} coins.',
-          style: const TextStyle(color: Colors.white70),
+          style: const TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Buy', style: TextStyle(color: Colors.tealAccent)),
+            child: const Text('Buy', style: TextStyle(color: AppColors.gold, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -62,9 +63,8 @@ class _ShopState extends State<Shop> {
     final userDoc = Provider.of<DocumentSnapshot?>(context);
     final user = Provider.of<myUser?>(context);
 
-
     if (userDoc == null || user == null) {
-      return Scaffold(backgroundColor: Colors.teal[900], body: Loading());
+      return Scaffold(backgroundColor: AppColors.background, body: Loading());
     }
 
     final data = userDoc.exists
@@ -78,7 +78,7 @@ class _ShopState extends State<Shop> {
         : storeCatalog.where((item) => item.category == _selectedCategory).toList();
 
     return Scaffold(
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
           _CoinBalance(coins: coins),
@@ -115,7 +115,6 @@ class _ShopState extends State<Shop> {
   }
 }
 
-// Shows ho many coins the user has
 class _CoinBalance extends StatelessWidget {
   final int coins;
   const _CoinBalance({required this.coins});
@@ -126,21 +125,22 @@ class _CoinBalance extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.teal[800],
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
-          const Icon(Icons.monetization_on, color: Colors.amber, size: 36),
+          const Icon(Icons.monetization_on, color: AppColors.gold, size: 36),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Your coins', style: TextStyle(color: Colors.white70, fontSize: 13)),
+              const Text('Your coins', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               Text(
                 '$coins',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
@@ -153,7 +153,6 @@ class _CoinBalance extends StatelessWidget {
   }
 }
 
-// Filter
 class _CategoryFilter extends StatelessWidget {
   final StoreCategory? selected;
   final ValueChanged<StoreCategory?> onSelected;
@@ -168,11 +167,11 @@ class _CategoryFilter extends StatelessWidget {
         selected: isSelected,
         showCheckmark: false,
         onSelected: (_) => onTap(),
-        backgroundColor: Colors.teal[800],
-        selectedColor: Colors.teal[600],
+        backgroundColor: AppColors.surface,
+        selectedColor: AppColors.secondary,
         side: BorderSide.none,
         labelStyle: TextStyle(
-          color: isSelected ? Colors.tealAccent : Colors.white70,
+          color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -226,16 +225,16 @@ class _ItemCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.teal[800],
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: isOwned ? Border.all(color: Colors.tealAccent, width: 1.5) : null,
+        border: isOwned ? Border.all(color: AppColors.gold, width: 1.5) : Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
           CircleAvatar(
             radius: 28,
-            backgroundColor: Colors.teal[900],
-            child: Icon(item.icon, color: Colors.tealAccent, size: 30),
+            backgroundColor: AppColors.container,
+            child: Icon(item.icon, color: AppColors.gold, size: 30),
           ),
           const SizedBox(height: 8),
           Text(
@@ -243,7 +242,7 @@ class _ItemCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -255,18 +254,18 @@ class _ItemCard extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
             ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.monetization_on, color: Colors.amber, size: 18),
+              const Icon(Icons.monetization_on, color: AppColors.gold, size: 18),
               const SizedBox(width: 4),
               Text(
                 '${item.price}',
                 style: TextStyle(
-                  color: (canAfford || isOwned) ? Colors.white : Colors.orangeAccent,
+                  color: (canAfford || isOwned) ? AppColors.textPrimary : AppColors.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -277,10 +276,10 @@ class _ItemCard extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal[600],
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: Colors.teal[900],
-                disabledForegroundColor: isOwned ? Colors.tealAccent : Colors.white38,
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.textPrimary,
+                disabledBackgroundColor: AppColors.container,
+                disabledForegroundColor: isOwned ? AppColors.gold : AppColors.textMuted,
                 shape: const StadiumBorder(),
               ),
               onPressed: onPressed,
@@ -288,7 +287,7 @@ class _ItemCard extends StatelessWidget {
                   ? const SizedBox(
                       height: 18,
                       width: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textPrimary),
                     )
                   : Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),

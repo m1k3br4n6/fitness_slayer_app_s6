@@ -12,6 +12,7 @@ import 'package:fitness_slayer_01/services/database_service.dart';
 import 'package:fitness_slayer_01/screens/game-features/shop.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -57,7 +58,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     //Pages ordered with home centred
@@ -66,8 +66,6 @@ class _HomeState extends State<Home> {
       const WorkoutPlanning(),
       // calendar page
       const Calendar(),
-
-
 
       // main dashboard hub
       LayoutBuilder(
@@ -86,7 +84,7 @@ class _HomeState extends State<Home> {
                         'Welcome Home, Great Slayer.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.parchmentWhite,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
@@ -98,7 +96,8 @@ class _HomeState extends State<Home> {
                       // daily challenge button anchored at the bottom
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal[800],
+                          backgroundColor: AppColors.flameOrange,
+                          foregroundColor: AppColors.parchmentWhite,
                           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -110,7 +109,7 @@ class _HomeState extends State<Home> {
                             MaterialPageRoute(builder: (context) => const SideQuest()),
                           );
                         },
-                        child: const Text('Daily Side Quest', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        child: Text('Daily Side Quest', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 16)),
                       ),
                       const SizedBox(height: 12),
                     ],
@@ -173,8 +172,8 @@ class _HomeState extends State<Home> {
 
           //logout button
           TextButton.icon(
-            icon: const Icon(Icons.person, color: Colors.white70),
-            label: const Text('Logout', style: TextStyle(color: Colors.white70)),
+            icon: Icon(Icons.person, color: AppColors.mutedParchment),
+            label: Text('Logout', style: TextStyle(color: AppColors.mutedParchment)),
             onPressed: () async {
               await _auth.signOut();
             },
@@ -182,7 +181,7 @@ class _HomeState extends State<Home> {
         ],
       ),
 
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.obsidianBlack,
 
       //IndexedStack keeps state alive so switching tabs doesn't wipe your screen data
       body: IndexedStack(
@@ -193,10 +192,10 @@ class _HomeState extends State<Home> {
       //bottom navbar with Home in the middle (index 2)
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
-          backgroundColor: Colors.teal[800],
-          indicatorColor: Colors.teal[600],
+          backgroundColor: AppColors.darkTavernGreen,
+          indicatorColor: AppColors.crimsonRed,
           labelTextStyle: WidgetStateProperty.all(
-            const TextStyle(color: Colors.white70, fontSize: 12),
+            const TextStyle(color: AppColors.mutedParchment, fontSize: 12),
           ),
         ),
         child: NavigationBar(
