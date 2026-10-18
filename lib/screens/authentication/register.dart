@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 import 'package:fitness_slayer_01/theme/constants.dart';
 
+import '../../theme/app_colors.dart';
+
 class Register extends StatefulWidget {
   final Function toggleView;
   const Register({super.key, required this.toggleView});
@@ -26,18 +28,18 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
     return loading ? Loading() : Scaffold(
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.obsidianBlack,
       appBar: AppBar(
-        backgroundColor: Colors.teal,
+        backgroundColor: AppColors.darkTavernGreen,
         elevation: 0.0,
         title: Text('Register', style: const TextStyle(
-          color: Colors.white,
+          color: AppColors.parchmentWhite,
           fontSize: 20,
         ),),
         actions: <Widget>[
           TextButton.icon(
-            icon: Icon(Icons.person, color: Colors.white,),
-            label: Text('Log In', style: TextStyle(color: Colors.white),),
+            icon: Icon(Icons.person, color: AppColors.parchmentWhite,),
+            label: Text('Log In', style: TextStyle(color: AppColors.parchmentWhite,),),
             onPressed: () {
               widget
                   .toggleView();
@@ -55,7 +57,7 @@ class _RegisterState extends State<Register> {
               Text(
                 'How will we remember you?',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.parchmentWhite,
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -63,7 +65,10 @@ class _RegisterState extends State<Register> {
               SizedBox(height: 12.0),
               //Username input field
               TextFormField(
-                decoration: textInputFieldDecoration.copyWith(hintText: 'Username'),
+                style: const TextStyle(color: Colors.black),
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Username', hintStyle: const TextStyle(
+                  color: Colors.blueGrey,
+                ),),
                 validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 16
                     ? 'Enter an unique username, between 6 - 16 characters long'
                     : null,
@@ -74,7 +79,10 @@ class _RegisterState extends State<Register> {
               SizedBox(height: 20.0),
               //Email input field
               TextFormField(
-                decoration: textInputFieldDecoration.copyWith(hintText: 'Email'),
+                style: const TextStyle(color: Colors.black),
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Email', hintStyle: const TextStyle(
+                  color: Colors.blueGrey,
+                ),),
                 validator: (val) => val == null || val.isEmpty
                     ? 'Enter an email'
                     : null,
@@ -87,7 +95,10 @@ class _RegisterState extends State<Register> {
               SizedBox(height: 20.0),
               //Password input field
               TextFormField(
-                decoration: textInputFieldDecoration.copyWith(hintText: 'Password'),
+                style: const TextStyle(color: Colors.black),
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Password', hintStyle: const TextStyle(
+                  color: Colors.blueGrey,
+                ),),
                 obscureText: true,
                 validator: (val) => val == null || val.length < 6
                     ? 'Enter a password 6+ chars long'
@@ -101,7 +112,10 @@ class _RegisterState extends State<Register> {
               SizedBox(height: 20.0),
               //Confirm password input field
               TextFormField(
-                decoration: textInputFieldDecoration.copyWith(hintText: 'Confirm Password'),
+                style: const TextStyle(color: Colors.black),
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Confirm Password', hintStyle: const TextStyle(
+                  color: Colors.blueGrey,
+                ),),
                 obscureText: true,
                 validator: (val) => val == null || val.length < 6 || val != password
                     ? 'Must match password'
@@ -117,14 +131,34 @@ class _RegisterState extends State<Register> {
               Text(
                 'What will you name your slayer?',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.parchmentWhite,
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: 12.0),
+              Container(
+                width: 80,
+                height: 80,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Image.asset(
+                  'assets/images/test_slayer_sprite.png',
+                  width: 72,
+                  height: 72,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.none,
+                ),
+              ),
+              SizedBox(height: 12.0),
               TextFormField(
-                decoration: textInputFieldDecoration.copyWith(hintText: 'e.g. Fernando'),
+                style: const TextStyle(color: Colors.black),
+                decoration: textInputFieldDecoration.copyWith(hintText: 'e.g. Fernando', hintStyle: const TextStyle(
+                  color: Colors.blueGrey,
+                ),),
                 validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 16
                     ? 'Their name must be between 3 - 16 characters long'
                     : null,
@@ -138,9 +172,9 @@ class _RegisterState extends State<Register> {
               //Register button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.pink[400],
+                  backgroundColor: AppColors.flameOrange,
                 ),
-                child: Text('Register', style: TextStyle(color: Colors.white)),
+                child: Text('Register', style: TextStyle(color: AppColors.parchmentWhite)),
                 onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false)
                   {

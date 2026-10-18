@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_colors.dart';
 
 const textInputFieldDecoration = InputDecoration(
   fillColor: Colors.white,
@@ -7,6 +8,6 @@ const textInputFieldDecoration = InputDecoration(
       borderSide: BorderSide(color: Colors.white, width: 4.0),
   ),
   focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.pink, width: 4.0),
+      borderSide: BorderSide(color: AppColors.flameOrange, width: 4.0),
   ),
 );

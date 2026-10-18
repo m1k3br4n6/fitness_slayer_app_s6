@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 import 'package:fitness_slayer_01/theme/constants.dart';
 
+import '../../theme/app_colors.dart';
+
 class Login extends StatefulWidget {
   final Function toggleView;
   const Login({super.key, required this.toggleView});
@@ -23,18 +25,18 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return loading ? Loading() : Scaffold( //if loading is true, show Loading widget
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.obsidianBlack,
       appBar: AppBar(
-        backgroundColor: Colors.teal,
+        backgroundColor: AppColors.darkTavernGreen,
         elevation: 0.0,
         title: Text('Sign in',  style: const TextStyle(
-          color: Colors.white,
+          color: AppColors.parchmentWhite,
           fontSize: 20,
         ),),
         actions: <Widget>[
           TextButton.icon(
-            icon: const Icon(Icons.person, color: Colors.white,),
-            label: const Text('Register', style: TextStyle(color: Colors.white),),
+            icon: const Icon(Icons.person, color: AppColors.parchmentWhite,),
+            label: const Text('Register', style: TextStyle(color: AppColors.parchmentWhite,),),
             onPressed: () {
               widget.toggleView();
             },
@@ -49,7 +51,10 @@ class _LoginState extends State<Login> {
             children: <Widget>[
               SizedBox(height: 20.0),
               TextFormField(
-                decoration: textInputFieldDecoration.copyWith(hintText: 'Email'),
+                style: const TextStyle(color: Colors.black),
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Email', hintStyle: const TextStyle(
+                  color: Colors.blueGrey,
+                ),),
                 validator: (val) => val == null || val.isEmpty
                     ? 'Enter an email'
                     : null,
@@ -59,7 +64,10 @@ class _LoginState extends State<Login> {
               ),
               SizedBox(height: 20.0),
               TextFormField(
-                decoration: textInputFieldDecoration.copyWith(hintText: 'Password'),
+                style: const TextStyle(color: Colors.black),
+                decoration: textInputFieldDecoration.copyWith(hintText: 'Password', hintStyle: const TextStyle(
+                  color: Colors.blueGrey,
+                ),),
                 obscureText: true,
                 validator: (val) => val == null || val.length < 6
                     ? 'Enter a password 6+ chars long'
@@ -73,9 +81,9 @@ class _LoginState extends State<Login> {
               SizedBox(height: 20.0),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.pink[400],
+                  backgroundColor: AppColors.flameOrange,
                 ),
-                child: Text('Sign in', style: TextStyle(color: Colors.white)),
+                child: Text('Sign in', style: TextStyle(color: AppColors.parchmentWhite,)),
                 onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false)
                   {

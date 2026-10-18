@@ -25,7 +25,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       level = (rawLevel < 1 ? 1 : rawLevel) + (rawXp ~/ 100);
     }
 
-    String appBarText = '$username  (Lv. $level)';
+    String appBarText = '$username lv$level';
 
     return AppBar(
       title: Text(

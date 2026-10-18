@@ -4,6 +4,7 @@ import 'package:fitness_slayer_01/screens/planning/calendar.dart';
 import 'package:fitness_slayer_01/screens/settings/settings.dart';
 import 'package:fitness_slayer_01/screens/planning/workout_planning.dart';
 import 'package:fitness_slayer_01/screens/profile/profile.dart';
+import 'package:fitness_slayer_01/screens/extra-features/bmi_calculator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -76,7 +77,7 @@ class _HomeState extends State<Home> {
               child: IntrinsicHeight(
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.only(top: 40.0, left: 20.0, right: 20.0, bottom: 24.0),
+                  padding: const EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0, bottom: 24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -87,6 +88,90 @@ class _HomeState extends State<Home> {
                           color: AppColors.parchmentWhite,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      // Notifications button with pixel art
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          constraints: const BoxConstraints(
+                            maxWidth: 50,
+                            maxHeight: 50,
+                          ),
+                          padding: EdgeInsets.zero,
+                          icon: pixelIcon('assets/icons/notifications.png'),
+                          iconSize: 20,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Notifications(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      // Settings button with pixel art
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          constraints: const BoxConstraints(
+                            maxWidth: 50,
+                            maxHeight: 50,
+                          ),
+                          padding: EdgeInsets.zero,
+                          icon: pixelIcon('assets/icons/settings.png'),
+                          iconSize: 20,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AppSettings(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      // BMI button
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            minimumSize: const Size(50, 50),
+                            padding: EdgeInsets.zero,
+                            foregroundColor: Colors.white,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const BmiCalculator(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'BMI',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
 
@@ -131,45 +216,6 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: MyAppBar(
         actions: [
-
-          // Notifications button with pixel art
-          IconButton(
-            constraints: const BoxConstraints(
-              minWidth: 36,
-              minHeight: 40,
-            ),
-            padding: EdgeInsets.zero,
-            icon: pixelIcon('assets/icons/notifications.png'),
-            iconSize: 24,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const Notifications(),
-                ),
-              );
-            },
-          ),
-
-          // Settings button with pixel art
-          IconButton(
-            constraints: const BoxConstraints(
-              minWidth: 36,
-              minHeight: 40,
-            ),
-            padding: EdgeInsets.zero,
-            icon: pixelIcon('assets/icons/settings.png'),
-            iconSize: 24,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AppSettings(),
-                ),
-              );
-            },
-          ),
-
           //logout button
           TextButton.icon(
             icon: Icon(Icons.person, color: AppColors.mutedParchment),
