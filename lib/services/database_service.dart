@@ -41,14 +41,19 @@ class DatabaseService {
     }, SetOptions(merge: true));
   }
 
-  Future<void> addEquipment(String itemId, int atk_bonus, int hp_bonus, String description, String name, double price) async {
+  Future<void> addEquipment(String itemId, String imagePath, int atk_bonus, int hp_bonus, String description, String name, double price) async {
     await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).set({
       'name': name,
       'description': description,
+      'image_path': imagePath,
       'price': price,
       'hp_bonus': hp_bonus,
       'atk_bonus': atk_bonus,
     }, SetOptions(merge: true));
+  }
+
+  Future<void> deleteEquipment(String itemId) async {
+    await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).delete();
   }
 
   Future<void> saveWorkout(String userId, CompletedWorkout workout) async {

@@ -1,3 +1,5 @@
+import 'package:fitness_slayer_01/screens/admin/equipment_management.dart';
+import 'package:fitness_slayer_01/screens/extra-features/info.dart';
 import 'package:fitness_slayer_01/screens/notifications/notifications.dart';
 import 'package:fitness_slayer_01/screens/notifications/side_quest.dart';
 import 'package:fitness_slayer_01/screens/planning/calendar.dart';
@@ -24,6 +26,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final AuthService _auth = AuthService();
+  final user = FirebaseAuth.instance.currentUser;
+
 
   //keeps track of active tab; defaults to Home in the middle
   int _currentIndex = 2;
@@ -91,6 +95,8 @@ class _HomeState extends State<Home> {
                         ),
                       ),
 
+                      SizedBox(height: 5),
+
                       // Notifications button with pixel art
                       Container(
                         decoration: BoxDecoration(
@@ -116,6 +122,8 @@ class _HomeState extends State<Home> {
                         ),
                       ),
 
+                      SizedBox(height: 5),
+
                       // Settings button with pixel art
                       Container(
                         decoration: BoxDecoration(
@@ -140,6 +148,36 @@ class _HomeState extends State<Home> {
                           },
                         ),
                       ),
+
+                      SizedBox(height: 5),
+                      
+                      //Info button
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          constraints: const BoxConstraints(
+                            maxWidth: 50,
+                            maxHeight: 50,
+                          ),
+                          padding: EdgeInsets.zero,
+                          icon: Icon(Icons.menu_book),
+                          color: AppColors.parchmentWhite,
+                          iconSize: 25,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Info(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      SizedBox(height: 5),
 
                       // BMI button
                       Container(
@@ -168,10 +206,38 @@ class _HomeState extends State<Home> {
                           child: const Text(
                             'BMI',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                        ),
+                      ),
+
+                      SizedBox(height: 5),
+
+                      //Admin only equipment upload button
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.amber,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          constraints: const BoxConstraints(
+                            maxWidth: 50,
+                            maxHeight: 50,
+                          ),
+                          padding: EdgeInsets.zero,
+                          icon: Icon(Icons.admin_panel_settings),
+                          color: Colors.black87,
+                          iconSize:28,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const equipmentManage(),
+                              ),
+                            );
+                          },
                         ),
                       ),
 
