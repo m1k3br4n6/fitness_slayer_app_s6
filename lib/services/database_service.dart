@@ -6,6 +6,7 @@ import 'package:fitness_slayer_01/services/streak_service.dart';
 import '../models/routine.dart';
 
 class DatabaseService {
+
   Future<void> updateUserData(String userId, String username, int coin, int streak, int xp, int level) async {
     await FirebaseFirestore.instance.collection('users').doc(userId).set({
       'username': username,
@@ -13,6 +14,40 @@ class DatabaseService {
       'streak': streak,
       'xp': xp,
       'level': level,
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> updateSlayerData(String userId, String slayerName, String item, int hp, int atk) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('slayer').doc('SO1').set({
+      'slayer_name': slayerName,
+      'item_equipped': item,
+      'hp': hp,
+      'atk': atk
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> addToInventory(String userId, String itemId) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('inventory').doc(itemId).set({
+      'item_id': itemId,
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> updateBMI(String userId, double latestBMI, int prev_age, double prev_weight, double prev_height) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('BMI').doc('userBMI').set({
+      'latestBMI': latestBMI,
+      'prev_age': prev_age,
+      'prev_weight': prev_weight,
+      'prev_height': prev_height
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> addEquipment(String itemId, int atk_bonus, int hp_bonus, String description, String name, double price) async {
+    await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).set({
+      'name': name,
+      'description': description,
+      'price': price,
+      'hp_bonus': hp_bonus,
+      'atk_bonus': atk_bonus,
     }, SetOptions(merge: true));
   }
 

@@ -20,6 +20,7 @@ class _RegisterState extends State<Register> {
   String password = '';
   String passwordConfirm = '';
   String username = '';
+  String slayerName = '';
   String error = '';
 
   @override
@@ -50,12 +51,21 @@ class _RegisterState extends State<Register> {
           key: _formKey,
           child: Column(
             children: <Widget>[
-              SizedBox(height: 20.0),
+              SizedBox(height: 10.0),
+              Text(
+                'How will we remember you?',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 12.0),
               //Username input field
               TextFormField(
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Username'),
-                validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 18
-                    ? 'Enter an unique username, between 6 - 18 characters long'
+                validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 16
+                    ? 'Enter an unique username, between 6 - 16 characters long'
                     : null,
                 onChanged: (val) {
                   username = val;
@@ -103,6 +113,28 @@ class _RegisterState extends State<Register> {
                 },
               ),
               SizedBox(height: 20.0),
+              //slayer name
+              Text(
+                'What will you name your slayer?',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 12.0),
+              TextFormField(
+                decoration: textInputFieldDecoration.copyWith(hintText: 'e.g. Fernando'),
+                validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 16
+                    ? 'Their name must be between 3 - 16 characters long'
+                    : null,
+                onChanged: (val) {
+                  setState(() {
+                    slayerName = val;
+                  });
+                },
+              ),
+              SizedBox(height: 20.0),
               //Register button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -113,10 +145,10 @@ class _RegisterState extends State<Register> {
                   if (_formKey.currentState?.validate() ?? false)
                   {
                     setState(() => loading = true);
-                    dynamic result = await _auth.registerWithEmailAndPassword(username, email, password,);
+                    dynamic result = await _auth.registerWithEmailAndPassword(username, email, password, slayerName);
                     if (result == null) {
                       setState(() {
-                        error = 'please supply valid email';
+                        error = 'Please supply valid email';
                         loading = false;
                       });
                     }

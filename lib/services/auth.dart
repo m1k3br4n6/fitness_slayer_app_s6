@@ -29,7 +29,7 @@ class AuthService {
   }
 
   //2. register with email & password
-  Future registerWithEmailAndPassword(String username, String email, String password) async {
+  Future registerWithEmailAndPassword(String username, String email, String password, String slayerName) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User? user = result.user;
@@ -37,6 +37,9 @@ class AuthService {
       //create a new document for the user with uid
       if (user != null) {
         await DatabaseService().updateUserData(user.uid, username, 0, 0, 0, 1);
+        await DatabaseService().updateSlayerData(user.uid, slayerName, "E001", 10, 10);
+        await DatabaseService().addToInventory(user.uid, "E001");
+        await DatabaseService().updateBMI(user.uid, 0, 0, 0, 0);
       }
 
       return _userFromFirebaseUser(user);
