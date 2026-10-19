@@ -1,5 +1,6 @@
 import 'package:fitness_slayer_01/screens/admin/equipment_management.dart';
 import 'package:fitness_slayer_01/screens/extra-features/info.dart';
+import 'package:fitness_slayer_01/screens/extra-features/work_in_progress_warning.dart';
 import 'package:fitness_slayer_01/screens/notifications/notifications.dart';
 import 'package:fitness_slayer_01/screens/notifications/side_quest.dart';
 import 'package:fitness_slayer_01/screens/planning/calendar.dart';
@@ -28,13 +29,24 @@ class _HomeState extends State<Home> {
   final AuthService _auth = AuthService();
   final user = FirebaseAuth.instance.currentUser;
 
-
+  bool isAdmin = false;
   //keeps track of active tab; defaults to Home in the middle
   int _currentIndex = 2;
 
   @override
   void initState() {
     super.initState();
+
+    final user = context.read<myUser?>();
+    final String uid = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+    if (uid == "6Iw3AiqlCObMc77PAbCLDsmaBbh2")
+    {
+      isAdmin = true;
+    }
+    else
+    {
+      isAdmin = false;
+    }
 
     // Checks users streak if needs reset
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -115,7 +127,7 @@ class _HomeState extends State<Home> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const Notifications(),
+                                builder: (context) => const WorkInProgressWarning(),
                               ),
                             );
                           },
@@ -142,7 +154,7 @@ class _HomeState extends State<Home> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const AppSettings(),
+                                builder: (context) => const WorkInProgressWarning(),
                               ),
                             );
                           },
@@ -216,6 +228,7 @@ class _HomeState extends State<Home> {
                       SizedBox(height: 5),
 
                       //Admin only equipment upload button
+                      if (isAdmin)
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.amber,
@@ -234,7 +247,7 @@ class _HomeState extends State<Home> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const equipmentManage(),
+                                builder: (context) => const WorkInProgressWarning(),
                               ),
                             );
                           },
@@ -257,7 +270,7 @@ class _HomeState extends State<Home> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const SideQuest()),
+                            MaterialPageRoute(builder: (context) => const WorkInProgressWarning()),
                           );
                         },
                         child: Text('Daily Side Quest', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 16)),
