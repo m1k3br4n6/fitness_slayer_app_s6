@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fitness_slayer_01/models/exercises.dart';
 import 'package:fitness_slayer_01/screens/workout/exercise_info_screen.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 class RoutineSetData {
   String weight;
@@ -62,9 +63,9 @@ class _RoutineExerciseCardState extends State<RoutineExerciseCard> {
 
   @override
   Widget build(BuildContext context) {
-    final Color cardColor = Colors.teal[800]!;
-    final Color inputColor = Colors.teal[900]!;
-    final Color textColor = Colors.white70;
+    const Color cardColor = AppColors.hearthPanel;
+    const Color inputColor = AppColors.woodFrame;
+    const Color textColor = AppColors.parchmentBeige;
 
     final exercise = widget.routineExercise.exercise;
     final sets = widget.routineExercise.sets;
@@ -75,6 +76,7 @@ class _RoutineExerciseCardState extends State<RoutineExerciseCard> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.woodFrame, width: 1),
       ),
       child: Column(
         children: [
@@ -91,7 +93,7 @@ class _RoutineExerciseCardState extends State<RoutineExerciseCard> {
                     color: Colors.grey[900],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(_getMuscleIcon(), color: Colors.greenAccent, size: 28),
+                  child: Icon(_getMuscleIcon(), color: AppColors.gemGold, size: 28),
                 ),
                 const SizedBox(width: 16),
 
@@ -118,7 +120,7 @@ class _RoutineExerciseCardState extends State<RoutineExerciseCard> {
                     child: Text(
                       exercise.name,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.parchmentWhite,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -130,7 +132,7 @@ class _RoutineExerciseCardState extends State<RoutineExerciseCard> {
                 IconButton(
                   icon: Icon(
                     _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    color: Colors.white70,
+                    color: AppColors.brassBorder,
                   ),
                   onPressed: () {
                     setState(() {
@@ -141,7 +143,7 @@ class _RoutineExerciseCardState extends State<RoutineExerciseCard> {
 
                 // DELETE EXERCISE POPUP
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: Colors.white70),
+                  icon: const Icon(Icons.more_vert, color: AppColors.brassBorder),
                   color: inputColor,
                   onSelected: (value) {
                     if (value == 'delete') {
@@ -151,7 +153,7 @@ class _RoutineExerciseCardState extends State<RoutineExerciseCard> {
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'delete',
-                      child: Text('Delete Exercise', style: TextStyle(color: Colors.redAccent)),
+                      child: Text('Delete Exercise', style: TextStyle(color: AppColors.crimsonRed)),
                     ),
                   ],
                 ),
@@ -273,7 +275,7 @@ class RoutineSetInputRow extends StatelessWidget {
             flex: 1,
             child: Text(
               '${setIndex + 1}',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: const TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold),
             ),
           ),
 
@@ -295,12 +297,12 @@ class RoutineSetInputRow extends StatelessWidget {
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                 ],
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.parchmentWhite,
                   fontWeight: FontWeight.w600,
                 ),
                 decoration: const InputDecoration(
                   hintText: '0',
-                  hintStyle: TextStyle(color: Colors.white38),
+                  hintStyle: TextStyle(color: AppColors.brassBorder),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                   isDense: true,
@@ -328,12 +330,12 @@ class RoutineSetInputRow extends StatelessWidget {
                   FilteringTextInputFormatter.digitsOnly,
                 ],
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.parchmentWhite,
                   fontWeight: FontWeight.w600,
                 ),
                 decoration: const InputDecoration(
                   hintText: '0',
-                  hintStyle: TextStyle(color: Colors.white38),
+                  hintStyle: TextStyle(color: AppColors.brassBorder),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(vertical: 8),
                   isDense: true,
@@ -357,7 +359,7 @@ class RoutineSetInputRow extends StatelessWidget {
                   ),
                   child: const Icon(
                     Icons.delete_outline,
-                    color: Colors.redAccent,
+                    color: AppColors.crimsonRed,
                     size: 20,
                   ),
                 ),

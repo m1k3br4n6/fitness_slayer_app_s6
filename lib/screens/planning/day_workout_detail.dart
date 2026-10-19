@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 import 'package:fitness_slayer_01/widgets/cards/completed_exercise_card.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 class DayWorkoutDetailScreen extends StatelessWidget {
   final DateTime date;
@@ -24,7 +25,7 @@ class DayWorkoutDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: const MyAppBar(),
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.slateBackdrop,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -35,13 +36,13 @@ class DayWorkoutDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 children: [
-                  const Icon(Icons.event, color: Colors.tealAccent, size: 28),
+                  const Icon(Icons.event, color: AppColors.gemGold, size: 28),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       formattedDate,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.parchmentWhite,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -58,16 +59,17 @@ class DayWorkoutDetailScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: Colors.teal[800],
+                  color: AppColors.hearthPanel,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.woodFrame, width: 1),
                 ),
                 child: const Column(
                   children: [
-                    Icon(Icons.fitness_center_outlined, color: Colors.white38, size: 48),
+                    Icon(Icons.fitness_center_outlined, color: AppColors.brassBorder, size: 48),
                     SizedBox(height: 12),
                     Text(
                       'No workouts logged on this date.',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      style: TextStyle(color: AppColors.brassBorder, fontSize: 16),
                     ),
                   ],
                 ),
@@ -83,29 +85,29 @@ class DayWorkoutDetailScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
-                          color: Colors.teal[800],
+                          color: AppColors.hearthPanel,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.teal[700]!),
+                          border: Border.all(color: AppColors.woodFrame),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.check_circle, color: Colors.greenAccent, size: 22),
+                            const Icon(Icons.check_circle, color: AppColors.flameOrange, size: 22),
                             const SizedBox(width: 10),
                             const Text(
                               'Completed Session',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.parchmentWhite,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
                             ),
                             const Spacer(),
-                            const Icon(Icons.timer_outlined, color: Colors.tealAccent, size: 18),
+                            const Icon(Icons.timer_outlined, color: AppColors.gemGold, size: 18),
                             const SizedBox(width: 6),
                             Text(
                               '${workout.durationMinutes} min',
                               style: const TextStyle(
-                                color: Colors.tealAccent,
+                                color: AppColors.gemGold,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),

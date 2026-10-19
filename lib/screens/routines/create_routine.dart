@@ -8,6 +8,7 @@ import 'package:fitness_slayer_01/models/exercises.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/widgets/exercise_search.dart';
 import 'package:fitness_slayer_01/widgets/cards/routine_exercise_card.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 import '../../models/routine.dart';
 import '../../services/database_service.dart';
@@ -178,7 +179,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
               widget.initialRoutine != null
                   ? 'Routine Updated Successfully!'
                   : 'Routine Saved Successfully!',
-              style: const TextStyle(color: Colors.greenAccent),
+              style: const TextStyle(color: AppColors.parchmentWhite),
             ),
           ),
         );
@@ -190,7 +191,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
           _isSubmitting = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save routine: $e', style: const TextStyle(color: Colors.redAccent))),
+          SnackBar(content: Text('Failed to save routine: $e', style: const TextStyle(color: AppColors.crimsonRed))),
         );
       }
     }
@@ -202,12 +203,12 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
 
     return Scaffold(
       appBar: const MyAppBar(),
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.slateBackdrop,
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: _isLoadingInitialData
             ? const Center(
-                child: CircularProgressIndicator(color: Colors.greenAccent),
+                child: CircularProgressIndicator(color: AppColors.flameOrange),
               )
             : SingleChildScrollView(
                 child: Padding(
@@ -217,15 +218,16 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
                       // Text field for the Routine Name
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.teal[800],
+                          color: AppColors.hearthPanel,
                           borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.woodFrame, width: 1),
                         ),
                         child: TextField(
                           controller: _routineNameController,
-                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                          style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 18, fontWeight: FontWeight.bold),
                           decoration: const InputDecoration(
                             hintText: 'Routine Name (e.g. Push Day)',
-                            hintStyle: TextStyle(color: Colors.white54),
+                            hintStyle: TextStyle(color: AppColors.brassBorder),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                           ),
@@ -269,18 +271,18 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
                       // Add exercise button
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal[800],
-                          foregroundColor: Colors.tealAccent,
+                          backgroundColor: AppColors.hearthPanel,
+                          foregroundColor: AppColors.parchmentWhite,
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 2,
                         ),
-                        icon: const Icon(Icons.add_rounded, color: Colors.tealAccent),
+                        icon: const Icon(Icons.add_rounded, color: AppColors.gemGold),
                         label: const Text(
                           'Add Exercise',
-                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                          style: TextStyle(color: AppColors.parchmentWhite, fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                         onPressed: _navigateAndAddExercise,
                       ),
@@ -291,8 +293,8 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.greenAccent,
-                            foregroundColor: Colors.teal[900],
+                            backgroundColor: AppColors.flameOrange,
+                            foregroundColor: AppColors.parchmentWhite,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),

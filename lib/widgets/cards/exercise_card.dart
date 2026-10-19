@@ -91,7 +91,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                     color: Colors.grey[900],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(_getMuscleIcon(), color: Colors.greenAccent, size: 28),
+                  child: Icon(_getMuscleIcon(), color: AppColors.gemGold, size: 28),
                 ),
                 const SizedBox(width: 16),
 

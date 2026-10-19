@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 class ExerciseDemoScreen extends StatelessWidget {
   final String exerciseId;
@@ -16,13 +17,13 @@ class ExerciseDemoScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           '$exerciseName - Demo',
-          style: const TextStyle(color: Colors.white, fontSize: 18),
+          style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 18),
         ),
-        backgroundColor: Colors.teal[800],
-        iconTheme: IconThemeData(color: Colors.teal[200]),
+        backgroundColor: AppColors.hearthPanel,
+        iconTheme: const IconThemeData(color: AppColors.gemGold),
         elevation: 0,
       ),
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.slateBackdrop,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -57,8 +58,9 @@ class ExerciseDemoScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.teal[800],
+        color: AppColors.hearthPanel,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.woodFrame, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
@@ -77,13 +79,13 @@ class ExerciseDemoScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.teal[900],
+                    color: AppColors.woodFrame,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     stepLabel,
                     style: const TextStyle(
-                      color: Colors.greenAccent,
+                      color: AppColors.gemGold,
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -93,7 +95,7 @@ class ExerciseDemoScreen extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.parchmentWhite,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -114,24 +116,24 @@ class ExerciseDemoScreen extends StatelessWidget {
                 if (loadingProgress == null) return child;
                 return Container(
                   height: 220,
-                  color: Colors.teal[900],
+                  color: AppColors.slateBackdrop,
                   child: const Center(
-                    child: CircularProgressIndicator(color: Colors.greenAccent),
+                    child: CircularProgressIndicator(color: AppColors.flameOrange),
                   ),
                 );
               },
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   height: 180,
-                  color: Colors.teal[900],
+                  color: AppColors.slateBackdrop,
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.broken_image_outlined, color: Colors.white38, size: 48),
+                      Icon(Icons.broken_image_outlined, color: AppColors.brassBorder, size: 48),
                       SizedBox(height: 8),
                       Text(
                         'Image not available',
-                        style: TextStyle(color: Colors.white54, fontSize: 14),
+                        style: TextStyle(color: AppColors.brassBorder, fontSize: 14),
                       ),
                     ],
                   ),

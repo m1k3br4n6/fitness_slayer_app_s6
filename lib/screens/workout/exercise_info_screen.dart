@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:muscle_mapper/muscle_mapper.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'exercise_demo_screen.dart';
 
 class ExerciseInfoScreen extends StatelessWidget {
@@ -52,7 +53,6 @@ class ExerciseInfoScreen extends StatelessWidget {
     return activeMuscles;
   }
 
-  // Automatically determines which side of the model to show
   AnatomyView _getAnatomyView() {
     final backMuscles = [
       'lats',
@@ -71,7 +71,6 @@ class ExerciseInfoScreen extends StatelessWidget {
     return AnatomyView.front;
   }
 
-  // Converts raw strings to Title Case with 'N/A' fallback
   String _capitalize(String? text) {
     if (text == null || text.trim().isEmpty) return 'N/A';
     final trimmed = text.trim();
@@ -86,15 +85,15 @@ class ExerciseInfoScreen extends StatelessWidget {
     final Set<Muscle> activeMuscles = _getActiveMuscles();
 
     return Scaffold(
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.slateBackdrop,
       appBar: AppBar(
-        title: Text(exerciseName, style: const TextStyle(color: Colors.white)),
-        backgroundColor: Colors.teal[800],
-        iconTheme: IconThemeData(color: Colors.teal[200]),
+        title: Text(exerciseName, style: const TextStyle(color: AppColors.parchmentWhite)),
+        backgroundColor: AppColors.hearthPanel,
+        iconTheme: const IconThemeData(color: AppColors.gemGold),
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline_rounded, color: Colors.greenAccent),
+            icon: const Icon(Icons.help_outline_rounded, color: AppColors.gemGold),
             tooltip: 'View Exercise Demo',
             onPressed: () {
               Navigator.push(
@@ -116,14 +115,14 @@ class ExerciseInfoScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Muscle highlighter with high-contrast crisp body lines and vibrant active muscle highlight
+              // Muscle highlighter
               Container(
                 width: 320,
                 height: 320,
                 decoration: BoxDecoration(
-                  color: Colors.teal[950],
+                  color: AppColors.slateBackdrop,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.5), width: 2),
+                  border: Border.all(color: AppColors.flameOrange.withValues(alpha: 0.5), width: 2),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.5),
@@ -138,9 +137,9 @@ class ExerciseInfoScreen extends StatelessWidget {
                   assetProvider: const DefaultAnatomyProvider(),
                   activeMuscles: activeMuscles,
                   muscleColors: {
-                    for (var muscle in activeMuscles) muscle: Colors.greenAccent,
+                    for (var muscle in activeMuscles) muscle: AppColors.flameOrange,
                   },
-                  baseColor: Colors.white60,
+                  baseColor: AppColors.brassBorder,
                 ),
               ),
 
@@ -151,13 +150,14 @@ class ExerciseInfoScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.teal[800],
+                  color: AppColors.hearthPanel,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.woodFrame, width: 1),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Target Muscle Badges inline next to "Targeted Muscles:"
+                    // Target Muscle Badges
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 8,
@@ -165,19 +165,19 @@ class ExerciseInfoScreen extends StatelessWidget {
                       children: [
                         const Text(
                           'Targeted Muscles:',
-                          style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: AppColors.brassBorder, fontSize: 13, fontWeight: FontWeight.bold),
                         ),
                         ...primaryMuscles.map((muscle) {
                           return Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.teal[700],
+                              color: AppColors.woodFrame,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.teal[200]!.withValues(alpha: 0.3)),
+                              border: Border.all(color: AppColors.brassBorder.withValues(alpha: 0.3)),
                             ),
                             child: Text(
                               _capitalize(muscle),
-                              style: TextStyle(color: Colors.teal[200], fontWeight: FontWeight.w600, fontSize: 13),
+                              style: const TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.w600, fontSize: 13),
                             ),
                           );
                         }),
@@ -193,15 +193,15 @@ class ExerciseInfoScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.teal[900]?.withValues(alpha: 0.5),
+                              color: AppColors.woodFrame,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Mechanic', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                                const Text('Mechanic', style: TextStyle(color: AppColors.brassBorder, fontSize: 11)),
                                 const SizedBox(height: 2),
-                                Text(_capitalize(mechanic), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                                Text(_capitalize(mechanic), style: const TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold, fontSize: 13)),
                               ],
                             ),
                           ),
@@ -211,15 +211,15 @@ class ExerciseInfoScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.teal[900]?.withValues(alpha: 0.5),
+                              color: AppColors.woodFrame,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Force', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                                const Text('Force', style: TextStyle(color: AppColors.brassBorder, fontSize: 11)),
                                 const SizedBox(height: 2),
-                                Text(_capitalize(force), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                                Text(_capitalize(force), style: const TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold, fontSize: 13)),
                               ],
                             ),
                           ),
@@ -236,15 +236,15 @@ class ExerciseInfoScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.teal[900]?.withValues(alpha: 0.5),
+                              color: AppColors.woodFrame,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Category', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                                const Text('Category', style: TextStyle(color: AppColors.brassBorder, fontSize: 11)),
                                 const SizedBox(height: 2),
-                                Text(_capitalize(category), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                                Text(_capitalize(category), style: const TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold, fontSize: 13)),
                               ],
                             ),
                           ),
@@ -254,15 +254,15 @@ class ExerciseInfoScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.teal[900]?.withValues(alpha: 0.5),
+                              color: AppColors.woodFrame,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Equipment', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                                const Text('Equipment', style: TextStyle(color: AppColors.brassBorder, fontSize: 11)),
                                 const SizedBox(height: 2),
-                                Text(_capitalize(equipment), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                                Text(_capitalize(equipment), style: const TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold, fontSize: 13)),
                               ],
                             ),
                           ),
@@ -271,16 +271,16 @@ class ExerciseInfoScreen extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 20),
-                    const Divider(color: Colors.white12),
+                    const Divider(color: AppColors.woodFrame),
                     const SizedBox(height: 12),
 
-                    // Instructions Header with Visual Demo button
+                    // Instructions Header
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
                           'Instructions:',
-                          style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: AppColors.parchmentWhite, fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                         InkWell(
                           onTap: () {
@@ -298,18 +298,18 @@ class ExerciseInfoScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.teal[700],
+                              color: AppColors.woodFrame,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.teal[200]!.withValues(alpha: 0.3)),
+                              border: Border.all(color: AppColors.brassBorder.withValues(alpha: 0.3)),
                             ),
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.help_outline_rounded, color: Colors.greenAccent, size: 16),
+                                Icon(Icons.help_outline_rounded, color: AppColors.gemGold, size: 16),
                                 SizedBox(width: 4),
                                 Text(
                                   'Visual Demo',
-                                  style: TextStyle(color: Colors.greenAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: AppColors.gemGold, fontSize: 12, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -320,7 +320,7 @@ class ExerciseInfoScreen extends StatelessWidget {
                     const SizedBox(height: 12),
 
                     if (instructions.isEmpty)
-                      const Text('No instructions provided.', style: TextStyle(color: Colors.white54))
+                      const Text('No instructions provided.', style: TextStyle(color: AppColors.brassBorder))
                     else
                       ...instructions.asMap().entries.map((entry) {
                         int stepNum = entry.key + 1;
@@ -335,20 +335,20 @@ class ExerciseInfoScreen extends StatelessWidget {
                                 width: 22,
                                 height: 22,
                                 alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: Colors.teal[700],
+                                decoration: const BoxDecoration(
+                                  color: AppColors.woodFrame,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Text(
                                   '$stepNum',
-                                  style: TextStyle(color: Colors.teal[200], fontWeight: FontWeight.bold, fontSize: 11),
+                                  style: const TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold, fontSize: 11),
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
                                   stepText,
-                                  style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.4),
+                                  style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 14, height: 1.4),
                                 ),
                               ),
                             ],

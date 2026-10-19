@@ -8,6 +8,7 @@ import 'package:fitness_slayer_01/models/exercises.dart';
 import 'package:fitness_slayer_01/providers/workout_provider.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/screens/routines/create_routine.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 import '../../services/database_service.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'dart:convert';
@@ -35,14 +36,14 @@ class RoutineDetailScreen extends StatelessWidget {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Routine deleted', style: TextStyle(color: Colors.greenAccent))),
+          const SnackBar(content: Text('Routine deleted', style: TextStyle(color: AppColors.parchmentWhite))),
         );
         Navigator.pop(context);
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e', style: const TextStyle(color: Colors.redAccent))),
+          SnackBar(content: Text('Failed to delete: $e', style: const TextStyle(color: AppColors.crimsonRed))),
         );
       }
     }
@@ -53,17 +54,13 @@ class RoutineDetailScreen extends StatelessWidget {
       final workoutProvider = context.read<WorkoutProvider>();
       final timerProvider = context.read<WorkoutTimerProvider>();
 
-      // Starts routine and cleans out any old left overs
       workoutProvider.clearWorkout();
       timerProvider.stopAndReset();
 
-     //We only store the ID of the routines with the exercise names and weights/reps
-      // So we reroute everything through the json otherwise the exercise details will be empty
       final String jsonString = await rootBundle.loadString('assets/exercises.json');
       final List<dynamic> jsonData = json.decode(jsonString);
 
       for (var routineEx in routine.exercises) {
-        // Match JSON with exercise ID from saved routine
         final matchingJson = jsonData.firstWhere(
               (jsonEx) => jsonEx['id'] == routineEx.exerciseId,
           orElse: () => null,
@@ -71,18 +68,15 @@ class RoutineDetailScreen extends StatelessWidget {
 
         if (matchingJson == null) continue;
 
-        // Make a FullExercise object by routing the matching json key through the exercises model
         final fullExercise = Exercise.fromJson(matchingJson);
 
         workoutProvider.addExercise(fullExercise);
         int newExIndex = workoutProvider.activeExercises.length - 1;
 
-        //Adds all the sets planned for Routine
         while (workoutProvider.activeExercises[newExIndex].sets.length < routineEx.targetSets.length) {
           workoutProvider.addSet(newExIndex);
         }
 
-        //Adds weights and reps planned for routine.
         for (int i = 0; i < routineEx.targetSets.length; i++) {
           final targetSet = routineEx.targetSets[i];
           workoutProvider.updateSetWeight(newExIndex, i, targetSet.targetWeight.toString());
@@ -93,13 +87,12 @@ class RoutineDetailScreen extends StatelessWidget {
       if (context.mounted) {
         timerProvider.start();
 
-        // Pop back to home screen so WorkoutPlanning displays the active workout in place
         Navigator.popUntil(context, (route) => route.isFirst);
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error starting routine: $e', style: const TextStyle(color: Colors.redAccent))),
+          SnackBar(content: Text('Error starting routine: $e', style: const TextStyle(color: AppColors.crimsonRed))),
         );
       }
     }
@@ -109,7 +102,7 @@ class RoutineDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const MyAppBar(),
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.slateBackdrop,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -122,11 +115,11 @@ class RoutineDetailScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     routine.routineName,
-                    style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                    style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 32, fontWeight: FontWeight.bold),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined, color: Colors.tealAccent, size: 28),
+                  icon: const Icon(Icons.edit_outlined, color: AppColors.gemGold, size: 28),
                   tooltip: 'Edit Routine',
                   onPressed: () async {
                     final result = await Navigator.push(
@@ -141,26 +134,26 @@ class RoutineDetailScreen extends StatelessWidget {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 28),
+                  icon: const Icon(Icons.delete_outline, color: AppColors.crimsonRed, size: 28),
                   tooltip: 'Delete Routine',
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        backgroundColor: Colors.teal[800],
-                        title: const Text('Delete Routine?', style: TextStyle(color: Colors.white)),
-                        content: const Text('This cannot be undone.', style: TextStyle(color: Colors.white70)),
+                        backgroundColor: AppColors.hearthPanel,
+                        title: const Text('Delete Routine?', style: TextStyle(color: AppColors.parchmentWhite)),
+                        content: const Text('This cannot be undone.', style: TextStyle(color: AppColors.brassBorder)),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('CANCEL', style: TextStyle(color: Colors.white54)),
+                            child: const Text('CANCEL', style: TextStyle(color: AppColors.brassBorder)),
                           ),
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
                               _deleteRoutine(context);
                             },
-                            child: const Text('DELETE', style: TextStyle(color: Colors.redAccent)),
+                            child: const Text('DELETE', style: TextStyle(color: AppColors.crimsonRed)),
                           ),
                         ],
                       ),
@@ -178,12 +171,16 @@ class RoutineDetailScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final ex = routine.exercises[index];
                 return Card(
-                  color: Colors.teal[800],
+                  color: AppColors.hearthPanel,
                   margin: const EdgeInsets.only(bottom: 12.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: AppColors.woodFrame, width: 1),
+                  ),
                   child: ListTile(
-                    title: Text(ex.exerciseName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    subtitle: Text('${ex.targetSets.length} Sets planned', style: const TextStyle(color: Colors.white70)),
-                    trailing: const Icon(Icons.fitness_center, color: Colors.greenAccent),
+                    title: Text(ex.exerciseName, style: const TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold)),
+                    subtitle: Text('${ex.targetSets.length} Sets planned', style: const TextStyle(color: AppColors.brassBorder)),
+                    trailing: const Icon(Icons.fitness_center, color: AppColors.gemGold),
                   ),
                 );
               },
@@ -196,8 +193,8 @@ class RoutineDetailScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.greenAccent,
-                  foregroundColor: Colors.teal[900],
+                  backgroundColor: AppColors.flameOrange,
+                  foregroundColor: AppColors.parchmentWhite,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),

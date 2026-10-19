@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 import '../../widgets/app_bar.dart';
 
@@ -23,7 +24,7 @@ class _RestTimerCardState extends State<RestTimerCard> {
 
     return Scaffold(
       appBar: const MyAppBar(),
-      backgroundColor: Colors.teal[900],
+      backgroundColor: AppColors.slateBackdrop,
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -31,7 +32,7 @@ class _RestTimerCardState extends State<RestTimerCard> {
             child: Container(
               padding: const EdgeInsets.all(24.0),
               decoration: BoxDecoration(
-                color: Colors.teal[800],
+                color: AppColors.hearthPanel,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -48,12 +49,12 @@ class _RestTimerCardState extends State<RestTimerCard> {
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.timer_outlined, color: Colors.greenAccent, size: 28),
+                      Icon(Icons.timer_outlined, color: AppColors.gemGold, size: 28),
                       SizedBox(width: 10),
                       Text(
                         'Rest Timer',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.parchmentWhite,
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.1,
@@ -69,14 +70,14 @@ class _RestTimerCardState extends State<RestTimerCard> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                     decoration: BoxDecoration(
                       color: timerData.isRestPaused
-                          ? Colors.amber.withValues(alpha: 0.2)
-                          : Colors.greenAccent.withValues(alpha: 0.2),
+                          ? AppColors.gemGold.withValues(alpha: 0.2)
+                          : AppColors.flameOrange.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       timerData.isRestPaused ? 'PAUSED' : 'RESTING',
                       style: TextStyle(
-                        color: timerData.isRestPaused ? Colors.amberAccent : Colors.greenAccent,
+                        color: timerData.isRestPaused ? AppColors.gemGold : AppColors.flameOrange,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
@@ -113,18 +114,18 @@ class _RestTimerCardState extends State<RestTimerCard> {
                             width: 54,
                             height: 54,
                             decoration: BoxDecoration(
-                              color: Colors.teal[900],
+                              color: AppColors.slateBackdrop,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.teal[700]!, width: 1.5),
+                              border: Border.all(color: AppColors.brassBorder, width: 1.5),
                             ),
                             child: const Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.remove_rounded, color: Colors.tealAccent, size: 22),
+                                Icon(Icons.remove_rounded, color: AppColors.gemGold, size: 22),
                                 Text(
                                   '-10s',
                                   style: TextStyle(
-                                    color: Colors.tealAccent,
+                                    color: AppColors.gemGold,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -144,9 +145,9 @@ class _RestTimerCardState extends State<RestTimerCard> {
                         height: MediaQuery.of(context).size.width / 2.6,
                         duration: timerData.restSecondsRemaining,
                         initialDuration: 0,
-                        fillColor: Colors.greenAccent,
-                        ringColor: Colors.teal[700]!,
-                        backgroundColor: Colors.teal[900],
+                        fillColor: AppColors.flameOrange,
+                        ringColor: AppColors.woodFrame,
+                        backgroundColor: AppColors.slateBackdrop,
                         strokeWidth: 14.0,
                         strokeCap: StrokeCap.round,
                         isReverse: true,
@@ -155,7 +156,7 @@ class _RestTimerCardState extends State<RestTimerCard> {
                         textStyle: const TextStyle(
                           fontSize: 34,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppColors.parchmentWhite,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
                         textFormat: CountdownTextFormat.MM_SS,
@@ -183,18 +184,18 @@ class _RestTimerCardState extends State<RestTimerCard> {
                             width: 54,
                             height: 54,
                             decoration: BoxDecoration(
-                              color: Colors.teal[900],
+                              color: AppColors.slateBackdrop,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.teal[700]!, width: 1.5),
+                              border: Border.all(color: AppColors.brassBorder, width: 1.5),
                             ),
                             child: const Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.add_rounded, color: Colors.tealAccent, size: 22),
+                                Icon(Icons.add_rounded, color: AppColors.gemGold, size: 22),
                                 Text(
                                   '+10s',
                                   style: TextStyle(
-                                    color: Colors.tealAccent,
+                                    color: AppColors.gemGold,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -216,8 +217,8 @@ class _RestTimerCardState extends State<RestTimerCard> {
                       // Pause / Resume Toggle
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal[900],
-                          foregroundColor: Colors.tealAccent,
+                          backgroundColor: AppColors.woodFrame,
+                          foregroundColor: AppColors.parchmentWhite,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -235,13 +236,13 @@ class _RestTimerCardState extends State<RestTimerCard> {
                         },
                         icon: Icon(
                           timerData.isRestPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                          color: Colors.tealAccent,
+                          color: AppColors.gemGold,
                           size: 22,
                         ),
                         label: Text(
                           timerData.isRestPaused ? 'Resume' : 'Pause',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppColors.parchmentWhite,
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),
@@ -253,8 +254,8 @@ class _RestTimerCardState extends State<RestTimerCard> {
                       // Restart Button
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal[900],
-                          foregroundColor: Colors.tealAccent,
+                          backgroundColor: AppColors.woodFrame,
+                          foregroundColor: AppColors.parchmentWhite,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -265,11 +266,11 @@ class _RestTimerCardState extends State<RestTimerCard> {
                           context.read<WorkoutTimerProvider>().restartRest(_totalRestDuration);
                           _countDownController.restart(duration: _totalRestDuration);
                         },
-                        icon: const Icon(Icons.refresh_rounded, color: Colors.tealAccent, size: 22),
+                        icon: const Icon(Icons.refresh_rounded, color: AppColors.gemGold, size: 22),
                         label: const Text(
                           'Restart',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.parchmentWhite,
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),

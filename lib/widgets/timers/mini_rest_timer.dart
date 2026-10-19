@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/screens/workout/rest_timer.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 class MiniRestTimer extends StatelessWidget {
   const MiniRestTimer({super.key});
@@ -26,8 +27,9 @@ class MiniRestTimer extends StatelessWidget {
           child: Container(
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.teal[800],
+              color: AppColors.hearthPanel,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.brassBorder, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.3),
@@ -40,13 +42,13 @@ class MiniRestTimer extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 children: [
-                  const Icon(Icons.timer, color: Colors.greenAccent, size: 28),
+                  const Icon(Icons.timer, color: AppColors.gemGold, size: 28),
                   const SizedBox(width: 12),
 
                   Text(
                     'Rest: ${timerData.formattedRestTime}',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.parchmentWhite,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -56,8 +58,8 @@ class MiniRestTimer extends StatelessWidget {
                   const Spacer(),
 
                   Container(
-                    decoration: BoxDecoration(
-                      color: Colors.teal[900],
+                    decoration: const BoxDecoration(
+                      color: AppColors.woodFrame,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -70,7 +72,7 @@ class MiniRestTimer extends StatelessWidget {
                       },
                       icon: Icon(
                         timerData.isRestPaused ? Icons.play_arrow : Icons.pause,
-                        color: Colors.greenAccent,
+                        color: AppColors.gemGold,
                       ),
                     ),
                   ),

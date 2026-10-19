@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 class CompletedExerciseCard extends StatefulWidget {
   final WorkoutExercise workoutExercise;
@@ -18,9 +19,9 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
 
   @override
   Widget build(BuildContext context) {
-    final Color cardColor = Colors.teal[800]!;
-    final Color rowBgColor = Colors.teal[900]!;
-    final Color textColor = Colors.white70;
+    const Color cardColor = AppColors.hearthPanel;
+    const Color rowBgColor = AppColors.woodFrame;
+    const Color textColor = AppColors.parchmentBeige;
 
     final exercise = widget.workoutExercise;
     final bool isCardio = exercise.category.toLowerCase() == 'cardio';
@@ -30,6 +31,7 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.woodFrame, width: 1),
       ),
       child: Column(
         children: [
@@ -47,7 +49,7 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
                   ),
                   child: Icon(
                     isCardio ? Icons.directions_run : Icons.fitness_center,
-                    color: Colors.greenAccent,
+                    color: AppColors.gemGold,
                     size: 22,
                   ),
                 ),
@@ -57,7 +59,7 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
                   child: Text(
                     exercise.exerciseName,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.parchmentWhite,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -68,7 +70,7 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
                 IconButton(
                   icon: Icon(
                     _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    color: Colors.white70,
+                    color: AppColors.brassBorder,
                   ),
                   onPressed: () {
                     setState(() {
@@ -129,7 +131,7 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
                         flex: 1,
                         child: Text(
                           '${set.setNumber}',
-                          style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold),
+                          style: const TextStyle(color: AppColors.gemGold, fontWeight: FontWeight.bold),
                         ),
                       ),
                       Expanded(
@@ -139,7 +141,7 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
                               ? '${set.weight.toStringAsFixed(set.weight.truncateToDouble() == set.weight ? 0 : 1)} km'
                               : '${set.weight.toStringAsFixed(set.weight.truncateToDouble() == set.weight ? 0 : 1)} kg',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                          style: const TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.w600),
                         ),
                       ),
                       Expanded(
@@ -147,7 +149,7 @@ class _CompletedExerciseCardState extends State<CompletedExerciseCard> {
                         child: Text(
                           isCardio ? '${set.reps} min' : '${set.reps} reps',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                          style: const TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
