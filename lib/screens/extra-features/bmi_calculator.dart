@@ -23,6 +23,8 @@ class _BmiCalculatorState extends State<BmiCalculator> {
   double calculatedBMI = 0;
   String message = "";
 
+  IconData arrowIcon = Icons.arrow_upward;
+
   String infotext = "BMI (Body Mass Index) is a commonly used international standard to measure the degree of obesity and health of the human body. It is calculated by dividing weight (Kg) by the square of height (m)";
 
   //grab user's previous bmi-related stats
@@ -62,6 +64,9 @@ class _BmiCalculatorState extends State<BmiCalculator> {
         });
       }
     }
+    print(latestBMI);
+
+    calculatedBMI = latestBMI;
   }
 
   @override
@@ -154,6 +159,16 @@ class _BmiCalculatorState extends State<BmiCalculator> {
                         setState(() {
                           calculatedBMI = weight / (height * height);
 
+                          getLatestBMI();
+
+                          if (calculatedBMI > latestBMI)
+                            {
+                              arrowIcon = Icons.arrow_upward;
+                            } else if (calculatedBMI < latestBMI)
+                              {
+                                arrowIcon = Icons.arrow_downward;
+                              }
+
                           if (age >= 16)
                           {
                               if (calculatedBMI < 18.5) {
@@ -176,12 +191,15 @@ class _BmiCalculatorState extends State<BmiCalculator> {
                           await DatabaseService().updateBMI(user.uid, calculatedBMI, age, weight, height,);
                         }
 
+                        getLatestBMI();
+
                       },
                     ),
 
                     SizedBox(height: 20),
 
-                    if (calculatedBMI != 0)
+                    //if (calculatedBMI != 0 && calculatedBMI < latestBMI)
+                      //if (calculatedBMI < latestBMI)
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(24),
@@ -191,13 +209,24 @@ class _BmiCalculatorState extends State<BmiCalculator> {
                         ),
                         child: Column(
                           children: [
-                            Text(
-                              calculatedBMI.toStringAsFixed(1),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 42,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  calculatedBMI.toStringAsFixed(1),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 42,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  arrowIcon,
+                                  color: Colors.white,
+                                  size: 32,
+                                ),
+                              ],
                             ),
                             Text(
                               message,
@@ -209,7 +238,6 @@ class _BmiCalculatorState extends State<BmiCalculator> {
                           ],
                         ),
                       ),
-
                     SizedBox(height: 15),
 
                     Container(
