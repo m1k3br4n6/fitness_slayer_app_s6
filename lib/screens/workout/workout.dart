@@ -9,6 +9,7 @@ import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 import '../../services/database_service.dart';
+import 'package:fitness_slayer_01/services/user_stats.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/widgets/cards/workout_timer_card.dart';
 import 'package:fitness_slayer_01/widgets/timers/mini_rest_timer.dart';
@@ -113,6 +114,7 @@ class _WorkoutViewState extends State<WorkoutView> {
         return WorkoutExercise(
           exerciseId: activeEx.exercise.id,
           exerciseName: activeEx.exercise.name,
+          category: activeEx.exercise.category,
           sets: activeEx.sets.asMap().entries.map((entry) {
             return WorkoutSet(
               setNumber: entry.key + 1,
@@ -127,13 +129,20 @@ class _WorkoutViewState extends State<WorkoutView> {
     try {
       await DatabaseService().saveWorkout(currentUserId, completedWorkout);
 
+      // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore
+      final UserStatsResult stats = await DatabaseService().updateUserStatsForWorkout(currentUserId, completedWorkout);
+
       if (mounted) {
         workoutProvider.clearWorkout();
         timerProvider.stopAndReset();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Workout Saved Successfully!', style: TextStyle(color: AppColors.warmIvory)),
+          SnackBar(
+            content: Text(
+              'Workout Saved! +${stats.earnedXp} XP Earned!  Day Streak: ${stats.newStreak}',
+              style: const TextStyle(color: AppColors.warmIvory),
+            ),
+            duration: const Duration(seconds: 4),
           ),
         );
 
@@ -178,6 +187,8 @@ class _WorkoutViewState extends State<WorkoutView> {
                       primaryMuscles: activeEx.exercise.primaryMuscles,
                       mechanic: activeEx.exercise.mechanic,
                       force: activeEx.exercise.force,
+                      category: activeEx.exercise.category,
+                      equipment: activeEx.exercise.equipment,
                       instructions: activeEx.exercise.instructions,
                       onDelete: () {
                         context.read<WorkoutProvider>().removeExercise(index);
@@ -194,7 +205,6 @@ class _WorkoutViewState extends State<WorkoutView> {
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: AppColors.hearthBorder),
                       ),
                       elevation: 2,
                     ),
