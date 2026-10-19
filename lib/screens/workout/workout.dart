@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 import '../../services/database_service.dart';
 import 'package:fitness_slayer_01/services/user_stats.dart';
+import 'package:fitness_slayer_01/services/notification_service.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/widgets/cards/workout_timer_card.dart';
 import 'package:fitness_slayer_01/widgets/timers/mini_rest_timer.dart';
@@ -91,14 +92,52 @@ class _WorkoutViewState extends State<WorkoutView> {
 
     if (currentUserId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please sign in to save your workout.')),
+        SnackBar(
+          backgroundColor: AppColors.hearthPanel,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: const BorderSide(color: AppColors.emberOrange, width: 1.5),
+          ),
+          content: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: AppColors.emberOrange, size: 22),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Please sign in to save your workout.',
+                  style: TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
       return;
     }
 
     if (workoutProvider.activeExercises.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Add some exercises before finishing!')),
+        SnackBar(
+          backgroundColor: AppColors.hearthPanel,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: const BorderSide(color: AppColors.emberOrange, width: 1.5),
+          ),
+          content: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: AppColors.emberOrange, size: 22),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Add some exercises before finishing!',
+                  style: TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
       return;
     }
@@ -132,15 +171,36 @@ class _WorkoutViewState extends State<WorkoutView> {
       // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore
       final UserStatsResult stats = await DatabaseService().updateUserStatsForWorkout(currentUserId, completedWorkout);
 
+      // Schedule notification reminder to maintain streak
+      await NotificationService().scheduleStreakReminder(hoursDelay: 24);
+
       if (mounted) {
         workoutProvider.clearWorkout();
         timerProvider.stopAndReset();
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Workout Saved! +${stats.earnedXp} XP Earned!  Day Streak: ${stats.newStreak}',
-              style: const TextStyle(color: AppColors.warmIvory),
+            backgroundColor: AppColors.hearthPanel,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: const BorderSide(color: AppColors.gemGold, width: 1.5),
+            ),
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: AppColors.gemGold, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Workout Saved! +${stats.earnedXp} XP Earned!  Day Streak: ${stats.newStreak}',
+                    style: const TextStyle(
+                      color: AppColors.parchmentWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
             duration: const Duration(seconds: 4),
           ),
@@ -154,7 +214,30 @@ class _WorkoutViewState extends State<WorkoutView> {
           _isSubmitting = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save: $e', style: const TextStyle(color: AppColors.crimsonWine))),
+          SnackBar(
+            backgroundColor: AppColors.hearthPanel,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: const BorderSide(color: AppColors.crimsonWine, width: 1.5),
+            ),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline_rounded, color: AppColors.crimsonWine, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Failed to save: $e',
+                    style: const TextStyle(
+                      color: AppColors.parchmentWhite,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       }
     }
