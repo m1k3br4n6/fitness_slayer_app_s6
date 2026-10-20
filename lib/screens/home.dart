@@ -271,7 +271,7 @@ class _HomeState extends State<Home> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const SideQuest()),
+                            MaterialPageRoute(builder: (context) => const WorkInProgressWarning()),
                           );
                         },
                         child: Text('Daily Side Quest', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 16)),

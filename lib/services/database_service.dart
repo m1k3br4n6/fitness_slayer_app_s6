@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 import 'package:fitness_slayer_01/services/user_stats.dart';
 import 'package:fitness_slayer_01/services/streak_service.dart';
-
 import '../models/routine.dart';
 import 'package:fitness_slayer_01/models/equipment.dart';
 
@@ -69,7 +68,7 @@ class DatabaseService {
   }
 
   Future<void> updateEquipment(String itemId, String name, String description, String spriteImagePath,
-      String attackSheetPath, String idleSheetPath, int atkBonus, int hpBonus, double price) async {
+      String attackSheetPath, String idleSheetPath, int atkBonus, int hpBonus, int price) async {
     await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).set({
       'name': name,
       'description': description,
@@ -98,13 +97,14 @@ class DatabaseService {
       idleSheetPath: data['idle_sheet_path'],
       atkBonus: (data['atk_bonus'] as num).toInt(),
       hpBonus: (data['hp_bonus'] as num).toInt(),
-      price: (data['price'] as num).toDouble(),
+      price: (data['price'] as num).toInt(),
     );
   }
 
   Future<void> deleteEquipment(String itemId) async {
     await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).delete();
   }
+
   Future<void> saveWorkout(String userId, CompletedWorkout workout) async {
     // Navigates to: users / {userId} / workoutsCompleted / {auto-generated-doc-id}
     await FirebaseFirestore.instance

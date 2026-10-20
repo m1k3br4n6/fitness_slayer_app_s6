@@ -7,7 +7,7 @@ class Equipment {
   final String idleSheetPath;
   final int atkBonus;
   final int hpBonus;
-  final double price;
+  final int price;
 
   Equipment({
     required this.id,

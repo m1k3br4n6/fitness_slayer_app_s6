@@ -157,7 +157,7 @@ class _CalendarState extends State<Calendar> {
                               color: isToday
                                   ? AppColors.gold
                                   : (hasWorkout ? Colors.greenAccent : AppColors.border),
-                              width: isToday ? 2.5 : (hasWorkout ? 1.5 : 1),
+                              width: isToday ? 4 : (hasWorkout ? 3 : 2),
                             ),
                           ),
                           child: Stack(

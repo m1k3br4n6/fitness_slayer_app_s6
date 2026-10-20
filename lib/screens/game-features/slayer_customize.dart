@@ -100,7 +100,7 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
             Center(
               child: Column(
                 children: [
-                  Image.asset('assets/images/test_slayer_sprite.png', height: 140),
+                  Image.asset('assets/spritesheets/stock/knight_attack_red.png', height: 140),
                   const SizedBox(height: 8),
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _nameController,

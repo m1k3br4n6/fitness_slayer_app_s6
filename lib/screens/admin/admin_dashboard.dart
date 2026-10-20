@@ -49,7 +49,7 @@ class _adminDashboardState extends State<adminDashboard> {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const equipmentManage(),
+                    builder: (context) => const EquipmentList(),
                   ),
                 );
 
