@@ -505,8 +505,8 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: (widget.position.dx - 60).clamp(16.0, MediaQuery.of(context).size.width - 160.0),
-      top: widget.position.dy - 35,
+      left: (widget.position.dx - 15).clamp(16.0, MediaQuery.of(context).size.width - 140.0),
+      top: widget.position.dy - 40,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -517,14 +517,21 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Pill 1: XP Flame Pill
+                  // Bubble 1: Flame XP Circular Bubble
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    width: 48,
+                    height: 48,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.primary, width: 1.5),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.primary, width: 2),
                       boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                        ),
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.5),
                           blurRadius: 8,
@@ -533,11 +540,13 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
                       ],
                     ),
                     child: Text(
-                      '+${widget.xpGained} XP',
+                      '+${widget.xpGained}\nXP',
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 11,
+                        height: 1.1,
                         decoration: TextDecoration.none,
                       ),
                     ),
@@ -545,14 +554,21 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
 
                   const SizedBox(width: 8),
 
-                  // Pill 2: Gold Coin Pill
+                  // Bubble 2: Gold GP Circular Bubble
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    width: 48,
+                    height: 48,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.gold, width: 1.5),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.gold, width: 2),
                       boxShadow: [
+                        BoxShadow(
+                          color: AppColors.gold.withValues(alpha: 0.3),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                        ),
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.5),
                           blurRadius: 8,
@@ -561,11 +577,13 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
                       ],
                     ),
                     child: Text(
-                      '+${widget.coinsGained} GP',
+                      '+${widget.coinsGained}\nGP',
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: AppColors.gold,
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 11,
+                        height: 1.1,
                         decoration: TextDecoration.none,
                       ),
                     ),
