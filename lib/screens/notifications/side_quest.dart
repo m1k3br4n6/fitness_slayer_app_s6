@@ -90,12 +90,14 @@ class _SideQuestState extends State<SideQuest> {
       final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
       final now = DateTime.now();
       final questKey = _questKey(now, questIndex);
+      final questText = _getTodayQuests()[questIndex].text;
 
       // Rolled outside the transaction so a retry does not re-roll the reward
       final xpGained = Random().nextInt(12) + 1;
       final coinsGained = Random().nextInt(8) + 1;
 
-      // The transaction reads the latest document, so nothing is overwritten by a stale snapshot from another screen or device
+      // The transaction reads the latest document, so nothing is overwritten
+      // by a stale snapshot from another screen or device
       final awarded = await FirebaseFirestore.instance.runTransaction<bool>((transaction) async {
         final snapshot = await transaction.get(userRef);
         final data = snapshot.data() ?? <String, dynamic>{};
@@ -141,6 +143,18 @@ class _SideQuestState extends State<SideQuest> {
           'lastWorkoutDate': now,
           'completedSideQuests': completedQuests,
         }, SetOptions(merge: true));
+
+        // Permanent history for the calendar. The document id is the quest key,
+        // so each quest can only be logged once per day
+        transaction.set(
+          userRef.collection('sideQuestLog').doc(questKey),
+          {
+            'text': questText,
+            'xp': xpGained,
+            'coins': coinsGained,
+            'dateCompleted': Timestamp.fromDate(now),
+          },
+        );
 
         return true;
       });
