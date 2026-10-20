@@ -1,7 +1,7 @@
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
-/// Placeholder screen for features that are not built yet.
+// Placeholder screen for features that are not built yet.
 class WorkInProgress extends StatelessWidget {
   final String title;
   const WorkInProgress({super.key, required this.title});
