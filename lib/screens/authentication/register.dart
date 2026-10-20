@@ -2,7 +2,6 @@ import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 import 'package:fitness_slayer_01/theme/constants.dart';
-
 import '../../theme/app_colors.dart';
 
 class Register extends StatefulWidget {
@@ -27,7 +26,7 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    return loading ? Loading() : Scaffold(
+    return loading ? Loading() : Scaffold( //if loading is true, show loading widget
       backgroundColor: AppColors.obsidianBlack,
       appBar: AppBar(
         backgroundColor: AppColors.darkTavernGreen,
@@ -41,8 +40,7 @@ class _RegisterState extends State<Register> {
             icon: Icon(Icons.person, color: AppColors.parchmentWhite,),
             label: Text('Log In', style: TextStyle(color: AppColors.parchmentWhite,),),
             onPressed: () {
-              widget
-                  .toggleView();
+              widget.toggleView(); //toggles to login
             },
           ),
         ],
@@ -50,10 +48,11 @@ class _RegisterState extends State<Register> {
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
         child: Form(
-          key: _formKey,
+          key: _formKey, //form needs form key
           child: Column(
             children: <Widget>[
               SizedBox(height: 10.0),
+
               Text(
                 'How will we remember you?',
                 style: TextStyle(
@@ -62,7 +61,9 @@ class _RegisterState extends State<Register> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               SizedBox(height: 12.0),
+
               //Username input field
               TextFormField(
                 style: const TextStyle(color: Colors.black),
@@ -70,13 +71,15 @@ class _RegisterState extends State<Register> {
                   color: Colors.blueGrey,
                 ),),
                 validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 16
-                    ? 'Enter an unique username, between 6 - 16 characters long'
+                    ? 'Username should be between 6 - 16 characters long'
                     : null,
                 onChanged: (val) {
                   username = val;
                 },
               ),
+
               SizedBox(height: 20.0),
+
               //Email input field
               TextFormField(
                 style: const TextStyle(color: Colors.black),
@@ -84,7 +87,7 @@ class _RegisterState extends State<Register> {
                   color: Colors.blueGrey,
                 ),),
                 validator: (val) => val == null || val.isEmpty
-                    ? 'Enter an email'
+                    ? 'Please enter an email'
                     : null,
                 onChanged: (val) {
                   setState(() {
@@ -92,7 +95,9 @@ class _RegisterState extends State<Register> {
                   });
                 },
               ),
+
               SizedBox(height: 20.0),
+
               //Password input field
               TextFormField(
                 style: const TextStyle(color: Colors.black),
@@ -101,7 +106,7 @@ class _RegisterState extends State<Register> {
                 ),),
                 obscureText: true,
                 validator: (val) => val == null || val.length < 6
-                    ? 'Enter a password 6+ chars long'
+                    ? 'Password should be 6+ characters long'
                     : null,
                 onChanged: (val) {
                   setState(() {
@@ -109,7 +114,9 @@ class _RegisterState extends State<Register> {
                   });
                 },
               ),
+
               SizedBox(height: 20.0),
+
               //Confirm password input field
               TextFormField(
                 style: const TextStyle(color: Colors.black),
@@ -127,6 +134,7 @@ class _RegisterState extends State<Register> {
                 },
               ),
               SizedBox(height: 20.0),
+
               //slayer name
               Text(
                 'What will you name your slayer?',
@@ -136,7 +144,9 @@ class _RegisterState extends State<Register> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               SizedBox(height: 12.0),
+
               Container(
                 width: 80,
                 height: 80,
@@ -153,7 +163,9 @@ class _RegisterState extends State<Register> {
                   filterQuality: FilterQuality.none,
                 ),
               ),
+
               SizedBox(height: 12.0),
+
               TextFormField(
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'e.g. Fernando', hintStyle: const TextStyle(
@@ -168,8 +180,10 @@ class _RegisterState extends State<Register> {
                   });
                 },
               ),
+
               SizedBox(height: 20.0),
-              //Register button
+
+              //register button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.flameOrange,
@@ -189,7 +203,9 @@ class _RegisterState extends State<Register> {
                   }
                 },
               ),
+
               SizedBox(height: 12.0),
+
               Text(error, style: TextStyle(color: Colors.red, fontSize: 14.0)),
             ],
           ),

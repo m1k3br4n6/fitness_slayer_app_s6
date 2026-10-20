@@ -15,14 +15,13 @@ class BmiCalculator extends StatefulWidget {
 
 class _BmiCalculatorState extends State<BmiCalculator> {
 
-  // Store the user's saved BMI
+  //default values
   int age = 22;
   double weight = 68;
   double height = 1.75;
   double latestBMI = 0;
   double calculatedBMI = 0;
   String message = "";
-
   IconData arrowIcon = Icons.arrow_upward;
 
   String infotext = "BMI (Body Mass Index) is a commonly used international standard to measure the degree of obesity and health of the human body. It is calculated by dividing weight (Kg) by the square of height (m)";
@@ -34,10 +33,12 @@ class _BmiCalculatorState extends State<BmiCalculator> {
     if (user != null) {
       String userId = user.uid;
 
+      //get bmi doc snapshot
       DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users')
           .doc(userId).collection('BMI').doc('userBMI').get();
 
       if (doc.exists) {
+
         latestBMI = (doc.get('latestBMI') as num).toDouble();
         if (latestBMI == 0) {
           //default values if user has not calculated BMI before
@@ -54,21 +55,22 @@ class _BmiCalculatorState extends State<BmiCalculator> {
             height = (doc.get('prev_height') as num).toDouble();
           });
         }
+
       } else {
-        print('could not find BMI doc');
+
         setState(() {
           age = 22;
           weight = 68.0;
           height = 1.75;
           latestBMI = 0.0;
         });
+
       }
     }
-    print(latestBMI);
-
     calculatedBMI = latestBMI;
   }
 
+  //get latest bmi when initialising
   @override
   void initState() {
     super.initState();
@@ -106,6 +108,7 @@ class _BmiCalculatorState extends State<BmiCalculator> {
                         });
                       },
                     ),
+
                     //weight slider
                     Text(
                       'Weight: ${weight.toStringAsFixed(1)} kg',
@@ -149,7 +152,7 @@ class _BmiCalculatorState extends State<BmiCalculator> {
                     ),
                     SizedBox(height: 10.0),
 
-                    //Calculate BMI
+                    //calculate BMI when button pressed and update values
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.flameOrange,
@@ -198,8 +201,7 @@ class _BmiCalculatorState extends State<BmiCalculator> {
 
                     SizedBox(height: 20),
 
-                    //if (calculatedBMI != 0 && calculatedBMI < latestBMI)
-                      //if (calculatedBMI < latestBMI)
+                      //display BMI, arrow and verdict based on common stats
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(24),
@@ -240,6 +242,7 @@ class _BmiCalculatorState extends State<BmiCalculator> {
                       ),
                     SizedBox(height: 15),
 
+                    //display context about BMI
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(10),
