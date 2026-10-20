@@ -7,6 +7,7 @@ import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class SideQuest extends StatefulWidget {
@@ -75,12 +76,36 @@ class _SideQuestState extends State<SideQuest> {
     return pool.take(5).toList();
   }
 
+  void _showFloatingLoot(Offset position, int xpGained, int coinsGained) {
+    late OverlayEntry overlayEntry;
+    overlayEntry = OverlayEntry(
+      builder: (context) {
+        return _FloatingLootOverlay(
+          position: position,
+          xpGained: xpGained,
+          coinsGained: coinsGained,
+          onDismiss: () {
+            if (overlayEntry.mounted) {
+              overlayEntry.remove();
+            }
+          },
+        );
+      },
+    );
+
+    Overlay.of(context).insert(overlayEntry);
+  }
+
   Future<void> _completeQuest(
     String uid,
     int questIndex,
-    Map<dynamic, dynamic> userData,
-  ) async {
+    Map<dynamic, dynamic> userData, {
+    Offset? tapPosition,
+  }) async {
     if (_isClaiming) return;
+
+    // Trigger audio click feedback
+    SystemSound.play(SystemSoundType.click);
 
     setState(() {
       _isClaiming = true;
@@ -137,13 +162,8 @@ class _SideQuestState extends State<SideQuest> {
         'completedSideQuests': completedQuests,
       }, SetOptions(merge: true));
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Side Quest Complete! +$xpGained XP & +$coinsGained Coins', style: const TextStyle(color: AppColors.warmIvory)),
-            backgroundColor: AppColors.surface,
-          ),
-        );
+      if (mounted && tapPosition != null) {
+        _showFloatingLoot(tapPosition, xpGained, coinsGained);
       }
     } catch (e) {
       if (mounted) {
@@ -169,6 +189,8 @@ class _SideQuestState extends State<SideQuest> {
     required String uid,
     required Map<dynamic, dynamic> userData,
   }) {
+    Offset? tapDetailsPosition;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -203,21 +225,26 @@ class _SideQuestState extends State<SideQuest> {
               ],
             ),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isDone ? AppColors.container : AppColors.primary,
-              foregroundColor: AppColors.warmIvory,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          GestureDetector(
+            onTapDown: (details) {
+              tapDetailsPosition = details.globalPosition;
+            },
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDone ? AppColors.container : AppColors.primary,
+                foregroundColor: AppColors.warmIvory,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
-            ),
-            onPressed: isDone ? null : () => _completeQuest(uid, index, userData),
-            child: Text(
-              isDone ? 'Completed' : 'Complete',
-              style: TextStyle(
-                color: isDone ? AppColors.textMuted : AppColors.warmIvory,
-                fontWeight: FontWeight.bold,
+              onPressed: isDone ? null : () => _completeQuest(uid, index, userData, tapPosition: tapDetailsPosition),
+              child: Text(
+                isDone ? 'Completed' : 'Complete',
+                style: TextStyle(
+                  color: isDone ? AppColors.textMuted : AppColors.warmIvory,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -410,6 +437,119 @@ class _SideQuestState extends State<SideQuest> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// Floating loot overlay animation (+X XP & +Y GP) that spawns at tap position and floats up while fading out
+class _FloatingLootOverlay extends StatefulWidget {
+  final Offset position;
+  final int xpGained;
+  final int coinsGained;
+  final VoidCallback onDismiss;
+
+  const _FloatingLootOverlay({
+    required this.position,
+    required this.xpGained,
+    required this.coinsGained,
+    required this.onDismiss,
+  });
+
+  @override
+  State<_FloatingLootOverlay> createState() => _FloatingLootOverlayState();
+}
+
+class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
+  late Animation<double> _translateAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+
+    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.5, 1.0, curve: Curves.easeOut)),
+    );
+
+    _translateAnimation = Tween<double>(begin: 0.0, end: -50.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+
+    _controller.forward().then((_) {
+      widget.onDismiss();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: widget.position.dx - 60,
+      top: widget.position.dy - 30,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(0, _translateAnimation.value),
+            child: Opacity(
+              opacity: _opacityAnimation.value,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.gold, width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          '+${widget.xpGained} XP',
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '+${widget.coinsGained} GP',
+                          style: const TextStyle(
+                            color: AppColors.gold,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
