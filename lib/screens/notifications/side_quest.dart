@@ -18,7 +18,8 @@ class SideQuest extends StatefulWidget {
 }
 
 class _SideQuestState extends State<SideQuest> {
-  // Pool of light bodyweight and stretching activities
+  // Pool of low effort stretches and exercises for daily side quests
+  // logic for selection of exercises for daily quests
   final List<String> _activityPool = const [
     '8 Sit-ups',
     '10 Jumping Jacks',
@@ -68,7 +69,7 @@ class _SideQuestState extends State<SideQuest> {
     return '$hours:$minutes:$seconds';
   }
 
-  // Deterministically selects 5 light exercises for today based on date seed
+  // logic for selection of exercises for daily quests
   List<String> _getTodayQuests() {
     DateTime now = DateTime.now();
     int dateSeed = now.year * 10000 + now.month * 100 + now.day;
@@ -76,12 +77,12 @@ class _SideQuestState extends State<SideQuest> {
     return pool.take(5).toList();
   }
 
-  void _showFloatingLoot(Offset position, int xpGained, int coinsGained) {
+  void _showFloatingLoot(Offset buttonCenter, int xpGained, int coinsGained) {
     late OverlayEntry overlayEntry;
     overlayEntry = OverlayEntry(
       builder: (context) {
         return _FloatingLootOverlay(
-          position: position,
+          buttonCenter: buttonCenter,
           xpGained: xpGained,
           coinsGained: coinsGained,
           onDismiss: () {
@@ -100,7 +101,7 @@ class _SideQuestState extends State<SideQuest> {
     String uid,
     int questIndex,
     Map<dynamic, dynamic> userData, {
-    Offset? tapPosition,
+    Offset? buttonCenter,
   }) async {
     if (_isClaiming) return;
 
@@ -162,9 +163,9 @@ class _SideQuestState extends State<SideQuest> {
         'completedSideQuests': completedQuests,
       }, SetOptions(merge: true));
 
-      // Spawn 2 separate floating loot pills (+X XP and +Y GP) 100% of the time
+      // Spawn 2 floating loot bubbles (+X XP and +Y GP) centered on button
       if (mounted) {
-        Offset position = tapPosition ?? const Offset(200, 300);
+        Offset position = buttonCenter ?? const Offset(200, 300);
         _showFloatingLoot(position, xpGained, coinsGained);
       }
     } catch (e) {
@@ -240,12 +241,14 @@ class _SideQuestState extends State<SideQuest> {
             onPressed: isDone
                 ? null
                 : () {
-                    Offset? buttonPosition;
+                    Offset? buttonCenter;
                     final renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
                     if (renderBox != null) {
-                      buttonPosition = renderBox.localToGlobal(Offset.zero);
+                      final pos = renderBox.localToGlobal(Offset.zero);
+                      final size = renderBox.size;
+                      buttonCenter = Offset(pos.dx + (size.width / 2), pos.dy + (size.height / 2));
                     }
-                    _completeQuest(uid, index, userData, tapPosition: buttonPosition);
+                    _completeQuest(uid, index, userData, buttonCenter: buttonCenter);
                   },
             child: Text(
               isDone ? 'Completed' : 'Complete',
@@ -449,15 +452,15 @@ class _SideQuestState extends State<SideQuest> {
   }
 }
 
-// Floating loot overlay animation (+X XP & +Y GP as 2 separate floating pills)
+// Floating loot overlay animation (+X XP & +Y GP as 2 separate floating bubbles)
 class _FloatingLootOverlay extends StatefulWidget {
-  final Offset position;
+  final Offset buttonCenter;
   final int xpGained;
   final int coinsGained;
   final VoidCallback onDismiss;
 
   const _FloatingLootOverlay({
-    required this.position,
+    required this.buttonCenter,
     required this.xpGained,
     required this.coinsGained,
     required this.onDismiss,
@@ -475,15 +478,15 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
   @override
   void initState() {
     super.initState();
-    // Longer lasting animation (2.4 seconds)
+    // Lingers for 3.0 seconds (3000ms)
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2400),
+      duration: const Duration(milliseconds: 3000),
     );
 
-    // Stays fully opaque for 60% of the duration, then smoothly fades out
+    // Stays 100% opaque for 70% of the duration, then smoothly fades out
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.6, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(parent: _controller, curve: const Interval(0.7, 1.0, curve: Curves.easeOut)),
     );
 
     // Slowly floats upward by 60 pixels
@@ -504,9 +507,13 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
 
   @override
   Widget build(BuildContext context) {
+    // Two 48px bubbles + 8px gap = 104px total width.
+    // Subtracting 52px from buttonCenter.dx centers the gap between bubbles directly over button center!
+    double leftPosition = (widget.buttonCenter.dx - 52).clamp(16.0, MediaQuery.of(context).size.width - 120.0);
+
     return Positioned(
-      left: (widget.position.dx - 15).clamp(16.0, MediaQuery.of(context).size.width - 140.0),
-      top: widget.position.dy - 40,
+      left: leftPosition,
+      top: widget.buttonCenter.dy - 40,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
