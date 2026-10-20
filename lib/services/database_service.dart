@@ -27,6 +27,12 @@ class DatabaseService {
     }, SetOptions(merge: true));
   }
 
+  Future<void> addToInventory(String userId, String itemId) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('inventory').doc('E001').set({
+      'item_id': itemId,
+    }, SetOptions(merge: true));
+  }
+
   // Saves the profile photo
   Future<void> updateProfilePhoto(String userId, String? base64Image) async {
     await FirebaseFirestore.instance.collection('users').doc(userId).set({
