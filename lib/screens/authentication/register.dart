@@ -156,7 +156,7 @@ class _RegisterState extends State<Register> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Image.asset(
-                  'assets/images/test_slayer_sprite.png',
+                  'assets/spritesheets/stock/knight_attack_red.png',
                   width: 72,
                   height: 72,
                   fit: BoxFit.contain,
