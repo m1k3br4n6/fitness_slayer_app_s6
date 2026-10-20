@@ -14,6 +14,7 @@ import 'package:fitness_slayer_01/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  //initialize firebase --> to use auth and firestore
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -29,17 +30,17 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  //this widget is the root of the application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
-          StreamProvider<myUser?>.value( //stream actively listens for user related auth changes
+          StreamProvider<myUser?>.value( //stream actively listens for user related auth changes, uses myUser model
           value: AuthService().user, //stream we are going to listen to, accessing 'user' stream in auth class
           initialData: null,
           ),
 
-          // Current user's Firestore document
+          //current user's Firestore document
           StreamProvider<DocumentSnapshot?>.value(
             value: FirebaseAuth.instance.authStateChanges().asyncExpand((user) {
               if (user == null) {
@@ -51,19 +52,18 @@ class MyApp extends StatelessWidget {
             initialData: null,
           ),
 
-          ChangeNotifierProvider( //actively listens for Changes in the workout screen
+          ChangeNotifierProvider( //actively listens for changes in the workout screen
           create: (_) => WorkoutProvider(),
           ),
 
-          ChangeNotifierProvider( //
+          ChangeNotifierProvider(
             create: (_) => WorkoutTimerProvider(),
           ),
         ],
         child: MaterialApp(
           theme: AppTheme.darkForgeTheme,
-          home: const Wrapper(), //wrapper should be the home/main screen
+          home: const Wrapper(), //wrapper should be either the home/main screen
          ),
     ) ;
-
   }
 }

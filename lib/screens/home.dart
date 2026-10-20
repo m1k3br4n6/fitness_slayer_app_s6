@@ -26,19 +26,20 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final AuthService _auth = AuthService();
-  final user = FirebaseAuth.instance.currentUser;
+  final AuthService _auth = AuthService(); //instance of auth service
+  final user = FirebaseAuth.instance.currentUser; //get currently signed in user
 
+  //bool for checking admin status
   bool isAdmin = false;
   //keeps track of active tab; defaults to Home in the middle
   int _currentIndex = 2;
 
   @override
-  void initState() {
+  void initState() { //runs when stateful widget is first created
     super.initState();
 
-    final user = context.read<myUser?>();
-    final String uid = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+    //checks if current user is admin
+    final String uid = user?.uid ?? ''; //gets uid if user is not null, otherwise return empty string
     if (uid == "6Iw3AiqlCObMc77PAbCLDsmaBbh2")
     {
       isAdmin = true;
@@ -48,23 +49,22 @@ class _HomeState extends State<Home> {
       isAdmin = false;
     }
 
-    // Checks users streak if needs reset
+    //checks users streak if needs reset
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = context.read<myUser?>();
-      final String uid = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+      final String uid = user?.uid ?? '';
       if (uid.isNotEmpty) {
         DatabaseService().checkAndUpdateStreakOnLaunch(uid);
       }
     });
   }
 
-  // Custom pixel art icon
+  //custom pixel art icon
   Widget pixelIcon(
       String path, {
         bool selected = false,
         double size = 57,
       }) {
-    //u can customize the sizes here without touching the pixel size
+    //you can customize the sizes here without touching the pixel size
     return Image.asset(
       path,
       width: size,
@@ -77,14 +77,14 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    //Pages ordered with home centred
+    //pages ordered with home centred
     final List<Widget> pages = [
-      // workout page
+      //workout page
       const WorkoutPlanning(),
-      // calendar page
+      //calendar page
       const Calendar(),
 
-      // main dashboard hub
+      //main dashboard hub
       LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -163,7 +163,7 @@ class _HomeState extends State<Home> {
 
                       SizedBox(height: 5),
                       
-                      //Info button
+                      // Info button
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.blue,
@@ -227,8 +227,8 @@ class _HomeState extends State<Home> {
 
                       SizedBox(height: 5),
 
-                      //Admin only equipment upload button
-                      if (isAdmin)
+                      //admin only: equipment crud page button
+                      if (isAdmin) //only displays button if user is admin
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.amber,
@@ -257,7 +257,7 @@ class _HomeState extends State<Home> {
                       // Empty spacer area for future campfire scenes, assets, GIFs, videos, or widgets
                       const Spacer(),
 
-                      // daily challenge button anchored at the bottom
+                      //daily challenge side quest button anchored at the bottom
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.flameOrange,
@@ -285,10 +285,10 @@ class _HomeState extends State<Home> {
         },
       ),
 
-      // store / shop page
+      //store page
       const Shop(),
 
-      // profile page
+      //profile page
       const Profile(),
     ];
 
@@ -308,7 +308,7 @@ class _HomeState extends State<Home> {
 
       backgroundColor: AppColors.obsidianBlack,
 
-      //IndexedStack keeps state alive so switching tabs doesn't wipe your screen data
+      // IndexedStack keeps state alive so switching tabs doesn't wipe your screen data
       body: IndexedStack(
         index: _currentIndex,
         children: pages,
@@ -331,7 +331,7 @@ class _HomeState extends State<Home> {
             });
           },
           destinations:  [
-            // workouts tab
+            //workouts tab
             NavigationDestination(
               icon: pixelIcon('assets/icons/workouts.png'),
               selectedIcon: pixelIcon(
@@ -341,7 +341,7 @@ class _HomeState extends State<Home> {
               label: 'Workouts',
             ),
 
-            // calendar tab
+            //calendar tab
             NavigationDestination(
               icon: pixelIcon('assets/icons/calendar.png'),
               selectedIcon: pixelIcon(
@@ -351,7 +351,7 @@ class _HomeState extends State<Home> {
               label: 'Calendar',
             ),
 
-            // home tab in middle
+            //home tab in middle
             NavigationDestination(
               icon: pixelIcon('assets/icons/home.png'),
               selectedIcon: pixelIcon(
@@ -361,7 +361,7 @@ class _HomeState extends State<Home> {
               label: 'Home',
             ),
 
-            // store / shop tab
+            //store tab
             NavigationDestination(
               icon: pixelIcon('assets/icons/store.png'),
               selectedIcon: pixelIcon(
@@ -371,7 +371,7 @@ class _HomeState extends State<Home> {
               label: 'Store',
             ),
 
-            // profile
+            //profile
             NavigationDestination(
               icon: pixelIcon('assets/icons/profile.png'),
               selectedIcon: pixelIcon(

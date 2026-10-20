@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-/// Centralized ThemeData based off a fantasy/pixelated palette
 class AppTheme {
   static ThemeData get darkForgeTheme {
     return ThemeData(

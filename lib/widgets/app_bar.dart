@@ -9,7 +9,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get the current user's document from the stream
+    //get the current user's document from the stream
     final userData = Provider.of<DocumentSnapshot?>(context);
 
     String username = '';
@@ -21,7 +21,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       int rawLevel = (data['level'] as num?)?.toInt() ?? 1;
       int rawXp = (data['xp'] as num?)?.toInt() ?? 0;
       
-      // Calculate effective level based on 100 XP per level
+      //calculate effective level based on 100 XP per level
       level = (rawLevel < 1 ? 1 : rawLevel) + (rawXp ~/ 100);
     }
 
@@ -37,7 +37,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       backgroundColor: AppColors.darkTavernGreen,
       elevation: 0.0,
-      actions: actions, // displays custom action buttons
+      actions: actions, //displays custom action buttons
     );
   }
 

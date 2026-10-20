@@ -2,7 +2,6 @@ import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 import 'package:fitness_slayer_01/theme/constants.dart';
-
 import '../../theme/app_colors.dart';
 
 class Login extends StatefulWidget {
@@ -24,7 +23,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return loading ? Loading() : Scaffold( //if loading is true, show Loading widget
+    return loading ? Loading() : Scaffold( //if loading is true, show loading widget
       backgroundColor: AppColors.obsidianBlack,
       appBar: AppBar(
         backgroundColor: AppColors.darkTavernGreen,
@@ -38,7 +37,7 @@ class _LoginState extends State<Login> {
             icon: const Icon(Icons.person, color: AppColors.parchmentWhite,),
             label: const Text('Register', style: TextStyle(color: AppColors.parchmentWhite,),),
             onPressed: () {
-              widget.toggleView();
+              widget.toggleView(); //toggles to register
             },
           ),
         ],
@@ -46,23 +45,27 @@ class _LoginState extends State<Login> {
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
         child: Form(
-          key: _formKey,
+          key: _formKey, //form needs form key
           child: Column(
             children: <Widget>[
+
               SizedBox(height: 20.0),
+
               TextFormField(
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Email', hintStyle: const TextStyle(
                   color: Colors.blueGrey,
                 ),),
                 validator: (val) => val == null || val.isEmpty
-                    ? 'Enter an email'
+                    ? 'Please enter an email'
                     : null,
                 onChanged: (val) {
                   email = val;
                 },
               ),
+
               SizedBox(height: 20.0),
+
               TextFormField(
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Password', hintStyle: const TextStyle(
@@ -70,7 +73,7 @@ class _LoginState extends State<Login> {
                 ),),
                 obscureText: true,
                 validator: (val) => val == null || val.length < 6
-                    ? 'Enter a password 6+ chars long'
+                    ? 'Password should be 6+ characters long'
                     : null,
                 onChanged: (val) {
                   setState(() {
@@ -78,7 +81,9 @@ class _LoginState extends State<Login> {
                   });
                 },
               ),
+
               SizedBox(height: 20.0),
+
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.flameOrange,
@@ -91,14 +96,16 @@ class _LoginState extends State<Login> {
                     dynamic result = await _auth.signInWithEmailAndPassword(email, password,);
                     if (result == null) {
                       setState(() {
-                        error = 'could not sign in with those credentials';
+                        error = 'Could not sign in with those credentials';
                         loading = false;
                       });
                     }
                   }
                 },
               ),
+
               SizedBox(height: 12.0),
+
               Text(error, style: TextStyle(color: Colors.red, fontSize: 14.0)),
             ],
           ),

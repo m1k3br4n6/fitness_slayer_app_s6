@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 import 'package:fitness_slayer_01/services/user_stats.dart';
 import 'package:fitness_slayer_01/services/streak_service.dart';
-
 import '../models/routine.dart';
 
 class DatabaseService {
@@ -41,7 +40,7 @@ class DatabaseService {
     }, SetOptions(merge: true));
   }
 
-  Future<void> addEquipment(String itemId, String imagePath, int atk_bonus, int hp_bonus, String description, String name, double price) async {
+  Future<void> updateEquipment(String itemId, String imagePath, int atk_bonus, int hp_bonus, String description, String name, double price) async {
     await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).set({
       'name': name,
       'description': description,
