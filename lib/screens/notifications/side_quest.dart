@@ -162,8 +162,10 @@ class _SideQuestState extends State<SideQuest> {
         'completedSideQuests': completedQuests,
       }, SetOptions(merge: true));
 
-      if (mounted && tapPosition != null) {
-        _showFloatingLoot(tapPosition, xpGained, coinsGained);
+      // Spawn 2 separate floating loot pills (+X XP and +Y GP) 100% of the time
+      if (mounted) {
+        Offset position = tapPosition ?? const Offset(200, 300);
+        _showFloatingLoot(position, xpGained, coinsGained);
       }
     } catch (e) {
       if (mounted) {
@@ -189,7 +191,7 @@ class _SideQuestState extends State<SideQuest> {
     required String uid,
     required Map<dynamic, dynamic> userData,
   }) {
-    Offset? tapDetailsPosition;
+    final GlobalKey buttonKey = GlobalKey();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -225,26 +227,31 @@ class _SideQuestState extends State<SideQuest> {
               ],
             ),
           ),
-          GestureDetector(
-            onTapDown: (details) {
-              tapDetailsPosition = details.globalPosition;
-            },
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isDone ? AppColors.container : AppColors.primary,
-                foregroundColor: AppColors.warmIvory,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+          ElevatedButton(
+            key: buttonKey,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isDone ? AppColors.container : AppColors.primary,
+              foregroundColor: AppColors.warmIvory,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-              onPressed: isDone ? null : () => _completeQuest(uid, index, userData, tapPosition: tapDetailsPosition),
-              child: Text(
-                isDone ? 'Completed' : 'Complete',
-                style: TextStyle(
-                  color: isDone ? AppColors.textMuted : AppColors.warmIvory,
-                  fontWeight: FontWeight.bold,
-                ),
+            ),
+            onPressed: isDone
+                ? null
+                : () {
+                    Offset? buttonPosition;
+                    final renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
+                    if (renderBox != null) {
+                      buttonPosition = renderBox.localToGlobal(Offset.zero);
+                    }
+                    _completeQuest(uid, index, userData, tapPosition: buttonPosition);
+                  },
+            child: Text(
+              isDone ? 'Completed' : 'Complete',
+              style: TextStyle(
+                color: isDone ? AppColors.textMuted : AppColors.warmIvory,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -442,7 +449,7 @@ class _SideQuestState extends State<SideQuest> {
   }
 }
 
-// Floating loot overlay animation (+X XP & +Y GP) that spawns at tap position and floats up while fading out
+// Floating loot overlay animation (+X XP & +Y GP as 2 separate floating pills)
 class _FloatingLootOverlay extends StatefulWidget {
   final Offset position;
   final int xpGained;
@@ -468,16 +475,19 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
   @override
   void initState() {
     super.initState();
+    // Longer lasting animation (2.4 seconds)
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: const Duration(milliseconds: 2400),
     );
 
+    // Stays fully opaque for 60% of the duration, then smoothly fades out
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.5, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(parent: _controller, curve: const Interval(0.6, 1.0, curve: Curves.easeOut)),
     );
 
-    _translateAnimation = Tween<double>(begin: 0.0, end: -50.0).animate(
+    // Slowly floats upward by 60 pixels
+    _translateAnimation = Tween<double>(begin: 0.0, end: -60.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
 
@@ -495,8 +505,8 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: widget.position.dx - 60,
-      top: widget.position.dy - 30,
+      left: (widget.position.dx - 60).clamp(16.0, MediaQuery.of(context).size.width - 160.0),
+      top: widget.position.dy - 35,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -507,42 +517,57 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Pill 1: XP Flame Pill
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.surface.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.gold, width: 1.5),
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.primary, width: 1.5),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.4),
+                          color: Colors.black.withValues(alpha: 0.5),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    child: Row(
-                      children: [
-                        Text(
-                          '+${widget.xpGained} XP',
-                          style: const TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '+${widget.coinsGained} GP',
-                          style: const TextStyle(
-                            color: AppColors.gold,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            decoration: TextDecoration.none,
-                          ),
+                    child: Text(
+                      '+${widget.xpGained} XP',
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  // Pill 2: Gold Coin Pill
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.gold, width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
                         ),
                       ],
+                    ),
+                    child: Text(
+                      '+${widget.coinsGained} GP',
+                      style: const TextStyle(
+                        color: AppColors.gold,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        decoration: TextDecoration.none,
+                      ),
                     ),
                   ),
                 ],
