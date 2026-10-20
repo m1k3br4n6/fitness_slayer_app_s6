@@ -1,3 +1,7 @@
+import 'package:fitness_slayer_01/screens/admin/admin_dashboard.dart';
+import 'package:fitness_slayer_01/screens/admin/equipment_management.dart';
+import 'package:fitness_slayer_01/screens/extra-features/info.dart';
+import 'package:fitness_slayer_01/screens/extra-features/work_in_progress_warning.dart';
 import 'package:fitness_slayer_01/screens/notifications/notifications.dart';
 import 'package:fitness_slayer_01/screens/notifications/side_quest.dart';
 import 'package:fitness_slayer_01/screens/planning/calendar.dart';
@@ -23,32 +27,45 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final AuthService _auth = AuthService();
+  final AuthService _auth = AuthService(); //instance of auth service
+  final user = FirebaseAuth.instance.currentUser; //get currently signed in user
 
+  //bool for checking admin status
+  bool isAdmin = false;
   //keeps track of active tab; defaults to Home in the middle
   int _currentIndex = 2;
 
   @override
-  void initState() {
+  void initState() { //runs when stateful widget is first created
     super.initState();
 
-    // Checks users streak if needs reset
+    //checks if current user is admin
+    final String uid = user?.uid ?? ''; //gets uid if user is not null, otherwise return empty string
+    if (uid == "6Iw3AiqlCObMc77PAbCLDsmaBbh2")
+    {
+      isAdmin = true;
+    }
+    else
+    {
+      isAdmin = false;
+    }
+
+    //checks users streak if needs reset
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = context.read<myUser?>();
-      final String uid = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+      final String uid = user?.uid ?? '';
       if (uid.isNotEmpty) {
         DatabaseService().checkAndUpdateStreakOnLaunch(uid);
       }
     });
   }
 
-  // Custom pixel art icon
+  //custom pixel art icon
   Widget pixelIcon(
       String path, {
         bool selected = false,
         double size = 57,
       }) {
-    //u can customize the sizes here without touching the pixel size
+    //you can customize the sizes here without touching the pixel size
     return Image.asset(
       path,
       width: size,
@@ -61,14 +78,14 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    //Pages ordered with home centred
+    //pages ordered with home centred
     final List<Widget> pages = [
-      // workout page
+      //workout page
       const WorkoutPlanning(),
-      // calendar page
+      //calendar page
       const Calendar(),
 
-      // main dashboard hub
+      //main dashboard hub
       LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -91,6 +108,8 @@ class _HomeState extends State<Home> {
                         ),
                       ),
 
+                      SizedBox(height: 5),
+
                       // Notifications button with pixel art
                       Container(
                         decoration: BoxDecoration(
@@ -109,12 +128,14 @@ class _HomeState extends State<Home> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const Notifications(),
+                                builder: (context) => const WorkInProgressWarning(),
                               ),
                             );
                           },
                         ),
                       ),
+
+                      SizedBox(height: 5),
 
                       // Settings button with pixel art
                       Container(
@@ -134,12 +155,42 @@ class _HomeState extends State<Home> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const AppSettings(),
+                                builder: (context) => const WorkInProgressWarning(),
                               ),
                             );
                           },
                         ),
                       ),
+
+                      SizedBox(height: 5),
+                      
+                      // Info button
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          constraints: const BoxConstraints(
+                            maxWidth: 50,
+                            maxHeight: 50,
+                          ),
+                          padding: EdgeInsets.zero,
+                          icon: Icon(Icons.menu_book),
+                          color: AppColors.parchmentWhite,
+                          iconSize: 25,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Info(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      SizedBox(height: 5),
 
                       // BMI button
                       Container(
@@ -168,17 +219,46 @@ class _HomeState extends State<Home> {
                           child: const Text(
                             'BMI',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
 
+                      SizedBox(height: 5),
+
+                      //admin only: equipment crud page button
+                      if (isAdmin) //only displays button if user is admin
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.amber,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          constraints: const BoxConstraints(
+                            maxWidth: 50,
+                            maxHeight: 50,
+                          ),
+                          padding: EdgeInsets.zero,
+                          icon: Icon(Icons.admin_panel_settings),
+                          color: Colors.black87,
+                          iconSize:28,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const adminDashboard(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
                       // Empty spacer area for future campfire scenes, assets, GIFs, videos, or widgets
                       const Spacer(),
 
-                      // daily challenge button anchored at the bottom
+                      //daily challenge side quest button anchored at the bottom
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.flameOrange,
@@ -206,16 +286,16 @@ class _HomeState extends State<Home> {
         },
       ),
 
-      // store / shop page
+      //store page
       const Shop(),
 
-      // profile page
+      //profile page
       const Profile(),
     ];
 
     return Scaffold(
       appBar: MyAppBar(
-        // tapping the profile photo jumps to the Profile tab 
+        // tapping the profile photo jumps to the Profile tab
         onAvatarTap: () => setState(() => _currentIndex = 4),
         actions: [
           //logout button
@@ -231,7 +311,7 @@ class _HomeState extends State<Home> {
 
       backgroundColor: AppColors.obsidianBlack,
 
-      //IndexedStack keeps state alive so switching tabs doesn't wipe your screen data
+      // IndexedStack keeps state alive so switching tabs doesn't wipe your screen data
       body: IndexedStack(
         index: _currentIndex,
         children: pages,
@@ -254,7 +334,7 @@ class _HomeState extends State<Home> {
             });
           },
           destinations:  [
-            // workouts tab
+            //workouts tab
             NavigationDestination(
               icon: pixelIcon('assets/icons/workouts.png'),
               selectedIcon: pixelIcon(
@@ -264,7 +344,7 @@ class _HomeState extends State<Home> {
               label: 'Workouts',
             ),
 
-            // calendar tab
+            //calendar tab
             NavigationDestination(
               icon: pixelIcon('assets/icons/calendar.png'),
               selectedIcon: pixelIcon(
@@ -274,7 +354,7 @@ class _HomeState extends State<Home> {
               label: 'Calendar',
             ),
 
-            // home tab in middle
+            //home tab in middle
             NavigationDestination(
               icon: pixelIcon('assets/icons/home.png'),
               selectedIcon: pixelIcon(
@@ -284,7 +364,7 @@ class _HomeState extends State<Home> {
               label: 'Home',
             ),
 
-            // store / shop tab
+            //store tab
             NavigationDestination(
               icon: pixelIcon('assets/icons/store.png'),
               selectedIcon: pixelIcon(
@@ -294,7 +374,7 @@ class _HomeState extends State<Home> {
               label: 'Store',
             ),
 
-            // profile
+            //profile
             NavigationDestination(
               icon: pixelIcon('assets/icons/profile.png'),
               selectedIcon: pixelIcon(
