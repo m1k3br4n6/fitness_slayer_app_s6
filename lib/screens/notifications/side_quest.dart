@@ -135,18 +135,13 @@ class _SideQuestState extends State<SideQuest> {
           children: [
             const Text(
               'Daily Side Quests',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.warmIvory,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 6),
-            const Text(
-              'Complete simple daily exercises for +5 XP & +3 Coins each.',
-              style: TextStyle(color: AppColors.parchmentBeige, fontSize: 14),
-            ),
-            const SizedBox(height: 24),
 
             ListView.separated(
               shrinkWrap: true,
