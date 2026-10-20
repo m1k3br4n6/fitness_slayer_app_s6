@@ -376,17 +376,33 @@ class _SideQuestState extends State<SideQuest> {
 
             const SizedBox(height: 24),
 
-            // In-App Testing Button to reset quests back to 0/5 instantly
+            // In-App Testing Button to reset quests back to 0/5 and deduct today's quest rewards
             Center(
               child: TextButton.icon(
                 icon: const Icon(Icons.refresh, color: AppColors.crimsonRed, size: 18),
-                label: const Text('Reset Quests (Testing)', style: TextStyle(color: AppColors.crimsonRed, fontSize: 13)),
+                label: const Text('Reset Quests & XP/Coins (Testing)', style: TextStyle(color: AppColors.crimsonRed, fontSize: 13)),
                 onPressed: () async {
                   final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-                  await userRef.set({'completedSideQuests': []}, SetOptions(merge: true));
+
+                  int currentXp = (userData['xp'] as num?)?.toInt() ?? 0;
+                  int currentCoin = (userData['coin'] as num?)?.toInt() ?? 0;
+
+                  // Deduct XP and Coins gained from completed quests today
+                  int xpToDeduct = finishedQuests.length * 5;
+                  int coinsToDeduct = finishedQuests.length * 3;
+
+                  int newXp = (currentXp - xpToDeduct).clamp(0, 999999);
+                  int newCoin = (currentCoin - coinsToDeduct).clamp(0, 999999);
+
+                  await userRef.set({
+                    'completedSideQuests': [],
+                    'xp': newXp,
+                    'coin': newCoin,
+                  }, SetOptions(merge: true));
+
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Quests reset to 0/5 for testing')),
+                      SnackBar(content: Text('Quests reset to 0/5 (-$xpToDeduct XP, -$coinsToDeduct Coins)')),
                     );
                   }
                 },
