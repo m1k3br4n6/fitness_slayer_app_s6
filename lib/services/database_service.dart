@@ -3,6 +3,7 @@ import 'package:fitness_slayer_01/models/completed_workout.dart';
 import 'package:fitness_slayer_01/services/user_stats.dart';
 import 'package:fitness_slayer_01/services/streak_service.dart';
 import '../models/routine.dart';
+import 'package:fitness_slayer_01/models/equipment.dart';
 
 class DatabaseService {
 
@@ -40,15 +41,38 @@ class DatabaseService {
     }, SetOptions(merge: true));
   }
 
-  Future<void> updateEquipment(String itemId, String imagePath, int atk_bonus, int hp_bonus, String description, String name, double price) async {
+  Future<void> updateEquipment(String itemId, String name, String description, String spriteImagePath,
+      String attackSheetPath, String idleSheetPath, int atkBonus, int hpBonus, double price) async {
     await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).set({
       'name': name,
       'description': description,
-      'image_path': imagePath,
+      'sprite_image_path': spriteImagePath,
+      'attack_sheet_path': attackSheetPath,
+      'idle_sheet_path': idleSheetPath,
       'price': price,
-      'hp_bonus': hp_bonus,
-      'atk_bonus': atk_bonus,
+      'hp_bonus': hpBonus,
+      'atk_bonus': atkBonus,
     }, SetOptions(merge: true));
+  }
+
+  Future<Equipment?> getEquipmentById(String itemId) async {
+    final doc = await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).get();
+    if (!doc.exists || doc.data() == null) {
+      return null; //return null if doc not found or is null
+    }
+    final data = doc.data()!; //! indicates that the doc will indeed exist and not be null
+    //return equipment model instance loaded with equipment data
+    return Equipment(
+      id: doc.id,
+      name: data['name'],
+      description: data['description'],
+      spriteImagePath: data['sprite_image_path'],
+      attackSheetPath: data['attack_sheet_path'],
+      idleSheetPath: data['idle_sheet_path'],
+      atkBonus: (data['atk_bonus'] as num).toInt(),
+      hpBonus: (data['hp_bonus'] as num).toInt(),
+      price: (data['price'] as num).toDouble(),
+    );
   }
 
   Future<void> deleteEquipment(String itemId) async {
