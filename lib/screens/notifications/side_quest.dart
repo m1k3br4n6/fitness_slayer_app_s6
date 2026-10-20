@@ -142,6 +142,7 @@ class _SideQuestState extends State<SideQuest> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 32), // adding 32 pixels of space to make things feel less cramped
 
             ListView.separated(
               shrinkWrap: true,
@@ -183,11 +184,6 @@ class _SideQuestState extends State<SideQuest> {
                                 fontWeight: FontWeight.bold,
                                 decoration: isDone ? TextDecoration.lineThrough : null,
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            const Text(
-                              '+5 XP  •  +3 Coins',
-                              style: TextStyle(color: AppColors.gold, fontSize: 12, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
