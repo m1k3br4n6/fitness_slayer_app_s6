@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/services/streak_service.dart';
@@ -15,15 +17,63 @@ class SideQuest extends StatefulWidget {
 }
 
 class _SideQuestState extends State<SideQuest> {
-  final List<String> _dailyQuests = const [
+  // Pool of light bodyweight and stretching activities
+  final List<String> _activityPool = const [
     '8 Sit-ups',
-    '4 Bodyweight Squats',
     '10 Jumping Jacks',
     '20-Second Plank',
-    '10s Touching the toes',
+    '10s Touching the Toes',
+    '10 Arm Circles',
+    '8 Shoulder Rolls',
+    '15-Second Neck Stretch',
+    '10 Standing Calf Raises',
+    '10 Cobra Stretches',
+    '10 Seated Torso Twists',
   ];
 
+  Timer? _countdownTimer;
   bool _isClaiming = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  // Calculates remaining time until 00:00:00 midnight
+  String _getFormattedCountdown() {
+    DateTime now = DateTime.now();
+    DateTime midnight = DateTime(now.year, now.month, now.day + 1);
+    Duration remaining = midnight.difference(now);
+
+    String hours = remaining.inHours.toString().padLeft(2, '0');
+    String minutes = (remaining.inMinutes % 60).toString().padLeft(2, '0');
+    String seconds = (remaining.inSeconds % 60).toString().padLeft(2, '0');
+
+    return '$hours:$minutes:$seconds';
+  }
+
+  // Deterministically selects 5 light exercises for today based on date seed
+  List<String> _getTodayQuests() {
+    DateTime now = DateTime.now();
+    int dateSeed = now.year * 10000 + now.month * 100 + now.day;
+    List<String> pool = List.from(_activityPool)..shuffle(Random(dateSeed));
+    return pool.take(5).toList();
+  }
 
   Future<void> _completeQuest(
     String uid,
@@ -52,14 +102,18 @@ class _SideQuestState extends State<SideQuest> {
         lastWorkoutDate = rawLastDate;
       }
 
-      int updatedXp = currentXp + 5;
+      // Roll randomized rewards on completion (1-12 XP, 1-8 Coins)
+      int xpGained = Random().nextInt(12) + 1;
+      int coinsGained = Random().nextInt(8) + 1;
+
+      int updatedXp = currentXp + xpGained;
       int updatedLevel = currentLevel < 1 ? 1 : currentLevel;
       while (updatedXp >= 100) {
         updatedXp -= 100;
         updatedLevel += 1;
       }
 
-      int updatedCoin = currentCoin + 3;
+      int updatedCoin = currentCoin + coinsGained;
 
       DateTime now = DateTime.now();
       int updatedStreak = StreakService.calculateNewStreak(
@@ -85,8 +139,8 @@ class _SideQuestState extends State<SideQuest> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Side Quest Complete!', style: TextStyle(color: AppColors.warmIvory)),
+          SnackBar(
+            content: Text('Side Quest Complete! +$xpGained XP & +$coinsGained Coins', style: const TextStyle(color: AppColors.warmIvory)),
             backgroundColor: AppColors.surface,
           ),
         );
@@ -124,6 +178,7 @@ class _SideQuestState extends State<SideQuest> {
     final userData = userDoc.exists ? (userDoc.data() as Map<String, dynamic>? ?? {}) : {};
     DateTime now = DateTime.now();
     List<String> completedQuests = List<String>.from(userData['completedSideQuests'] ?? []);
+    List<String> todayQuests = _getTodayQuests();
 
     return Scaffold(
       appBar: const MyAppBar(),
@@ -133,24 +188,40 @@ class _SideQuestState extends State<SideQuest> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Daily Side Quests',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.warmIvory,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+            SizedBox(
+              width: double.infinity,
+              child: Text(
+                'Daily Side Quests',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: AppColors.warmIvory,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const SizedBox(height: 32), // adding 32 pixels of space to make things feel less cramped
+            const SizedBox(height: 6),
+            SizedBox(
+              width: double.infinity,
+              child: Text(
+                'Quests Reset In: ${_getFormattedCountdown()}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: AppColors.gold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
 
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _dailyQuests.length,
+              itemCount: todayQuests.length,
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                String questText = _dailyQuests[index];
+                String questText = todayQuests[index];
                 String questKey = '${now.year}-${now.month}-${now.day}_$index';
                 bool isDone = completedQuests.contains(questKey);
 
