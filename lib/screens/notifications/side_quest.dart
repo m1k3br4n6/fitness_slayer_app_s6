@@ -10,6 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+const int _dailyQuestCount = 5;
+const int _xpPerLevel = 100;
+
+class _Quest {
+  final String text;
+  final int index;
+  const _Quest(this.text, this.index);
+}
+
 class SideQuest extends StatefulWidget {
   const SideQuest({super.key});
 
@@ -18,8 +27,7 @@ class SideQuest extends StatefulWidget {
 }
 
 class _SideQuestState extends State<SideQuest> {
-  // Pool of low effort stretches and exercises for daily side quests
-  // logic for selection of exercises for daily quests
+  // Pool of low effort stretches and exercises that daily quests are drawn from
   final List<String> _activityPool = const [
     '8 Sit-ups',
     '10 Jumping Jacks',
@@ -33,48 +41,19 @@ class _SideQuestState extends State<SideQuest> {
     '10 Seated Torso Twists',
   ];
 
-  Timer? _countdownTimer;
   bool _isClaiming = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _startTimer();
-  }
+  // Single source of truth for completion keys, used when saving and when reading
+  String _dayPrefix(DateTime date) => '${date.year}-${date.month}-${date.day}_';
+  String _questKey(DateTime date, int index) => '${_dayPrefix(date)}$index';
 
-  @override
-  void dispose() {
-    _countdownTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startTimer() {
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
-  }
-
-  // Calculates remaining time until 00:00:00 midnight
-  String _getFormattedCountdown() {
-    DateTime now = DateTime.now();
-    DateTime midnight = DateTime(now.year, now.month, now.day + 1);
-    Duration remaining = midnight.difference(now);
-
-    String hours = remaining.inHours.toString().padLeft(2, '0');
-    String minutes = (remaining.inMinutes % 60).toString().padLeft(2, '0');
-    String seconds = (remaining.inSeconds % 60).toString().padLeft(2, '0');
-
-    return '$hours:$minutes:$seconds';
-  }
-
-  // logic for selection of exercises for daily quests
-  List<String> _getTodayQuests() {
-    DateTime now = DateTime.now();
-    int dateSeed = now.year * 10000 + now.month * 100 + now.day;
-    List<String> pool = List.from(_activityPool)..shuffle(Random(dateSeed));
-    return pool.take(5).toList();
+  // The same date always gives the same shuffle, so the quest list is stable all day
+  List<_Quest> _getTodayQuests() {
+    final now = DateTime.now();
+    final dateSeed = now.year * 10000 + now.month * 100 + now.day;
+    final pool = List<String>.from(_activityPool)..shuffle(Random(dateSeed));
+    final picked = pool.take(_dailyQuestCount).toList();
+    return [for (int i = 0; i < picked.length; i++) _Quest(picked[i], i)];
   }
 
   void _showFloatingLoot(Offset buttonCenter, int xpGained, int coinsGained) {
@@ -98,75 +77,76 @@ class _SideQuestState extends State<SideQuest> {
   }
 
   Future<void> _completeQuest(
-    String uid,
-    int questIndex,
-    Map<dynamic, dynamic> userData, {
-    Offset? buttonCenter,
-  }) async {
+      String uid,
+      int questIndex, {
+        Offset? buttonCenter,
+      }) async {
     if (_isClaiming) return;
 
-    // Trigger audio click feedback
     SystemSound.play(SystemSoundType.click);
-
-    setState(() {
-      _isClaiming = true;
-    });
+    setState(() => _isClaiming = true);
 
     try {
       final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+      final now = DateTime.now();
+      final questKey = _questKey(now, questIndex);
 
-      int currentXp = (userData['xp'] as num?)?.toInt() ?? 0;
-      int currentLevel = (userData['level'] as num?)?.toInt() ?? 1;
-      int currentCoin = (userData['coin'] as num?)?.toInt() ?? 0;
-      int currentStreak = (userData['streak'] as num?)?.toInt() ?? 0;
+      // Rolled outside the transaction so a retry does not re-roll the reward
+      final xpGained = Random().nextInt(12) + 1;
+      final coinsGained = Random().nextInt(8) + 1;
 
-      DateTime? lastWorkoutDate;
-      final rawLastDate = userData['lastWorkoutDate'];
-      if (rawLastDate is Timestamp) {
-        lastWorkoutDate = rawLastDate.toDate();
-      } else if (rawLastDate is DateTime) {
-        lastWorkoutDate = rawLastDate;
-      }
+      // The transaction reads the latest document, so nothing is overwritten by a stale snapshot from another screen or device
+      final awarded = await FirebaseFirestore.instance.runTransaction<bool>((transaction) async {
+        final snapshot = await transaction.get(userRef);
+        final data = snapshot.data() ?? <String, dynamic>{};
 
-      // Roll randomized rewards on completion (1-12 XP, 1-8 Coins)
-      int xpGained = Random().nextInt(12) + 1;
-      int coinsGained = Random().nextInt(8) + 1;
-
-      int updatedXp = currentXp + xpGained;
-      int updatedLevel = currentLevel < 1 ? 1 : currentLevel;
-      while (updatedXp >= 100) {
-        updatedXp -= 100;
-        updatedLevel += 1;
-      }
-
-      int updatedCoin = currentCoin + coinsGained;
-
-      DateTime now = DateTime.now();
-      int updatedStreak = StreakService.calculateNewStreak(
-        currentStreak: currentStreak,
-        lastWorkoutDate: lastWorkoutDate,
-        currentWorkoutDate: now,
-      );
-
-      List<String> completedQuests = List<String>.from(userData['completedSideQuests'] ?? []);
-      String questKey = '${now.year}-${now.month}-${now.day}_$questIndex';
-      if (!completedQuests.contains(questKey)) {
+        // Keep only today's keys so old days do not pile up in the document
+        final completedQuests = List<String>.from(data['completedSideQuests'] ?? [])
+            .where((key) => key.startsWith(_dayPrefix(now)))
+            .toList();
+        if (completedQuests.contains(questKey)) return false;
         completedQuests.add(questKey);
-      }
 
-      await userRef.set({
-        'xp': updatedXp,
-        'level': updatedLevel,
-        'coin': updatedCoin,
-        'streak': updatedStreak,
-        'lastWorkoutDate': now,
-        'completedSideQuests': completedQuests,
-      }, SetOptions(merge: true));
+        final currentXp = (data['xp'] as num?)?.toInt() ?? 0;
+        final currentLevel = (data['level'] as num?)?.toInt() ?? 1;
+        final currentCoin = (data['coin'] as num?)?.toInt() ?? 0;
+        final currentStreak = (data['streak'] as num?)?.toInt() ?? 0;
 
-      // Spawn 2 floating loot bubbles (+X XP and +Y GP) centered on button
-      if (mounted) {
-        Offset position = buttonCenter ?? const Offset(200, 300);
-        _showFloatingLoot(position, xpGained, coinsGained);
+        DateTime? lastWorkoutDate;
+        final rawLastDate = data['lastWorkoutDate'];
+        if (rawLastDate is Timestamp) {
+          lastWorkoutDate = rawLastDate.toDate();
+        } else if (rawLastDate is DateTime) {
+          lastWorkoutDate = rawLastDate;
+        }
+
+        var updatedXp = currentXp + xpGained;
+        var updatedLevel = currentLevel < 1 ? 1 : currentLevel;
+        while (updatedXp >= _xpPerLevel) {
+          updatedXp -= _xpPerLevel;
+          updatedLevel += 1;
+        }
+
+        final updatedStreak = StreakService.calculateNewStreak(
+          currentStreak: currentStreak,
+          lastWorkoutDate: lastWorkoutDate,
+          currentWorkoutDate: now,
+        );
+
+        transaction.set(userRef, {
+          'xp': updatedXp,
+          'level': updatedLevel,
+          'coin': currentCoin + coinsGained,
+          'streak': updatedStreak,
+          'lastWorkoutDate': now,
+          'completedSideQuests': completedQuests,
+        }, SetOptions(merge: true));
+
+        return true;
+      });
+
+      if (awarded && mounted) {
+        _showFloatingLoot(buttonCenter ?? const Offset(200, 300), xpGained, coinsGained);
       }
     } catch (e) {
       if (mounted) {
@@ -178,22 +158,16 @@ class _SideQuestState extends State<SideQuest> {
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isClaiming = false;
-        });
+        setState(() => _isClaiming = false);
       }
     }
   }
 
   Widget _buildQuestCard({
-    required String questText,
-    required int index,
+    required _Quest quest,
     required bool isDone,
     required String uid,
-    required Map<dynamic, dynamic> userData,
   }) {
-    final GlobalKey buttonKey = GlobalKey();
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -207,54 +181,50 @@ class _SideQuestState extends State<SideQuest> {
       child: Row(
         children: [
           Icon(
-            isDone ? Icons.check_circle : Icons.fitness_center,
+            isDone ? Icons.check_circle : Icons.priority_high,
             color: isDone ? AppColors.gold : AppColors.primary,
             size: 26,
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  questText,
-                  style: TextStyle(
-                    color: isDone ? AppColors.parchmentBeige : AppColors.warmIvory,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    decoration: isDone ? TextDecoration.lineThrough : null,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ElevatedButton(
-            key: buttonKey,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isDone ? AppColors.container : AppColors.primary,
-              foregroundColor: AppColors.warmIvory,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+            child: Text(
+              quest.text,
+              style: TextStyle(
+                color: isDone ? AppColors.parchmentBeige : AppColors.warmIvory,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                decoration: isDone ? TextDecoration.lineThrough : null,
               ),
             ),
-            onPressed: isDone
-                ? null
-                : () {
-                    Offset? buttonCenter;
-                    final renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
-                    if (renderBox != null) {
-                      final pos = renderBox.localToGlobal(Offset.zero);
-                      final size = renderBox.size;
-                      buttonCenter = Offset(pos.dx + (size.width / 2), pos.dy + (size.height / 2));
-                    }
-                    _completeQuest(uid, index, userData, buttonCenter: buttonCenter);
-                  },
-            child: Text(
-              isDone ? 'Completed' : 'Complete',
-              style: TextStyle(
-                color: isDone ? AppColors.textMuted : AppColors.warmIvory,
-                fontWeight: FontWeight.bold,
+          ),
+          // Builder gives the button its own context, so its position can be
+          // read without a GlobalKey that gets recreated on every rebuild
+          Builder(
+            builder: (btnContext) => ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDone ? AppColors.container : AppColors.primary,
+                foregroundColor: AppColors.warmIvory,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: isDone
+                  ? null
+                  : () {
+                Offset? buttonCenter;
+                final renderBox = btnContext.findRenderObject() as RenderBox?;
+                if (renderBox != null) {
+                  buttonCenter = renderBox.localToGlobal(renderBox.size.center(Offset.zero));
+                }
+                _completeQuest(uid, quest.index, buttonCenter: buttonCenter);
+              },
+              child: Text(
+                isDone ? 'Completed' : 'Complete',
+                style: TextStyle(
+                  color: isDone ? AppColors.textMuted : AppColors.warmIvory,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -276,29 +246,24 @@ class _SideQuestState extends State<SideQuest> {
       );
     }
 
-    final userData = userDoc.exists ? (userDoc.data() as Map<String, dynamic>? ?? {}) : {};
-    DateTime now = DateTime.now();
-    List<String> completedQuests = List<String>.from(userData['completedSideQuests'] ?? []);
-    List<String> todayQuests = _getTodayQuests();
+    final Map<String, dynamic> userData =
+    userDoc.exists ? (userDoc.data() as Map<String, dynamic>? ?? <String, dynamic>{}) : <String, dynamic>{};
+    final now = DateTime.now();
+    final completedQuests = List<String>.from(userData['completedSideQuests'] ?? []);
 
-    // Separate today's quests into active vs completed
-    List<Map<String, dynamic>> activeQuests = [];
-    List<Map<String, dynamic>> finishedQuests = [];
+    final activeQuests = <_Quest>[];
+    final finishedQuests = <_Quest>[];
 
-    for (int i = 0; i < todayQuests.length; i++) {
-      String questKey = '${now.year}-${now.month}-${now.day}_$i';
-      bool isDone = completedQuests.contains(questKey);
-      final questData = {'text': todayQuests[i], 'index': i, 'isDone': isDone};
-
-      if (isDone) {
-        finishedQuests.add(questData);
+    for (final quest in _getTodayQuests()) {
+      if (completedQuests.contains(_questKey(now, quest.index))) {
+        finishedQuests.add(quest);
       } else {
-        activeQuests.add(questData);
+        activeQuests.add(quest);
       }
     }
 
-    int completedCount = finishedQuests.length;
-    bool allCleared = completedCount == 5;
+    final completedCount = finishedQuests.length;
+    final allCleared = completedCount == _dailyQuestCount;
 
     return Scaffold(
       appBar: const MyAppBar(),
@@ -308,12 +273,12 @@ class _SideQuestState extends State<SideQuest> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
+            const SizedBox(
               width: double.infinity,
               child: Text(
-                'Daily Side Quests',
+                'Slayer Quest Board',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.warmIvory,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -322,7 +287,7 @@ class _SideQuestState extends State<SideQuest> {
             ),
             const SizedBox(height: 16),
 
-            // Slayer Notice Board Card
+            // Progress card
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -333,15 +298,17 @@ class _SideQuestState extends State<SideQuest> {
               ),
               child: Column(
                 children: [
-                  Text(
-                    allCleared ? 'Notice Board Cleared!' : 'Slayer Quest Board',
-                    style: const TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 6),
+                  if (allCleared) ...[
+                    const Text(
+                      'Notice Board Cleared!',
+                      style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 6),
+                  ],
                   Text(
                     allCleared
-                        ? 'All 5 daily quests completed for today. Come back tomorrow for more quests!'
-                        : '$completedCount / 5 Quests Completed Today',
+                        ? 'All $_dailyQuestCount daily quests completed for today. Come back tomorrow for more quests!'
+                        : '$completedCount / $_dailyQuestCount Quests Completed Today',
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: AppColors.parchmentBeige, fontSize: 13),
                   ),
@@ -349,71 +316,60 @@ class _SideQuestState extends State<SideQuest> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
-                      value: completedCount / 5,
+                      value: completedCount / _dailyQuestCount,
                       minHeight: 8,
                       backgroundColor: AppColors.container,
                       color: AppColors.gold,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    'Next Quests In: ${_getFormattedCountdown()}',
-                    style: const TextStyle(color: AppColors.gold, fontSize: 13, fontWeight: FontWeight.bold),
-                  ),
+                  const _CountdownLabel(),
                 ],
               ),
             ),
 
             const SizedBox(height: 24),
 
-            // Active Quests Section
             if (activeQuests.isNotEmpty) ...[
               const Text(
                 'Active Quests',
                 style: TextStyle(color: AppColors.warmIvory, fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...activeQuests.map((q) {
+              ...activeQuests.map((quest) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
-                  child: _buildQuestCard(
-                    questText: q['text'],
-                    index: q['index'],
-                    isDone: false,
-                    uid: user.uid,
-                    userData: userData,
-                  ),
+                  child: _buildQuestCard(quest: quest, isDone: false, uid: user.uid),
                 );
               }),
             ],
 
-            // Completed Today Section
             if (finishedQuests.isNotEmpty) ...[
               const SizedBox(height: 12),
               const Divider(color: Colors.white12),
               const SizedBox(height: 12),
               Text(
-                'Completed Today ($completedCount / 5)',
+                'Completed Today ($completedCount / $_dailyQuestCount)',
                 style: const TextStyle(color: AppColors.parchmentBeige, fontSize: 15, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...finishedQuests.map((q) {
+              ...finishedQuests.map((quest) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
-                  child: _buildQuestCard(
-                    questText: q['text'],
-                    index: q['index'],
-                    isDone: true,
-                    uid: user.uid,
-                    userData: userData,
-                  ),
+                  child: _buildQuestCard(quest: quest, isDone: true, uid: user.uid),
                 );
               }),
             ],
 
             const SizedBox(height: 24),
 
-            // In-App Testing Button to reset quests back to 0/5 and deduct today's quest rewards
+            /*
+             Testing reset button, disabled.
+             Note: the flat 5 XP / 3 coin refund
+             does not match the random 1-12 XP / 1-8 coin rewards, so the real
+             amounts would need to be stored per quest before re-enabling this.
+            */
+            /*
             Center(
               child: TextButton.icon(
                 icon: const Icon(Icons.refresh, color: AppColors.crimsonRed, size: 18),
@@ -424,7 +380,6 @@ class _SideQuestState extends State<SideQuest> {
                   int currentXp = (userData['xp'] as num?)?.toInt() ?? 0;
                   int currentCoin = (userData['coin'] as num?)?.toInt() ?? 0;
 
-                  // Deduct XP and Coins gained from completed quests today
                   int xpToDeduct = finishedQuests.length * 5;
                   int coinsToDeduct = finishedQuests.length * 3;
 
@@ -439,12 +394,13 @@ class _SideQuestState extends State<SideQuest> {
 
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Quests reset to 0/5 (-$xpToDeduct XP, -$coinsToDeduct Coins)')),
+                      SnackBar(content: Text('Quests reset to 0/$_dailyQuestCount (-$xpToDeduct XP, -$coinsToDeduct Coins)')),
                     );
                   }
                 },
               ),
             ),
+            */
           ],
         ),
       ),
@@ -452,7 +408,54 @@ class _SideQuestState extends State<SideQuest> {
   }
 }
 
-// Floating loot overlay animation (+X XP & +Y GP as 2 separate floating bubbles)
+// Owns its own timer so only this label rebuilds each second, not the whole screen
+class _CountdownLabel extends StatefulWidget {
+  const _CountdownLabel();
+
+  @override
+  State<_CountdownLabel> createState() => _CountdownLabelState();
+}
+
+class _CountdownLabelState extends State<_CountdownLabel> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  // Time remaining until local midnight
+  String _formatRemaining() {
+    final now = DateTime.now();
+    final midnight = DateTime(now.year, now.month, now.day + 1);
+    final remaining = midnight.difference(now);
+
+    final hours = remaining.inHours.toString().padLeft(2, '0');
+    final minutes = (remaining.inMinutes % 60).toString().padLeft(2, '0');
+    final seconds = (remaining.inSeconds % 60).toString().padLeft(2, '0');
+
+    return '$hours:$minutes:$seconds';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      'Next Quests In: ${_formatRemaining()}',
+      style: const TextStyle(color: AppColors.gold, fontSize: 13, fontWeight: FontWeight.bold),
+    );
+  }
+}
+
+// Floating "+X XP" and "+Y GP" bubbles that rise and fade over the pressed button
 class _FloatingLootOverlay extends StatefulWidget {
   final Offset buttonCenter;
   final int xpGained;
@@ -471,6 +474,10 @@ class _FloatingLootOverlay extends StatefulWidget {
 }
 
 class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleTickerProviderStateMixin {
+  static const double _bubbleSize = 52;
+  static const double _bubbleGap = 8;
+  static const double _totalWidth = _bubbleSize * 2 + _bubbleGap;
+
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<double> _translateAnimation;
@@ -478,18 +485,16 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
   @override
   void initState() {
     super.initState();
-    // Lingers for 3.0 seconds (3000ms)
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 2400),
     );
 
-    // Stays 100% opaque for 70% of the duration, then smoothly fades out
+    // Fully opaque for most of the animation, fading only near the end
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.7, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(parent: _controller, curve: const Interval(0.65, 1.0, curve: Curves.easeOut)),
     );
 
-    // Slowly floats upward by 60 pixels
     _translateAnimation = Tween<double>(begin: 0.0, end: -60.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
@@ -507,13 +512,13 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
 
   @override
   Widget build(BuildContext context) {
-    // Two 48px bubbles + 8px gap = 104px total width.
-    // Subtracting 52px from buttonCenter.dx centers the gap between bubbles directly over button center!
-    double leftPosition = (widget.buttonCenter.dx - 52).clamp(16.0, MediaQuery.of(context).size.width - 120.0);
+    // Centers the pair of bubbles on the button while keeping them on screen
+    final screenWidth = MediaQuery.of(context).size.width;
+    final leftPosition = (widget.buttonCenter.dx - _totalWidth / 2).clamp(12.0, screenWidth - _totalWidth - 12.0);
 
     return Positioned(
       left: leftPosition,
-      top: widget.buttonCenter.dy - 40,
+      top: widget.buttonCenter.dy - 45,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -524,82 +529,58 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleT
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Bubble 1: Flame XP Circular Bubble
-                  Container(
-                    width: 48,
-                    height: 48,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.primary, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          spreadRadius: 1,
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      '+${widget.xpGained}\nXP',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
-                        height: 1.1,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: 8),
-
-                  // Bubble 2: Gold GP Circular Bubble
-                  Container(
-                    width: 48,
-                    height: 48,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.gold, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.gold.withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          spreadRadius: 1,
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      '+${widget.coinsGained}\nGP',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.gold,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
-                        height: 1.1,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ),
+                  _LootBubble(label: '+${widget.xpGained}XP', color: AppColors.primary),
+                  const SizedBox(width: _bubbleGap),
+                  _LootBubble(label: '+${widget.coinsGained}GP', color: AppColors.gold),
                 ],
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _LootBubble extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _LootBubble({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _FloatingLootOverlayState._bubbleSize,
+      height: _FloatingLootOverlayState._bubbleSize,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        shape: BoxShape.circle,
+        border: Border.all(color: color, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.4),
+            blurRadius: 10,
+            spreadRadius: 1,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.5),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+          height: 1.1,
+          decoration: TextDecoration.none,
+        ),
       ),
     );
   }
