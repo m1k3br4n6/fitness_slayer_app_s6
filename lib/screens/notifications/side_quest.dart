@@ -162,6 +162,70 @@ class _SideQuestState extends State<SideQuest> {
     }
   }
 
+  Widget _buildQuestCard({
+    required String questText,
+    required int index,
+    required bool isDone,
+    required String uid,
+    required Map<dynamic, dynamic> userData,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDone ? AppColors.gold : AppColors.border,
+          width: isDone ? 1.5 : 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isDone ? Icons.check_circle : Icons.fitness_center,
+            color: isDone ? AppColors.gold : AppColors.primary,
+            size: 26,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  questText,
+                  style: TextStyle(
+                    color: isDone ? AppColors.parchmentBeige : AppColors.warmIvory,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    decoration: isDone ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isDone ? AppColors.container : AppColors.primary,
+              foregroundColor: AppColors.warmIvory,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: isDone ? null : () => _completeQuest(uid, index, userData),
+            child: Text(
+              isDone ? 'Completed' : 'Complete',
+              style: TextStyle(
+                color: isDone ? AppColors.textMuted : AppColors.warmIvory,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final userDoc = Provider.of<DocumentSnapshot?>(context);
@@ -179,6 +243,25 @@ class _SideQuestState extends State<SideQuest> {
     DateTime now = DateTime.now();
     List<String> completedQuests = List<String>.from(userData['completedSideQuests'] ?? []);
     List<String> todayQuests = _getTodayQuests();
+
+    // Separate today's quests into active vs completed
+    List<Map<String, dynamic>> activeQuests = [];
+    List<Map<String, dynamic>> finishedQuests = [];
+
+    for (int i = 0; i < todayQuests.length; i++) {
+      String questKey = '${now.year}-${now.month}-${now.day}_$i';
+      bool isDone = completedQuests.contains(questKey);
+      final questData = {'text': todayQuests[i], 'index': i, 'isDone': isDone};
+
+      if (isDone) {
+        finishedQuests.add(questData);
+      } else {
+        activeQuests.add(questData);
+      }
+    }
+
+    int completedCount = finishedQuests.length;
+    bool allCleared = completedCount == 5;
 
     return Scaffold(
       appBar: const MyAppBar(),
@@ -200,87 +283,114 @@ class _SideQuestState extends State<SideQuest> {
                 ),
               ),
             ),
-            const SizedBox(height: 6),
-            SizedBox(
+            const SizedBox(height: 16),
+
+            // Slayer Notice Board Card
+            Container(
               width: double.infinity,
-              child: Text(
-                'Quests Reset In: ${_getFormattedCountdown()}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.gold,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: allCleared ? AppColors.gold : AppColors.border, width: 1.5),
               ),
-            ),
-            const SizedBox(height: 32),
-
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: todayQuests.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                String questText = todayQuests[index];
-                String questKey = '${now.year}-${now.month}-${now.day}_$index';
-                bool isDone = completedQuests.contains(questKey);
-
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDone ? AppColors.gold : AppColors.border,
-                      width: isDone ? 1.5 : 1,
+              child: Column(
+                children: [
+                  Text(
+                    allCleared ? 'Notice Board Cleared!' : 'Slayer Quest Board',
+                    style: const TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    allCleared
+                        ? 'All 5 daily quests completed for today. Come back tomorrow for more quests!'
+                        : '$completedCount / 5 Quests Completed Today',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: AppColors.parchmentBeige, fontSize: 13),
+                  ),
+                  const SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: LinearProgressIndicator(
+                      value: completedCount / 5,
+                      minHeight: 8,
+                      backgroundColor: AppColors.container,
+                      color: AppColors.gold,
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        isDone ? Icons.check_circle : Icons.fitness_center,
-                        color: isDone ? AppColors.gold : AppColors.primary,
-                        size: 26,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              questText,
-                              style: TextStyle(
-                                color: isDone ? AppColors.parchmentBeige : AppColors.warmIvory,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                decoration: isDone ? TextDecoration.lineThrough : null,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isDone ? AppColors.container : AppColors.primary,
-                          foregroundColor: AppColors.warmIvory,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: isDone ? null : () => _completeQuest(user.uid, index, userData),
-                        child: Text(
-                          isDone ? 'Completed' : 'Complete',
-                          style: TextStyle(
-                            color: isDone ? AppColors.textMuted : AppColors.warmIvory,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 10),
+                  Text(
+                    'Next Quests In: ${_getFormattedCountdown()}',
+                    style: const TextStyle(color: AppColors.gold, fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Active Quests Section
+            if (activeQuests.isNotEmpty) ...[
+              const Text(
+                'Active Quests',
+                style: TextStyle(color: AppColors.warmIvory, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              ...activeQuests.map((q) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: _buildQuestCard(
+                    questText: q['text'],
+                    index: q['index'],
+                    isDone: false,
+                    uid: user.uid,
+                    userData: userData,
                   ),
                 );
-              },
+              }),
+            ],
+
+            // Completed Today Section
+            if (finishedQuests.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              const Divider(color: Colors.white12),
+              const SizedBox(height: 12),
+              Text(
+                'Completed Today ($completedCount / 5)',
+                style: const TextStyle(color: AppColors.parchmentBeige, fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              ...finishedQuests.map((q) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: _buildQuestCard(
+                    questText: q['text'],
+                    index: q['index'],
+                    isDone: true,
+                    uid: user.uid,
+                    userData: userData,
+                  ),
+                );
+              }),
+            ],
+
+            const SizedBox(height: 24),
+
+            // In-App Testing Button to reset quests back to 0/5 instantly
+            Center(
+              child: TextButton.icon(
+                icon: const Icon(Icons.refresh, color: AppColors.crimsonRed, size: 18),
+                label: const Text('Reset Quests (Testing)', style: TextStyle(color: AppColors.crimsonRed, fontSize: 13)),
+                onPressed: () async {
+                  final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+                  await userRef.set({'completedSideQuests': []}, SetOptions(merge: true));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Quests reset to 0/5 for testing')),
+                    );
+                  }
+                },
+              ),
             ),
           ],
         ),
