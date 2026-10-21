@@ -26,35 +26,10 @@ class DatabaseService {
     }, SetOptions(merge: true));
   }
 
-  Future<void> addToInventory(String userId, String itemId) async {
-    await FirebaseFirestore.instance.collection('users').doc(userId).collection('inventory').doc('E001').set({
-      'item_id': itemId,
-    }, SetOptions(merge: true));
-  }
-
   // Saves the profile photo
   Future<void> updateProfilePhoto(String userId, String? base64Image) async {
     await FirebaseFirestore.instance.collection('users').doc(userId).set({
       'photoBase64': base64Image ?? FieldValue.delete(),
-    }, SetOptions(merge: true));
-  }
-
-  // Saves the slayer's name and equipped outfit
-  Future<void> updateSlayerCustomization(
-      String userId, {
-        required String slayerName,
-        String? outfitId,
-      }) async {
-    await FirebaseFirestore.instance.collection('users').doc(userId).set({
-      'slayer_name': slayerName,
-      'equipped_outfit': outfitId ?? FieldValue.delete(),
-    }, SetOptions(merge: true));
-  }
-
-  // Equips an outfit. Used by the store's Equip button.
-  Future<void> setEquippedOutfit(String userId, String? outfitId) async {
-    await FirebaseFirestore.instance.collection('users').doc(userId).set({
-      'equipped_outfit': outfitId ?? FieldValue.delete(),
     }, SetOptions(merge: true));
   }
 
@@ -104,6 +79,33 @@ class DatabaseService {
   Future<void> deleteEquipment(String itemId) async {
     await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).delete();
   }
+
+  //STORE AND CUSTOMIZATION
+
+  //add item to inventory -- when purchasing new equipment from the store
+  Future<void> addToInventory(String userId, String itemId) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('inventory').doc(itemId).set({
+      'item_id': itemId,
+    }, SetOptions(merge: true));
+  }
+
+  //check if user has item in inventory
+  Future<bool> hasItemInInventory(String userId, String itemId) async {
+    final doc = await FirebaseFirestore.instance.collection('users').doc(userId).collection('inventory').doc(itemId).get();
+    if (!doc.exists) {
+      return false;
+    }
+    return true;
+  }
+
+  //set user's slayer current equipped outfit by id
+  Future<void> setEquipped(String userId, String itemId) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('slayer').doc('SO1').set({
+      'item_equipped': itemId,
+    }, SetOptions(merge: true));
+  }
+  //-----------------------
+
 
   Future<void> saveWorkout(String userId, CompletedWorkout workout) async {
     // Navigates to: users / {userId} / workoutsCompleted / {auto-generated-doc-id}

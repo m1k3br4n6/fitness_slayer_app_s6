@@ -313,6 +313,7 @@ class _HomeState extends State<Home> {
       const Shop(),
 
       //profile page
+      //const Profile(),
       const Profile(),
     ];
 
