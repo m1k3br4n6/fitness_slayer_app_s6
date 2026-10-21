@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:fitness_slayer_01/services/boss_progression_service.dart';
 
 // Current phase of the combat state machine, enum allows the UI to know which character is currently active
 enum BattlePhase {
@@ -24,18 +25,18 @@ class CombatLogEntry {
 // state management service to automatically notify listening UI widgets
 // whenever combat stats, turns, or status messages update
 class BossBattleService extends ChangeNotifier {
+  bool _isDisposed = false;
 
-  // CHARACTER STATS
-
+  // CHARACTER STATS initialized from BossProgressionService
   String slayerName = 'SLAYER';
-  int slayerHp = 100;
-  int slayerMaxHp = 100;
-  int slayerDamage = 20;
+  int slayerHp = BossProgressionService.slayerBaseHp;
+  int slayerMaxHp = BossProgressionService.slayerBaseHp;
+  int slayerDamage = BossProgressionService.slayerBaseDamage;
 
   String bossName = 'NOSFERATU ZODD';
-  int bossHp = 100;
-  int bossMaxHp = 100;
-  int bossDamage = 15;
+  int bossHp = BossProgressionService.bossBaseHp;
+  int bossMaxHp = BossProgressionService.bossBaseHp;
+  int bossDamage = BossProgressionService.bossBaseDamage;
 
   // BATTLE STATE
   BattlePhase phase = BattlePhase.idle;
@@ -64,6 +65,42 @@ class BossBattleService extends ChangeNotifier {
     return 'idle/orc_boss_idle_spritesheet';
   }
 
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_isDisposed) {
+      super.notifyListeners();
+    }
+  }
+
+  void updateProgressionStats({
+    required int slayerLevel,
+    required int weekNumber,
+    String? slayerNameInput,
+  }) {
+    if (slayerNameInput != null && slayerNameInput.trim().isNotEmpty) {
+      slayerName = slayerNameInput.trim();
+    }
+
+    slayerMaxHp = BossProgressionService.calculateSlayerMaxHp(slayerLevel);
+    slayerDamage = BossProgressionService.calculateSlayerDamage(slayerLevel);
+
+    bossMaxHp = BossProgressionService.calculateBossMaxHp(weekNumber);
+    bossDamage = BossProgressionService.calculateBossDamage(weekNumber);
+
+    if (!isBattleActive) {
+      slayerHp = slayerMaxHp;
+      bossHp = bossMaxHp;
+    }
+
+    notifyListeners();
+  }
+
   // INITIALIZATION & RESET
 
   // Resets character health bars and returns the state machine to idle.
@@ -80,7 +117,7 @@ class BossBattleService extends ChangeNotifier {
   // COMBAT SCRIPT
 
   Future<void> startBattleScript() async {
-    if (isBattleActive) return;
+    if (isBattleActive || _isDisposed) return;
 
     //Reset health bars to full when starting a new fight
     slayerHp = slayerMaxHp;
@@ -94,7 +131,7 @@ class BossBattleService extends ChangeNotifier {
     await Future.delayed(const Duration(seconds: 1));
 
     // Combat loop continues until either character reaches 0 HP
-    while (slayerHp > 0 && bossHp > 0) {
+    while (slayerHp > 0 && bossHp > 0 && !_isDisposed) {
 
       // SLAYER TURN
       phase = BattlePhase.slayerAttacking;
@@ -104,7 +141,7 @@ class BossBattleService extends ChangeNotifier {
       // Pause for 800ms so the user sees Slayer is attacking
       await Future.delayed(const Duration(milliseconds: 800));
 
-      if (phase != BattlePhase.slayerAttacking) return;
+      if (phase != BattlePhase.slayerAttacking || _isDisposed) return;
 
       // SLAYER attack
       bossHp = (bossHp - slayerDamage).clamp(0, bossMaxHp);
@@ -122,7 +159,7 @@ class BossBattleService extends ChangeNotifier {
       // 2 second rest before boss turn
       await Future.delayed(const Duration(milliseconds: 1200));
 
-      if (phase != BattlePhase.slayerAttacking) return;
+      if (phase != BattlePhase.slayerAttacking || _isDisposed) return;
 
       // BOSS TURN
       phase = BattlePhase.bossAttacking;
@@ -132,7 +169,7 @@ class BossBattleService extends ChangeNotifier {
       // Pause for 800ms so the user sees Boss is attacking
       await Future.delayed(const Duration(milliseconds: 800));
 
-      if (phase != BattlePhase.bossAttacking) return;
+      if (phase != BattlePhase.bossAttacking || _isDisposed) return;
 
       // BOSS attack
       slayerHp = (slayerHp - bossDamage).clamp(0, slayerMaxHp);
@@ -150,7 +187,7 @@ class BossBattleService extends ChangeNotifier {
       // 2 second rest before slayer turn
       await Future.delayed(const Duration(milliseconds: 1200));
 
-      if (phase != BattlePhase.bossAttacking) return;
+      if (phase != BattlePhase.bossAttacking || _isDisposed) return;
     }
   }
 
