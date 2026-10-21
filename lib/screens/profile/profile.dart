@@ -1,32 +1,28 @@
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/models/store_item.dart';
 import 'package:fitness_slayer_01/screens/common/work_in_progress.dart';
 import 'package:fitness_slayer_01/screens/game-features/slayer_customize.dart';
 import 'package:fitness_slayer_01/services/database_service.dart';
-import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
+import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 int _xpForNextLevel(int level) => (level < 1 ? 1 : level) * 100;
 
-int _intField(Map<String, dynamic> data, String key) => (data[key] as num?)?.toInt() ?? 0;
-
-StoreItem? _catalogItem(String? id) {
-  for (final item in storeCatalog) {
-    if (item.id == id) return item;
-  }
-  return null;
-}
+int _intField(Map<String, dynamic> data, String key) =>
+    (data[key] as num?)?.toInt() ?? 0;
 
 void _openWip(BuildContext context, String title) {
   Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => WorkInProgress(title: title)),
+    MaterialPageRoute(
+      builder: (context) => WorkInProgress(title: title),
+    ),
   );
 }
 
@@ -39,12 +35,17 @@ class Profile extends StatelessWidget {
     final user = Provider.of<myUser?>(context);
 
     if (userDoc == null || user == null) {
-      return Scaffold(backgroundColor: AppColors.obsidianBlack, body: Loading());
+      return Scaffold(
+        backgroundColor: AppColors.obsidianBlack,
+        body: Loading(),
+      );
     }
 
     final data = userDoc.exists
-        ? (userDoc.data() as Map<String, dynamic>? ?? <String, dynamic>{})
+        ? (userDoc.data() as Map<String, dynamic>? ??
+        <String, dynamic>{})
         : <String, dynamic>{};
+
     final username = (data['username'] as String?) ?? 'Slayer';
     final level = _intField(data, 'level');
     final xp = _intField(data, 'xp');
@@ -52,11 +53,13 @@ class Profile extends StatelessWidget {
     final streak = _intField(data, 'streak');
 
     final xpNeeded = _xpForNextLevel(level);
-    final xpProgress = (xp / xpNeeded).clamp(0.0, 1.0).toDouble();
-    final initial = username.isNotEmpty ? username[0].toUpperCase() : '?';
+    final xpProgress =
+    (xp / xpNeeded).clamp(0.0, 1.0).toDouble();
+
+    final initial =
+    username.isNotEmpty ? username[0].toUpperCase() : '?';
+
     final photoBase64 = data['photoBase64'] as String?;
-    final slayerName = (data['slayer_name'] as String?)?.trim() ?? '';
-    final outfit = _catalogItem(data['equipped_outfit'] as String?);
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
@@ -66,9 +69,14 @@ class Profile extends StatelessWidget {
           children: [
             const SizedBox(height: 8),
 
-            // Avatar, name and level
-            _ProfileAvatar(uid: user.uid, initial: initial, photoBase64: photoBase64),
+            // Avatar, username and level
+            _ProfileAvatar(
+              uid: user.uid,
+              initial: initial,
+              photoBase64: photoBase64,
+            ),
             const SizedBox(height: 12),
+
             Text(
               username,
               style: const TextStyle(
@@ -78,9 +86,14 @@ class Profile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
+
             Text(
               'Level $level Slayer',
-              style: const TextStyle(color: AppColors.questGold, fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: AppColors.questGold,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 20),
 
@@ -90,20 +103,28 @@ class Profile extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.forgeSlate,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.hearthBorder),
+                border: Border.all(
+                  color: AppColors.hearthBorder,
+                ),
               ),
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         'Experience',
-                        style: TextStyle(color: AppColors.warmIvory, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: AppColors.warmIvory,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       Text(
                         '$xp / $xpNeeded XP',
-                        style: const TextStyle(color: AppColors.parchmentBeige),
+                        style: const TextStyle(
+                          color: AppColors.parchmentBeige,
+                        ),
                       ),
                     ],
                   ),
@@ -143,67 +164,105 @@ class Profile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(child: _WorkoutCountTile(uid: user.uid)),
+                Expanded(
+                  child: _WorkoutCountTile(uid: user.uid),
+                ),
               ],
             ),
             const SizedBox(height: 16),
 
-            // Slayer summary and customize button
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.forgeSlate,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.hearthBorder),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    slayerName.isEmpty ? 'Your Slayer' : slayerName,
-                    style: const TextStyle(
-                      color: AppColors.warmIvory,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Outfit: ${outfit?.name ?? 'None'}',
-                    style: const TextStyle(color: AppColors.parchmentBeige),
-                  ),
+            // Slayer summary and customize button.
+            // Reads the Slayer name from users/{uid}/slayer/SO1.
+            StreamBuilder<
+                DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user.uid)
+                  .collection('slayer')
+                  .doc('SO1')
+                  .snapshots(),
+              builder: (context, slayerSnapshot) {
+                final slayerData =
+                    slayerSnapshot.data?.data() ??
+                        <String, dynamic>{};
 
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SlayerCustomize()),
-                      ),
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Customize Slayer'),
+                final slayerName =
+                    (slayerData['slayer_name'] as String?)
+                        ?.trim() ??
+                        '';
+
+                final displayedName = slayerName.isEmpty
+                    ? 'Your Slayer'
+                    : slayerName;
+
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.forgeSlate,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.hearthBorder,
                     ),
                   ),
-                ],
-              ),
+                  child: Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayedName,
+                        style: const TextStyle(
+                          color: AppColors.warmIvory,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      _EquippedOutfitName(uid: user.uid),
+
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                const SlayerCustomize(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.edit),
+                          label: const Text(
+                            'Customize Slayer',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
 
-            // These screens aren't built yet, so they open the work in progress page
+            // Shortcuts to pages still in development
             _ShortcutTile(
               icon: Icons.insights,
               label: 'Fitness Stats',
-              onTap: () => _openWip(context, 'Fitness Stats'),
+              onTap: () =>
+                  _openWip(context, 'Fitness Stats'),
             ),
             const SizedBox(height: 12),
+
             _ShortcutTile(
               icon: Icons.emoji_events,
               label: 'Badges',
               onTap: () => _openWip(context, 'Badges'),
             ),
             const SizedBox(height: 12),
+
             _ShortcutTile(
               icon: Icons.people,
               label: 'Friends',
@@ -232,11 +291,16 @@ class _StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      padding: const EdgeInsets.symmetric(
+        vertical: 16,
+        horizontal: 8,
+      ),
       decoration: BoxDecoration(
         color: AppColors.forgeSlate,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.hearthBorder),
+        border: Border.all(
+          color: AppColors.hearthBorder,
+        ),
       ),
       child: Column(
         children: [
@@ -250,7 +314,13 @@ class _StatTile extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(label, style: const TextStyle(color: AppColors.parchmentBeige, fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.parchmentBeige,
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
     );
@@ -259,16 +329,20 @@ class _StatTile extends StatelessWidget {
 
 class _WorkoutCountTile extends StatefulWidget {
   final String uid;
+
   const _WorkoutCountTile({required this.uid});
 
   @override
-  State<_WorkoutCountTile> createState() => _WorkoutCountTileState();
+  State<_WorkoutCountTile> createState() =>
+      _WorkoutCountTileState();
 }
 
-class _WorkoutCountTileState extends State<_WorkoutCountTile> {
+class _WorkoutCountTileState
+    extends State<_WorkoutCountTile> {
   late Stream<QuerySnapshot<Map<String, dynamic>>> _workouts;
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> _openStream() {
+  Stream<QuerySnapshot<Map<String, dynamic>>>
+  _openStream() {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(widget.uid)
@@ -283,8 +357,11 @@ class _WorkoutCountTileState extends State<_WorkoutCountTile> {
   }
 
   @override
-  void didUpdateWidget(covariant _WorkoutCountTile oldWidget) {
+  void didUpdateWidget(
+      covariant _WorkoutCountTile oldWidget,
+      ) {
     super.didUpdateWidget(oldWidget);
+
     if (oldWidget.uid != widget.uid) {
       _workouts = _openStream();
     }
@@ -292,10 +369,14 @@ class _WorkoutCountTileState extends State<_WorkoutCountTile> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    return StreamBuilder<
+        QuerySnapshot<Map<String, dynamic>>>(
       stream: _workouts,
       builder: (context, snapshot) {
-        final count = snapshot.hasData ? '${snapshot.data!.docs.length}' : '-';
+        final count = snapshot.hasData
+            ? '${snapshot.data!.docs.length}'
+            : '-';
+
         return _StatTile(
           icon: Icons.fitness_center,
           color: AppColors.questGold,
@@ -312,7 +393,11 @@ class _ShortcutTile extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _ShortcutTile({required this.icon, required this.label, required this.onTap});
+  const _ShortcutTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -321,87 +406,135 @@ class _ShortcutTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: ListTile(
-        leading: Icon(icon, color: AppColors.emberOrange),
-        title: Text(label, style: const TextStyle(color: AppColors.warmIvory)),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.parchmentBeige),
+        leading: Icon(
+          icon,
+          color: AppColors.emberOrange,
+        ),
+        title: Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.warmIvory,
+          ),
+        ),
+        trailing: const Icon(
+          Icons.chevron_right,
+          color: AppColors.parchmentBeige,
+        ),
         onTap: onTap,
       ),
     );
   }
 }
 
-// Profile picture. Tap to pick a photo from the gallery or camera, or remove it.
+// Profile picture: choose from gallery or camera, or remove it.
 class _ProfileAvatar extends StatefulWidget {
   final String uid;
   final String initial;
   final String? photoBase64;
 
-  const _ProfileAvatar({required this.uid, required this.initial, required this.photoBase64});
+  const _ProfileAvatar({
+    required this.uid,
+    required this.initial,
+    required this.photoBase64,
+  });
 
   @override
-  State<_ProfileAvatar> createState() => _ProfileAvatarState();
+  State<_ProfileAvatar> createState() =>
+      _ProfileAvatarState();
 }
 
 class _ProfileAvatarState extends State<_ProfileAvatar> {
   final ImagePicker _picker = ImagePicker();
   bool _busy = false;
 
-  // Cache the decoded bytes so the image doesn't flicker on every rebuild.
+  // Cache decoded bytes to avoid unnecessary image decoding.
   String? _decodedFrom;
   Uint8List? _bytes;
 
   Uint8List? _photoBytes() {
     final raw = widget.photoBase64;
-    if (raw == null || raw.isEmpty) return null;
+
+    if (raw == null || raw.isEmpty) {
+      return null;
+    }
+
     if (raw != _decodedFrom) {
       try {
         _bytes = base64Decode(raw);
       } catch (_) {
         _bytes = null;
       }
+
       _decodedFrom = raw;
     }
+
     return _bytes;
   }
 
   void _toast(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   Future<void> _pick(ImageSource source) async {
     setState(() => _busy = true);
+
     try {
-      // Shrink and compress so the photo stays small enough for Firestore.
       final file = await _picker.pickImage(
         source: source,
         maxWidth: 512,
         maxHeight: 512,
         imageQuality: 75,
       );
+
       if (file == null) return;
+
       final bytes = await file.readAsBytes();
+
       if (bytes.length > 700 * 1024) {
-        _toast('That photo is too large. Please pick a smaller one.');
+        _toast(
+          'That photo is too large. Please pick a smaller one.',
+        );
         return;
       }
-      await DatabaseService().updateProfilePhoto(widget.uid, base64Encode(bytes));
+
+      await DatabaseService().updateProfilePhoto(
+        widget.uid,
+        base64Encode(bytes),
+      );
+
       _toast('Profile photo updated!');
     } catch (e) {
-      _toast('Could not update your photo. Please try again.');
+      _toast(
+        'Could not update your photo. Please try again.',
+      );
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+      }
     }
   }
 
   Future<void> _remove() async {
     setState(() => _busy = true);
+
     try {
-      await DatabaseService().updateProfilePhoto(widget.uid, null);
+      await DatabaseService().updateProfilePhoto(
+        widget.uid,
+        null,
+      );
+      _toast('Profile photo removed.');
     } catch (e) {
-      _toast('Could not remove your photo. Please try again.');
+      _toast(
+        'Could not remove your photo. Please try again.',
+      );
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+      }
     }
   }
 
@@ -409,44 +542,71 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.forgeSlate,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library, color: AppColors.emberOrange),
-              title: const Text('Choose from gallery', style: TextStyle(color: AppColors.warmIvory)),
-              onTap: () {
-                Navigator.pop(sheetContext);
-                _pick(ImageSource.gallery);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera, color: AppColors.emberOrange),
-              title: const Text('Take a photo', style: TextStyle(color: AppColors.warmIvory)),
-              onTap: () {
-                Navigator.pop(sheetContext);
-                _pick(ImageSource.camera);
-              },
-            ),
-            if (_photoBytes() != null)
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               ListTile(
-                leading: const Icon(Icons.delete, color: AppColors.emberOrange),
-                title: const Text('Remove photo', style: TextStyle(color: AppColors.warmIvory)),
+                leading: const Icon(
+                  Icons.photo_library,
+                  color: AppColors.emberOrange,
+                ),
+                title: const Text(
+                  'Choose from gallery',
+                  style: TextStyle(
+                    color: AppColors.warmIvory,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  _remove();
+                  _pick(ImageSource.gallery);
                 },
               ),
-          ],
-        ),
-      ),
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_camera,
+                  color: AppColors.emberOrange,
+                ),
+                title: const Text(
+                  'Take a photo',
+                  style: TextStyle(
+                    color: AppColors.warmIvory,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _pick(ImageSource.camera);
+                },
+              ),
+              if (_photoBytes() != null)
+                ListTile(
+                  leading: const Icon(
+                    Icons.delete,
+                    color: AppColors.emberOrange,
+                  ),
+                  title: const Text(
+                    'Remove photo',
+                    style: TextStyle(
+                      color: AppColors.warmIvory,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    _remove();
+                  },
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final bytes = _photoBytes();
+
     return GestureDetector(
       onTap: _busy ? null : _showOptions,
       child: Stack(
@@ -456,21 +616,25 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.questGold, width: 2),
+              border: Border.all(
+                color: AppColors.questGold,
+                width: 2,
+              ),
             ),
             child: CircleAvatar(
               radius: 48,
               backgroundColor: AppColors.forgeSlate,
-              backgroundImage: bytes != null ? MemoryImage(bytes) : null,
+              backgroundImage:
+              bytes != null ? MemoryImage(bytes) : null,
               child: bytes == null
                   ? Text(
-                      widget.initial,
-                      style: const TextStyle(
-                        color: AppColors.warmIvory,
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
+                widget.initial,
+                style: const TextStyle(
+                  color: AppColors.warmIvory,
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
                   : null,
             ),
           ),
@@ -482,12 +646,137 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
               bottom: 0,
               child: Container(
                 padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(color: AppColors.emberOrange, shape: BoxShape.circle),
-                child: const Icon(Icons.camera_alt, size: 16, color: AppColors.warmIvory),
+                decoration: const BoxDecoration(
+                  color: AppColors.emberOrange,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.camera_alt,
+                  size: 16,
+                  color: AppColors.warmIvory,
+                ),
               ),
             ),
         ],
       ),
+    );
+  }
+}
+
+// Displays the currently equipped outfit from Firestore.
+class _EquippedOutfitName extends StatefulWidget {
+  final String uid;
+
+  const _EquippedOutfitName({required this.uid});
+
+  @override
+  State<_EquippedOutfitName> createState() =>
+      _EquippedOutfitNameState();
+}
+
+class _EquippedOutfitNameState
+    extends State<_EquippedOutfitName> {
+  late Future<List<StoreItem>> _catalogFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _catalogFuture = StoreItem.fetchCatalog();
+  }
+
+  @override
+  void didUpdateWidget(
+      covariant _EquippedOutfitName oldWidget,
+      ) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.uid != widget.uid) {
+      _catalogFuture = StoreItem.fetchCatalog();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final slayerRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.uid)
+        .collection('slayer')
+        .doc('SO1');
+
+    return StreamBuilder<
+        DocumentSnapshot<Map<String, dynamic>>>(
+      stream: slayerRef.snapshots(),
+      builder: (context, slayerSnapshot) {
+        if (slayerSnapshot.hasError) {
+          return const Text(
+            'Outfit: Unavailable',
+            style: TextStyle(
+              color: AppColors.parchmentBeige,
+            ),
+          );
+        }
+
+        if (!slayerSnapshot.hasData) {
+          return const Text(
+            'Outfit: Loading...',
+            style: TextStyle(
+              color: AppColors.parchmentBeige,
+            ),
+          );
+        }
+
+        final equippedId =
+        slayerSnapshot.data?.data()?['item_equipped']
+        as String?;
+
+        if (equippedId == null || equippedId.isEmpty) {
+          return const Text(
+            'Outfit: None',
+            style: TextStyle(
+              color: AppColors.parchmentBeige,
+            ),
+          );
+        }
+
+        return FutureBuilder<List<StoreItem>>(
+          future: _catalogFuture,
+          builder: (context, catalogSnapshot) {
+            if (catalogSnapshot.hasError) {
+              return const Text(
+                'Outfit: Unavailable',
+                style: TextStyle(
+                  color: AppColors.parchmentBeige,
+                ),
+              );
+            }
+
+            if (!catalogSnapshot.hasData) {
+              return const Text(
+                'Outfit: Loading...',
+                style: TextStyle(
+                  color: AppColors.parchmentBeige,
+                ),
+              );
+            }
+
+            StoreItem? equippedItem;
+
+            for (final item in catalogSnapshot.data!) {
+              if (item.id == equippedId) {
+                equippedItem = item;
+                break;
+              }
+            }
+
+            return Text(
+              'Outfit: ${equippedItem?.name ?? 'Unknown Item'}',
+              style: const TextStyle(
+                color: AppColors.parchmentBeige,
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
