@@ -367,9 +367,8 @@ class _ItemCard extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: isEquipped
-            ? Border.all(color: AppColors.gold, width: 3.5)
-            : isOwned
-            ? Border.all(color: AppColors.gold.withOpacity(0.5), width: 2.5)
+            ? Border.all(color: AppColors.gold, width: 3.5) : isOwned
+            ? Border.all(color: AppColors.gold, width: 2.5)
             : Border.all(color: AppColors.border, width: 2),
       ),
       child: Column(
