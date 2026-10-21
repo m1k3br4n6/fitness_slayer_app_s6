@@ -1,3 +1,4 @@
+import 'package:fitness_slayer_01/screens/admin/admin_dashboard.dart';
 import 'package:fitness_slayer_01/screens/admin/equipment_management.dart';
 import 'package:fitness_slayer_01/screens/extra-features/info.dart';
 import 'package:fitness_slayer_01/screens/extra-features/work_in_progress_warning.dart';
@@ -248,7 +249,7 @@ class _HomeState extends State<Home> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const WorkInProgressWarning(),
+                                builder: (context) => const adminDashboard(),
                               ),
                             );
                           },
@@ -317,6 +318,8 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       appBar: MyAppBar(
+        // tapping the profile photo jumps to the Profile tab
+        onAvatarTap: () => setState(() => _currentIndex = 4),
         actions: [
           //logout button
           TextButton.icon(

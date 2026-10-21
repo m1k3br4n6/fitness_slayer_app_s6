@@ -56,7 +56,7 @@ class Info extends StatelessWidget {
         color: AppColors.darkTavernGreen,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.flameOrange,
+          color: AppColors.parchmentBeige,
           width: 2,
         ),
       ),
@@ -67,7 +67,7 @@ class Info extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: AppColors.flameOrange,
+                color: AppColors.parchmentBeige,
                 size: 30,
               ),
               const SizedBox(width: 12),
