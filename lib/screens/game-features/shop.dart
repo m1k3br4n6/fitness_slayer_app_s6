@@ -16,12 +16,24 @@ class Shop extends StatefulWidget {
 }
 
 class _ShopState extends State<Shop> {
-  StoreCategory? _selectedCategory;
   String? _buyingItemId;
+  late Future<List<StoreItem>> _catalogFuture;
 
-  void _toast(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  @override
+  void initState() {
+    super.initState();
+    _catalogFuture = StoreItem.fetchCatalog();
   }
+
+  void _retryCatalogLoad() {
+    setState(() {
+      _catalogFuture = StoreItem.fetchCatalog();
+    });
+  }
+
+  void _toast(String message) {ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message)),
+  );}
 
   Future<void> _buy(StoreItem item, String uid) async {
     final confirmed = await showDialog<bool>(
@@ -65,7 +77,7 @@ class _ShopState extends State<Shop> {
 
   Future<void> _equip(StoreItem item, String uid) async {
     try {
-      await DatabaseService().setEquippedOutfit(uid, item.id);
+      await DatabaseService().setEquipped(uid, item.id);
       if (!mounted) return;
       _toast('${item.name} equipped!');
     } catch (e) {
@@ -80,69 +92,160 @@ class _ShopState extends State<Shop> {
     final user = Provider.of<myUser?>(context);
 
     if (userDoc == null || user == null) {
-      return Scaffold(backgroundColor: AppColors.background, body: Loading());
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: Loading(),
+      );
     }
 
-    final data = userDoc.exists
-        ? (userDoc.data() as Map<String, dynamic>? ?? <String, dynamic>{})
-        : <String, dynamic>{};
-    final coins = (data['coin'] as num?)?.toInt() ?? 0;
-    final owned = List<String>.from(data['inventory'] ?? const []);
-    final equippedOutfit = data['equipped_outfit'] as String?;
+    final userData =
+        userDoc.data() as Map<String, dynamic>? ?? <String, dynamic>{};
 
-    // Only categories marked isLive are sold. Others are kept for future updates.
-    final liveCategories = StoreCategory.values.where((c) => c.isLive).toList();
-    final items = liveStoreItems
-        .where((item) => _selectedCategory == null || item.category == _selectedCategory)
-        .toList();
+    final coins = (userData['coin'] as num?)?.toInt() ?? 0;
+
+    final userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
         children: [
           _CoinBalance(coins: coins),
-          if (liveCategories.length > 1)
-            _CategoryFilter(
-              categories: liveCategories,
-              selected: _selectedCategory,
-              onSelected: (category) => setState(() => _selectedCategory = category),
-            )
-          else
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Outfits',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Equipment',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
+          ),
           Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 220,
-                mainAxisExtent: 290,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return _ItemCard(
-                  item: item,
-                  coins: coins,
-                  isOwned: owned.contains(item.id),
-                  isEquipped: equippedOutfit == item.id,
-                  isBuying: _buyingItemId == item.id,
-                  isBusy: _buyingItemId != null,
-                  onBuy: () => _buy(item, user.uid),
-                  onEquip: () => _equip(item, user.uid),
+            child: FutureBuilder<List<StoreItem>>(
+              future: _catalogFuture,
+              builder: (context, catalogSnapshot) {
+                if (catalogSnapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return Loading();
+                }
+
+                if (catalogSnapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Could not load the store.',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: _retryCatalogLoad,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final items = catalogSnapshot.data ?? <StoreItem>[];
+
+                if (items.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No items available right now.',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  );
+                }
+
+                return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: userRef.collection('inventory').snapshots(),
+                  builder: (context, inventorySnapshot) {
+                    if (inventorySnapshot.hasError) {
+                      return const Center(
+                        child: Text(
+                          'Could not load your inventory.',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    }
+
+                    if (!inventorySnapshot.hasData) {
+                      return Loading();
+                    }
+
+                    final ownedIds = inventorySnapshot.data!.docs
+                        .map((doc) => doc.id)
+                        .toSet();
+
+
+                    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                      stream: userRef
+                          .collection('slayer')
+                          .doc('SO1')
+                          .snapshots(),
+                      builder: (context, slayerSnapshot) {
+                        if (slayerSnapshot.hasError) {
+                          return const Center(
+                            child: Text(
+                              'Could not load equipped item.',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          );
+                        }
+
+                        if (!slayerSnapshot.hasData) {
+                          return Loading();
+                        }
+
+                        final slayerData = slayerSnapshot.data!.data();
+                        final equippedItemId =
+                        slayerData?['item_equipped'] as String?;
+
+                        return GridView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                          gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 220,
+                            mainAxisExtent: 290,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            final item = items[index];
+                            final isOwned = ownedIds.contains(item.id);
+
+                            return _ItemCard(
+                              item: item,
+                              coins: coins,
+                              isOwned: isOwned,
+                              isEquipped: equippedItemId == item.id,
+                              isBuying: _buyingItemId == item.id,
+                              isBusy: _buyingItemId != null,
+                              onBuy: () => _buy(item, user.uid),
+                              onEquip: () => _equip(item, user.uid),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
                 );
               },
             ),
@@ -191,53 +294,6 @@ class _CoinBalance extends StatelessWidget {
   }
 }
 
-class _CategoryFilter extends StatelessWidget {
-  final List<StoreCategory> categories;
-  final StoreCategory? selected;
-  final ValueChanged<StoreCategory?> onSelected;
-
-  const _CategoryFilter({
-    required this.categories,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  Widget _chip(String label, bool isSelected, VoidCallback onTap) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: isSelected,
-        showCheckmark: false,
-        onSelected: (_) => onTap(),
-        backgroundColor: AppColors.surface,
-        selectedColor: AppColors.secondary,
-        side: BorderSide.none,
-        labelStyle: TextStyle(
-          color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: [
-          _chip('All', selected == null, () => onSelected(null)),
-          for (final category in categories)
-            _chip(category.label, selected == category, () => onSelected(category)),
-        ],
-      ),
-    );
-  }
-}
-
 class _ItemCard extends StatelessWidget {
   final StoreItem item;
   final int coins;
@@ -260,15 +316,33 @@ class _ItemCard extends StatelessWidget {
   });
 
   Widget _art() {
-    final fallback = Icon(item.icon, color: AppColors.gold, size: 30);
-    if (item.imagePath == null) return fallback;
+    if (item.imagePath.isEmpty) {
+      return const Text(
+        'Image missing',
+        style: TextStyle(
+          color: AppColors.textSecondary,
+          fontSize: 10,
+        ),
+        textAlign: TextAlign.center,
+      );
+    }
+
     return ClipOval(
       child: Image.asset(
-        item.imagePath!,
-        width: 56,
-        height: 56,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stack) => fallback,
+        item.imagePath,
+        width: 64,
+        height: 64,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return const Text(
+            'Image unavailable',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 10,
+            ),
+            textAlign: TextAlign.center,
+          );
+        },
       ),
     );
   }
@@ -293,15 +367,14 @@ class _ItemCard extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: isEquipped
-            ? Border.all(color: AppColors.gold, width: 2)
-            : isOwned
-            ? Border.all(color: AppColors.gold.withOpacity(0.5), width: 1.5)
-            : Border.all(color: AppColors.border),
+            ? Border.all(color: AppColors.gold, width: 3.5) : isOwned
+            ? Border.all(color: AppColors.gold, width: 2.5)
+            : Border.all(color: AppColors.border, width: 2),
       ),
       child: Column(
         children: [
           CircleAvatar(
-            radius: 28,
+            radius: 40,
             backgroundColor: AppColors.container,
             child: _art(),
           ),
@@ -312,17 +385,8 @@ class _ItemCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 15,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            item.rarity.label,
-            style: TextStyle(
-              color: item.rarity.color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 4),
@@ -332,7 +396,7 @@ class _ItemCard extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
           ),
           if (!isOwned)
