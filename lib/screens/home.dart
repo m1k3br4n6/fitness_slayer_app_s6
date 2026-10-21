@@ -18,6 +18,16 @@ import 'package:fitness_slayer_01/screens/game-features/shop.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
+import 'package:fitness_slayer_01/screens/game-features/boss_battle.dart';
+
+//Sprite Animator
+import 'package:fitness_slayer_01/services/sprite_animator.dart';
+
+const String campfireScene =
+    'assets/spritesheets/backgrounds/campsite_background_spritesheet.png';
+
+//Campsite Height
+const double campsiteHeight = 300;
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -32,21 +42,27 @@ class _HomeState extends State<Home> {
 
   //bool for checking admin status
   bool isAdmin = false;
+
   //keeps track of active tab; defaults to Home in the middle
   int _currentIndex = 2;
 
+  //values for the XP bar. TODO: replace with the real values from the user
+  int level = 1;
+  int xp = 40;
+  int xpToNext = 100;
+
   @override
-  void initState() { //runs when stateful widget is first created
+  void initState() {
+    //runs when stateful widget is first created
     super.initState();
 
     //checks if current user is admin
-    final String uid = user?.uid ?? ''; //gets uid if user is not null, otherwise return empty string
-    if (uid == "6Iw3AiqlCObMc77PAbCLDsmaBbh2")
-    {
+    final String uid =
+        user?.uid ??
+        ''; //gets uid if user is not null, otherwise return empty string
+    if (uid == "6Iw3AiqlCObMc77PAbCLDsmaBbh2") {
       isAdmin = true;
-    }
-    else
-    {
+    } else {
       isAdmin = false;
     }
 
@@ -60,11 +76,7 @@ class _HomeState extends State<Home> {
   }
 
   //custom pixel art icon
-  Widget pixelIcon(
-      String path, {
-        bool selected = false,
-        double size = 57,
-      }) {
+  Widget pixelIcon(String path, {bool selected = false, double size = 57}) {
     //you can customize the sizes here without touching the pixel size
     return Image.asset(
       path,
@@ -73,6 +85,84 @@ class _HomeState extends State<Home> {
       fit: BoxFit.contain,
       filterQuality: FilterQuality.none,
       isAntiAlias: false,
+    );
+  }
+
+  //puts a small text label under an icon button
+  Widget withLabel(Widget button, String label) {
+    return Column(
+      children: [
+        button,
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(color: AppColors.mutedParchment, fontSize: 14),
+        ),
+      ],
+    );
+  }
+
+  // campsite container
+  Widget _buildCampsiteContainer() {
+    return SizedBox(
+      width: double.infinity,
+      height: campsiteHeight,
+      child: ClipRect(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            SpriteAnimator.play(
+              'backgrounds/campsite_background_spritesheet',
+              scale: 1.2,
+              fps: 8,
+              pingPong: false,
+              frameCount: 6,
+            ),
+
+            //welcome text
+            const Positioned(
+              top: 30,
+              left: 20,
+              right: 20,
+              child: Text(
+                'Welcome Home, Great Slayer.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.parchmentWhite,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+            //Slayer Sprite
+            Positioned(
+              left: 160,
+              right: 16,
+              bottom: 54,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // Slayer Sprite (Knight)
+                  AnimatedScale(
+                    scale: 1.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      //TODO: Load Sprites Dynamically from user ID
+                      child: SpriteAnimator.play(
+                        'idle/knight_idle_blue_spritesheet',
+                        scale: 1.9,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -94,176 +184,288 @@ class _HomeState extends State<Home> {
               child: IntrinsicHeight(
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0, bottom: 24.0),
+                  padding: const EdgeInsets.only(bottom: 24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Welcome Home, Great Slayer.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.parchmentWhite,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      // Horizontal campsite container (animation + character + welcome text)
+                      _buildCampsiteContainer(),
 
-                      SizedBox(height: 5),
+                      const SizedBox(height: 20),
 
-                      // Notifications button with pixel art
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: IconButton(
-                          constraints: const BoxConstraints(
-                            maxWidth: 50,
-                            maxHeight: 50,
-                          ),
-                          padding: EdgeInsets.zero,
-                          icon: pixelIcon('assets/icons/notifications.png'),
-                          iconSize: 20,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const WorkInProgressWarning(),
+                      // Row of icon buttons, directly below the campsite container
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            withLabel(
+                              // Notifications button with pixel art
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: IconButton(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 50,
+                                    maxHeight: 50,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  icon: pixelIcon(
+                                    'assets/icons/notifications.png',
+                                  ),
+                                  iconSize: 20,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const WorkInProgressWarning(),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      SizedBox(height: 5),
-
-                      // Settings button with pixel art
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: IconButton(
-                          constraints: const BoxConstraints(
-                            maxWidth: 50,
-                            maxHeight: 50,
-                          ),
-                          padding: EdgeInsets.zero,
-                          icon: pixelIcon('assets/icons/settings.png'),
-                          iconSize: 20,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const WorkInProgressWarning(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      SizedBox(height: 5),
-                      
-                      // Info button
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: IconButton(
-                          constraints: const BoxConstraints(
-                            maxWidth: 50,
-                            maxHeight: 50,
-                          ),
-                          padding: EdgeInsets.zero,
-                          icon: Icon(Icons.menu_book),
-                          color: AppColors.parchmentWhite,
-                          iconSize: 25,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Info(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      SizedBox(height: 5),
-
-                      // BMI button
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            minimumSize: const Size(50, 50),
-                            padding: EdgeInsets.zero,
-                            foregroundColor: Colors.white,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              'Alerts',
                             ),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const BmiCalculator(),
+
+                            withLabel(
+                              // Settings button with pixel art
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: IconButton(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 50,
+                                    maxHeight: 50,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  icon: pixelIcon('assets/icons/settings.png'),
+                                  iconSize: 20,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const WorkInProgressWarning(),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            );
-                          },
-                          child: const Text(
-                            'BMI',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              'Settings',
                             ),
-                          ),
-                        ),
-                      ),
 
-                      SizedBox(height: 5),
-
-                      //admin only: equipment crud page button
-                      if (isAdmin) //only displays button if user is admin
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.amber,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: IconButton(
-                          constraints: const BoxConstraints(
-                            maxWidth: 50,
-                            maxHeight: 50,
-                          ),
-                          padding: EdgeInsets.zero,
-                          icon: Icon(Icons.admin_panel_settings),
-                          color: Colors.black87,
-                          iconSize:28,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const adminDashboard(),
+                            withLabel(
+                              // Info button
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: IconButton(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 50,
+                                    maxHeight: 50,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  icon: Icon(Icons.menu_book),
+                                  color: AppColors.parchmentWhite,
+                                  iconSize: 25,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const Info(),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            );
-                          },
+                              'Journal',
+                            ),
+
+                            withLabel(
+                              // BMI button
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    minimumSize: const Size(50, 50),
+                                    padding: EdgeInsets.zero,
+                                    foregroundColor: Colors.white,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const BmiCalculator(),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text(
+                                    'BMI',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              'BMI',
+                            ),
+
+                            //admin only: equipment crud page button
+                            if (isAdmin) //only displays button if user is admin
+                              withLabel(
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: IconButton(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 50,
+                                      maxHeight: 50,
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                    icon: Icon(Icons.admin_panel_settings),
+                                    color: Colors.black87,
+                                    iconSize: 28,
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const adminDashboard(),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                'Admin',
+                              ),
+                          ],
                         ),
                       ),
 
-                      // Empty spacer area for future campfire scenes, assets, GIFs, videos, or widgets
+                      const SizedBox(height: 16),
+
+                      // XP bar. TODO: replace level / xp / xpToNext with the real values from the user.
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white10,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Level $level',
+                                    style: TextStyle(
+                                      color: AppColors.parchmentWhite,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Text(
+                                    '$xp / $xpToNext XP',
+                                    style: TextStyle(
+                                      color: AppColors.mutedParchment,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              LinearProgressIndicator(
+                                value: xp / xpToNext,
+                                minHeight: 12,
+                                color: AppColors.flameOrange,
+                                backgroundColor: Colors.black38,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Empty spacer area for future assets, GIFs, videos, or widgets
                       const Spacer(),
+
+                      const SizedBox(height: 12),
+
+                      // Boss battle button for Temp testing
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.flameOrange,
+                              foregroundColor: AppColors.parchmentWhite,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(40),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const BossBattleScreen(),
+                                ),
+                              );
+                            },
+                            child: const Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Boss battle',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'Unlocks at 20:00',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
 
                       //daily challenge side quest button anchored at the bottom
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.flameOrange,
                           foregroundColor: AppColors.parchmentWhite,
-                          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 28,
+                            vertical: 14,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -271,10 +473,18 @@ class _HomeState extends State<Home> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const SideQuest()),
+                            MaterialPageRoute(
+                              builder: (context) => const SideQuest(),
+                            ),
                           );
                         },
-                        child: Text('Daily Side Quest', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 16)),
+                        child: Text(
+                          'Daily Side Quest',
+                          style: TextStyle(
+                            color: AppColors.parchmentWhite,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 12),
                     ],
@@ -302,7 +512,10 @@ class _HomeState extends State<Home> {
           //logout button
           TextButton.icon(
             icon: Icon(Icons.person, color: AppColors.mutedParchment),
-            label: Text('Logout', style: TextStyle(color: AppColors.mutedParchment)),
+            label: Text(
+              'Logout',
+              style: TextStyle(color: AppColors.mutedParchment),
+            ),
             onPressed: () async {
               await _auth.signOut();
             },
@@ -313,10 +526,7 @@ class _HomeState extends State<Home> {
       backgroundColor: AppColors.obsidianBlack,
 
       // IndexedStack keeps state alive so switching tabs doesn't wipe your screen data
-      body: IndexedStack(
-        index: _currentIndex,
-        children: pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: pages),
 
       //bottom navbar with Home in the middle (index 2)
       bottomNavigationBar: NavigationBarTheme(
@@ -334,7 +544,7 @@ class _HomeState extends State<Home> {
               _currentIndex = index;
             });
           },
-          destinations:  [
+          destinations: [
             //workouts tab
             NavigationDestination(
               icon: pixelIcon('assets/icons/workouts.png'),
@@ -358,20 +568,14 @@ class _HomeState extends State<Home> {
             //home tab in middle
             NavigationDestination(
               icon: pixelIcon('assets/icons/home.png'),
-              selectedIcon: pixelIcon(
-                'assets/icons/home.png',
-                selected: true,
-              ),
+              selectedIcon: pixelIcon('assets/icons/home.png', selected: true),
               label: 'Home',
             ),
 
             //store tab
             NavigationDestination(
               icon: pixelIcon('assets/icons/store.png'),
-              selectedIcon: pixelIcon(
-                'assets/icons/store.png',
-                selected: true,
-              ),
+              selectedIcon: pixelIcon('assets/icons/store.png', selected: true),
               label: 'Store',
             ),
 
