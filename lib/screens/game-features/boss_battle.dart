@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/services/boss_battle_service.dart';
+import 'package:fitness_slayer_01/services/sprite_animator.dart';
 
 class BossBattleScreen extends StatefulWidget {
   const BossBattleScreen({super.key});
@@ -116,7 +117,7 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
 
                   const SizedBox(height: 12),
 
-                  //FIGHTING PLACE
+                  // FIGHTING PLACE
                   Expanded(
                     child: Center(
                       child: SingleChildScrollView(
@@ -175,25 +176,12 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
                                             width: 1.5,
                                           ),
                                         ),
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.person,
-                                              color: isSlayerTurn ? AppColors.gemGold : AppColors.parchmentWhite,
-                                              size: 44,
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              isSlayerTurn ? 'ATTACKING!' : 'SLAYER',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                color: isSlayerTurn ? AppColors.gemGold : AppColors.parchmentWhite,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: SpriteAnimator.play(
+                                            _battleService.slayerSpriteName,
+                                            scale: 2.5,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -317,25 +305,12 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
                                             width: 1.5,
                                           ),
                                         ),
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.security,
-                                              color: isBossTurn ? AppColors.crimsonRed : AppColors.parchmentWhite,
-                                              size: 44,
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              isBossTurn ? 'ATTACKING!' : 'BOSS',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                color: isBossTurn ? AppColors.crimsonRed : AppColors.parchmentWhite,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: SpriteAnimator.play(
+                                            _battleService.bossSpriteName,
+                                            scale: 2.5,
+                                          ),
                                         ),
                                       ),
                                     ),
