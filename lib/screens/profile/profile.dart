@@ -1,8 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
-import 'package:fitness_slayer_01/screens/profile/badges.dart';
-import 'package:fitness_slayer_01/screens/profile/fitness_stats.dart';
-import 'package:fitness_slayer_01/screens/social/friends.dart';
+import 'package:fitness_slayer_01/models/store_item.dart';
+import 'package:fitness_slayer_01/screens/common/work_in_progress.dart';
+import 'package:fitness_slayer_01/screens/game-features/slayer_customize.dart';
+import 'package:fitness_slayer_01/services/database_service.dart';
 import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +15,20 @@ import 'package:provider/provider.dart';
 int _xpForNextLevel(int level) => (level < 1 ? 1 : level) * 100;
 
 int _intField(Map<String, dynamic> data, String key) => (data[key] as num?)?.toInt() ?? 0;
+
+StoreItem? _catalogItem(String? id) {
+  for (final item in storeCatalog) {
+    if (item.id == id) return item;
+  }
+  return null;
+}
+
+void _openWip(BuildContext context, String title) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => WorkInProgress(title: title)),
+  );
+}
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -36,6 +54,9 @@ class Profile extends StatelessWidget {
     final xpNeeded = _xpForNextLevel(level);
     final xpProgress = (xp / xpNeeded).clamp(0.0, 1.0).toDouble();
     final initial = username.isNotEmpty ? username[0].toUpperCase() : '?';
+    final photoBase64 = data['photoBase64'] as String?;
+    final slayerName = (data['slayer_name'] as String?)?.trim() ?? '';
+    final outfit = _catalogItem(data['equipped_outfit'] as String?);
 
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
@@ -46,25 +67,7 @@ class Profile extends StatelessWidget {
             const SizedBox(height: 8),
 
             // Avatar, name and level
-            Container(
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.questGold, width: 2),
-              ),
-              child: CircleAvatar(
-                radius: 48,
-                backgroundColor: AppColors.forgeSlate,
-                child: Text(
-                  initial,
-                  style: const TextStyle(
-                    color: AppColors.warmIvory,
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
+            _ProfileAvatar(uid: user.uid, initial: initial, photoBase64: photoBase64),
             const SizedBox(height: 12),
             Text(
               username,
@@ -145,32 +148,66 @@ class Profile extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Links to the other profile screens
+            // Slayer summary and customize button
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.forgeSlate,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.hearthBorder),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    slayerName.isEmpty ? 'Your Slayer' : slayerName,
+                    style: const TextStyle(
+                      color: AppColors.warmIvory,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Outfit: ${outfit?.name ?? 'None'}',
+                    style: const TextStyle(color: AppColors.parchmentBeige),
+                  ),
+
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SlayerCustomize()),
+                      ),
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Customize Slayer'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // These screens aren't built yet, so they open the work in progress page
             _ShortcutTile(
               icon: Icons.insights,
               label: 'Fitness Stats',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FitnessStats()),
-              ),
+              onTap: () => _openWip(context, 'Fitness Stats'),
             ),
             const SizedBox(height: 12),
             _ShortcutTile(
               icon: Icons.emoji_events,
               label: 'Badges',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Badges()),
-              ),
+              onTap: () => _openWip(context, 'Badges'),
             ),
             const SizedBox(height: 12),
             _ShortcutTile(
               icon: Icons.people,
               label: 'Friends',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Friends()),
-              ),
+              onTap: () => _openWip(context, 'Friends'),
             ),
           ],
         ),
@@ -288,6 +325,168 @@ class _ShortcutTile extends StatelessWidget {
         title: Text(label, style: const TextStyle(color: AppColors.warmIvory)),
         trailing: const Icon(Icons.chevron_right, color: AppColors.parchmentBeige),
         onTap: onTap,
+      ),
+    );
+  }
+}
+
+// Profile picture. Tap to pick a photo from the gallery or camera, or remove it.
+class _ProfileAvatar extends StatefulWidget {
+  final String uid;
+  final String initial;
+  final String? photoBase64;
+
+  const _ProfileAvatar({required this.uid, required this.initial, required this.photoBase64});
+
+  @override
+  State<_ProfileAvatar> createState() => _ProfileAvatarState();
+}
+
+class _ProfileAvatarState extends State<_ProfileAvatar> {
+  final ImagePicker _picker = ImagePicker();
+  bool _busy = false;
+
+  // Cache the decoded bytes so the image doesn't flicker on every rebuild.
+  String? _decodedFrom;
+  Uint8List? _bytes;
+
+  Uint8List? _photoBytes() {
+    final raw = widget.photoBase64;
+    if (raw == null || raw.isEmpty) return null;
+    if (raw != _decodedFrom) {
+      try {
+        _bytes = base64Decode(raw);
+      } catch (_) {
+        _bytes = null;
+      }
+      _decodedFrom = raw;
+    }
+    return _bytes;
+  }
+
+  void _toast(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _pick(ImageSource source) async {
+    setState(() => _busy = true);
+    try {
+      // Shrink and compress so the photo stays small enough for Firestore.
+      final file = await _picker.pickImage(
+        source: source,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 75,
+      );
+      if (file == null) return;
+      final bytes = await file.readAsBytes();
+      if (bytes.length > 700 * 1024) {
+        _toast('That photo is too large. Please pick a smaller one.');
+        return;
+      }
+      await DatabaseService().updateProfilePhoto(widget.uid, base64Encode(bytes));
+      _toast('Profile photo updated!');
+    } catch (e) {
+      _toast('Could not update your photo. Please try again.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _remove() async {
+    setState(() => _busy = true);
+    try {
+      await DatabaseService().updateProfilePhoto(widget.uid, null);
+    } catch (e) {
+      _toast('Could not remove your photo. Please try again.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _showOptions() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.forgeSlate,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: AppColors.emberOrange),
+              title: const Text('Choose from gallery', style: TextStyle(color: AppColors.warmIvory)),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _pick(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera, color: AppColors.emberOrange),
+              title: const Text('Take a photo', style: TextStyle(color: AppColors.warmIvory)),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _pick(ImageSource.camera);
+              },
+            ),
+            if (_photoBytes() != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: AppColors.emberOrange),
+                title: const Text('Remove photo', style: TextStyle(color: AppColors.warmIvory)),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _remove();
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bytes = _photoBytes();
+    return GestureDetector(
+      onTap: _busy ? null : _showOptions,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.questGold, width: 2),
+            ),
+            child: CircleAvatar(
+              radius: 48,
+              backgroundColor: AppColors.forgeSlate,
+              backgroundImage: bytes != null ? MemoryImage(bytes) : null,
+              child: bytes == null
+                  ? Text(
+                      widget.initial,
+                      style: const TextStyle(
+                        color: AppColors.warmIvory,
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : null,
+            ),
+          ),
+          if (_busy)
+            const CircularProgressIndicator()
+          else
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(color: AppColors.emberOrange, shape: BoxShape.circle),
+                child: const Icon(Icons.camera_alt, size: 16, color: AppColors.warmIvory),
+              ),
+            ),
+        ],
       ),
     );
   }
