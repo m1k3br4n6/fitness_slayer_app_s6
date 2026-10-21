@@ -17,6 +17,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     // Get the current user's document from the stream
+    // TODO: Verify if Provider.of<DocumentSnapshot?> provides null or the new user snapshot immediately on account switch.
     final userData = Provider.of<DocumentSnapshot?>(context);
 
     String username = '';

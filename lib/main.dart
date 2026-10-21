@@ -41,7 +41,9 @@ class MyApp extends StatelessWidget {
           ),
 
           //current user's Firestore document
+          // TODO: Check if StreamProvider holding DocumentSnapshot emits null on user logout so old user data is not retained.
           StreamProvider<DocumentSnapshot?>.value(
+            // TODO: Ensure asyncExpand emits a null document snapshot when user changes to clear stale username state.
             value: FirebaseAuth.instance.authStateChanges().asyncExpand((user) {
               if (user == null) {
                 return Stream<DocumentSnapshot?>.value(null);

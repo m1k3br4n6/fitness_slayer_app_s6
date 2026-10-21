@@ -28,6 +28,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final AuthService _auth = AuthService(); //instance of auth service
+  // TODO: Check if reading currentUser once into a state field prevents user state from refreshing on login switch.
   final user = FirebaseAuth.instance.currentUser; //get currently signed in user
 
   //bool for checking admin status
@@ -39,6 +40,7 @@ class _HomeState extends State<Home> {
   void initState() { //runs when stateful widget is first created
     super.initState();
 
+    // TODO: Ensure admin status checks listen to active authStateChanges rather than evaluating user uid once on initState.
     //checks if current user is admin
     final String uid = user?.uid ?? ''; //gets uid if user is not null, otherwise return empty string
     if (uid == "6Iw3AiqlCObMc77PAbCLDsmaBbh2")
@@ -155,7 +157,7 @@ class _HomeState extends State<Home> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const WorkInProgressWarning(),
+                                builder: (context) => const AppSettings(),
                               ),
                             );
                           },
@@ -303,6 +305,7 @@ class _HomeState extends State<Home> {
           TextButton.icon(
             icon: Icon(Icons.person, color: AppColors.mutedParchment),
             label: Text('Logout', style: TextStyle(color: AppColors.mutedParchment)),
+            // TODO: Ensure logout resets local widget states and clears cached user document stream providers.
             onPressed: () async {
               await _auth.signOut();
             },
