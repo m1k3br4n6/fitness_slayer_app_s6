@@ -184,12 +184,12 @@ class _CalendarState extends State<Calendar> {
                               decoration: BoxDecoration(
                                 color: isToday
                                     ? AppColors.primary
-                                    : (hasWorkout ? Colors.teal[800] : AppColors.surface),
+                                    : (hasWorkout ? AppColors.woodFrame : AppColors.surface),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                   color: isToday
                                       ? AppColors.gold
-                                      : (hasWorkout ? Colors.greenAccent : AppColors.border),
+                                      : (hasWorkout ? AppColors.flameOrange : AppColors.border),
                                   width: isToday ? 2.5 : (hasWorkout ? 1.5 : 1),
                                 ),
                               ),
@@ -217,7 +217,7 @@ class _CalendarState extends State<Calendar> {
                                           width: 6,
                                           height: 6,
                                           decoration: const BoxDecoration(
-                                            color: Colors.greenAccent,
+                                            color: AppColors.gold,
                                             shape: BoxShape.circle,
                                           ),
                                         ),

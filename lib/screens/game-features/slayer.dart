@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
 
 class Slayer extends StatelessWidget {
   const Slayer({super.key});
@@ -7,15 +8,15 @@ class Slayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(),
-      backgroundColor: Colors.teal[900],
-      body: Center(
+      appBar: const MyAppBar(),
+      backgroundColor: AppColors.obsidianBlack,
+      body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               'Slayer Page',
-              style: TextStyle(color: Colors.white, fontSize: 20),
+              style: TextStyle(color: AppColors.parchmentWhite, fontSize: 20),
             ),
           ],
         ),
