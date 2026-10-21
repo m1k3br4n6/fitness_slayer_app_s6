@@ -55,6 +55,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Update local card color variables to read dynamically from ThemeController palette.
     const Color cardColor = AppColors.forgeSlate;
     const Color inputColor = AppColors.hearthStone;
     const Color completedColor = AppColors.crimsonWine;
@@ -88,6 +89,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
+                    // TODO: Replace hardcoded Colors.grey[900] with ThemeController surface container palette color.
                     color: Colors.grey[900],
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -117,6 +119,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                     },
                     child: Text(
                       widget.exerciseName,
+                      // TODO: Replace hardcoded Colors.white with AppColors.textPrimary or ThemeController text color.
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -130,6 +133,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                 IconButton(
                   icon: Icon(
                     _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    // TODO: Replace hardcoded Colors.white70 with ThemeController secondary text color.
                     color: Colors.white70,
                   ),
                   onPressed: () {
@@ -141,6 +145,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
 
                 // DELETE CARD
                 PopupMenuButton<String>(
+                  // TODO: Replace hardcoded Colors.white70 with ThemeController secondary text color.
                   icon: const Icon(Icons.more_vert, color: Colors.white70),
                   color: inputColor,
                   onSelected: (value) {
@@ -151,6 +156,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'delete',
+                      // TODO: Replace hardcoded Colors.redAccent with AppColors.secondary or ThemeController alert color.
                       child: Text('Delete Exercise', style: TextStyle(color: Colors.redAccent)),
                     ),
                   ],
@@ -211,6 +217,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                                 ? 'Please enter distance and time first'
                                 : 'Please enter weight and reps first',
                           ),
+                          // TODO: Replace hardcoded Colors.redAccent with AppColors.secondary or ThemeController alert color.
                           backgroundColor: Colors.redAccent,
                           duration: const Duration(seconds: 2),
                         ),
@@ -312,6 +319,7 @@ class SetInputRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // TODO: Replace hardcoded Colors.transparent with ThemeController palette color if needed.
       color: isCompleted ? completedColor : Colors.transparent,
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -319,6 +327,7 @@ class SetInputRow extends StatelessWidget {
           // DYNAMIC SET NUMBER
           Expanded(
             flex: 1,
+            // TODO: Replace hardcoded Colors.white with AppColors.textPrimary or ThemeController text color.
             child: Text(
               '${setIndex + 1}',
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -331,6 +340,7 @@ class SetInputRow extends StatelessWidget {
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
+                // TODO: Replace hardcoded Colors.transparent with ThemeController surface container palette color.
                 color: isCompleted ? Colors.transparent : inputColor,
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -343,6 +353,7 @@ class SetInputRow extends StatelessWidget {
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                 ],
                 style: TextStyle(
+                  // TODO: Replace hardcoded Colors.white54/white with ThemeController text color.
                   color: isCompleted ? Colors.white54 : Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -363,6 +374,7 @@ class SetInputRow extends StatelessWidget {
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
+                // TODO: Replace hardcoded Colors.transparent with ThemeController surface container palette color.
                 color: isCompleted ? Colors.transparent : inputColor,
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -375,6 +387,7 @@ class SetInputRow extends StatelessWidget {
                   FilteringTextInputFormatter.digitsOnly,
                 ],
                 style: TextStyle(
+                  // TODO: Replace hardcoded Colors.white54/white with ThemeController text color.
                   color: isCompleted ? Colors.white54 : Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -405,6 +418,7 @@ class SetInputRow extends StatelessWidget {
                     ),
                     child: Icon(
                       Icons.check,
+                      // TODO: Replace hardcoded Colors.black87/grey with ThemeController icon palette colors.
                       color: isCompleted ? Colors.black87 : Colors.grey,
                       size: 20,
                     ),
@@ -420,6 +434,7 @@ class SetInputRow extends StatelessWidget {
                     ),
                     child: const Icon(
                       Icons.delete_outline,
+                      // TODO: Replace hardcoded Colors.redAccent with AppColors.secondary or ThemeController alert color.
                       color: Colors.redAccent,
                       size: 20,
                     ),

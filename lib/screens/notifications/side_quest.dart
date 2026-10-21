@@ -166,6 +166,7 @@ class _SideQuestState extends State<SideQuest> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            // TODO: Remove const from TextStyle to support dynamic theme color updates.
             content: Text('Failed to complete quest: $e', style: const TextStyle(color: AppColors.crimsonWine)),
           ),
         );
@@ -287,6 +288,7 @@ class _SideQuestState extends State<SideQuest> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
             const SizedBox(
               width: double.infinity,
               child: Text(
@@ -313,6 +315,7 @@ class _SideQuestState extends State<SideQuest> {
               child: Column(
                 children: [
                   if (allCleared) ...[
+                    // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                     const Text(
                       'Notice Board Cleared!',
                       style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
@@ -324,6 +327,7 @@ class _SideQuestState extends State<SideQuest> {
                         ? 'All $_dailyQuestCount daily quests completed for today. Come back tomorrow for more quests!'
                         : '$completedCount / $_dailyQuestCount Quests Completed Today',
                     textAlign: TextAlign.center,
+                    // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                     style: const TextStyle(color: AppColors.parchmentBeige, fontSize: 13),
                   ),
                   const SizedBox(height: 10),
@@ -345,6 +349,7 @@ class _SideQuestState extends State<SideQuest> {
             const SizedBox(height: 24),
 
             if (activeQuests.isNotEmpty) ...[
+              // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
               const Text(
                 'Active Quests',
                 style: TextStyle(color: AppColors.warmIvory, fontSize: 16, fontWeight: FontWeight.bold),
@@ -360,10 +365,12 @@ class _SideQuestState extends State<SideQuest> {
 
             if (finishedQuests.isNotEmpty) ...[
               const SizedBox(height: 12),
+              // TODO: Replace hardcoded Colors.white12 with ThemeController divider palette color.
               const Divider(color: Colors.white12),
               const SizedBox(height: 12),
               Text(
                 'Completed Today ($completedCount / $_dailyQuestCount)',
+                // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                 style: const TextStyle(color: AppColors.parchmentBeige, fontSize: 15, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
@@ -464,6 +471,7 @@ class _CountdownLabelState extends State<_CountdownLabel> {
   Widget build(BuildContext context) {
     return Text(
       'Next Quests In: ${_formatRemaining()}',
+      // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
       style: const TextStyle(color: AppColors.gold, fontSize: 13, fontWeight: FontWeight.bold),
     );
   }
@@ -579,6 +587,7 @@ class _LootBubble extends StatelessWidget {
             spreadRadius: 1,
           ),
           BoxShadow(
+            // TODO: Replace hardcoded Colors.black with ThemeController shadow palette color.
             color: Colors.black.withValues(alpha: 0.5),
             blurRadius: 6,
             offset: const Offset(0, 3),
@@ -588,6 +597,7 @@ class _LootBubble extends StatelessWidget {
       child: Text(
         label,
         textAlign: TextAlign.center,
+        // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
         style: TextStyle(
           color: color,
           fontWeight: FontWeight.bold,

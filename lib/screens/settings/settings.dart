@@ -14,6 +14,9 @@ class AppSettings extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // TODO: Add Dark/Light mode toggle switch to allow user to switch active theme palette.
+            // TODO: Add color pickers for custom user theme options to modify primary and background accent colors.
+            // TODO: Remove const from TextStyle wrapping dynamic AppColors text color.
             const Text(
               'Settings Page',
               style: TextStyle(color: Colors.white, fontSize: 20),

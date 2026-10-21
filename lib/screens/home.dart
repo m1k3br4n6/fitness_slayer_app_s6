@@ -98,6 +98,7 @@ class _HomeState extends State<Home> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                       const Text(
                         'Welcome Home, Great Slayer.',
                         textAlign: TextAlign.center,
@@ -113,6 +114,7 @@ class _HomeState extends State<Home> {
                       // Notifications button with pixel art
                       Container(
                         decoration: BoxDecoration(
+                          // TODO: Replace hardcoded Colors.blue with ThemeController surface container palette color.
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -140,6 +142,7 @@ class _HomeState extends State<Home> {
                       // Settings button with pixel art
                       Container(
                         decoration: BoxDecoration(
+                          // TODO: Replace hardcoded Colors.blue with ThemeController surface container palette color.
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -155,7 +158,7 @@ class _HomeState extends State<Home> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const WorkInProgressWarning(),
+                                builder: (context) => const AppSettings(),
                               ),
                             );
                           },
@@ -167,6 +170,7 @@ class _HomeState extends State<Home> {
                       // Info button
                       Container(
                         decoration: BoxDecoration(
+                          // TODO: Replace hardcoded Colors.blue with ThemeController surface container palette color.
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -195,6 +199,7 @@ class _HomeState extends State<Home> {
                       // BMI button
                       Container(
                         decoration: BoxDecoration(
+                          // TODO: Replace hardcoded Colors.blue with ThemeController surface container palette color.
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -202,6 +207,7 @@ class _HomeState extends State<Home> {
                           style: TextButton.styleFrom(
                             minimumSize: const Size(50, 50),
                             padding: EdgeInsets.zero,
+                            // TODO: Replace hardcoded Colors.white with AppColors.textPrimary or ThemeController text color.
                             foregroundColor: Colors.white,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             shape: RoundedRectangleBorder(
@@ -218,6 +224,7 @@ class _HomeState extends State<Home> {
                           },
                           child: const Text(
                             'BMI',
+                            // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -232,6 +239,7 @@ class _HomeState extends State<Home> {
                       if (isAdmin) //only displays button if user is admin
                       Container(
                         decoration: BoxDecoration(
+                          // TODO: Replace hardcoded Colors.amber with AppColors.gold or ThemeController accent color.
                           color: Colors.amber,
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -242,6 +250,7 @@ class _HomeState extends State<Home> {
                           ),
                           padding: EdgeInsets.zero,
                           icon: Icon(Icons.admin_panel_settings),
+                          // TODO: Replace hardcoded Colors.black87 with ThemeController dark icon palette color.
                           color: Colors.black87,
                           iconSize:28,
                           onPressed: () {
@@ -324,6 +333,7 @@ class _HomeState extends State<Home> {
           backgroundColor: AppColors.darkTavernGreen,
           indicatorColor: AppColors.crimsonRed,
           labelTextStyle: WidgetStateProperty.all(
+            // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
             const TextStyle(color: AppColors.mutedParchment, fontSize: 12),
           ),
         ),

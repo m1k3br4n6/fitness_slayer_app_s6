@@ -54,7 +54,7 @@ class _CalendarState extends State<Calendar> {
       _sideQuestStreamUid = uid;
       _sideQuestStream = FirebaseFirestore.instance
           .collection('users')
-          .doc(uid)
+        .doc(uid)
           .collection('sideQuestLog')
           .snapshots()
           .map((snap) => snap.docs.map((doc) => SideQuestEntry.fromMap(doc.data())).toList());
@@ -98,18 +98,21 @@ class _CalendarState extends State<Calendar> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // TODO: Remove const from Icon to support dynamic ThemeController color updates.
                         IconButton(
                           icon: const Icon(Icons.chevron_left, color: AppColors.textPrimary, size: 28),
                           onPressed: () => _changeMonth(-1),
                         ),
                         Text(
                           monthTitle,
+                          // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                           style: const TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        // TODO: Remove const from Icon to support dynamic ThemeController color updates.
                         IconButton(
                           icon: const Icon(Icons.chevron_right, color: AppColors.textPrimary, size: 28),
                           onPressed: () => _changeMonth(1),
@@ -126,6 +129,7 @@ class _CalendarState extends State<Calendar> {
                         child: Text(
                           day,
                           textAlign: TextAlign.center,
+                          // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                             fontWeight: FontWeight.bold,

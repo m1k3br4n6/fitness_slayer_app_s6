@@ -37,11 +37,13 @@ class DayWorkoutDetailScreen extends StatelessWidget {
         children: [
           Row(
             children: [
+              // TODO: Remove const from Icon to support dynamic ThemeController color updates.
               const Icon(Icons.priority_high, color: AppColors.flameOrange, size: 22),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Side Quests Completed (${sideQuests.length})',
+                  // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                   style: const TextStyle(
                     color: AppColors.parchmentWhite,
                     fontWeight: FontWeight.bold,
@@ -57,16 +59,19 @@ class DayWorkoutDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 children: [
+                  // TODO: Remove const from Icon to support dynamic ThemeController color updates.
                   const Icon(Icons.check_circle, color: AppColors.gemGold, size: 18),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       quest.text,
+                      // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                       style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 15),
                     ),
                   ),
                   Text(
                     '+${quest.xp}XP  +${quest.coins}GP',
+                    // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                     style: const TextStyle(color: AppColors.brassBorder, fontSize: 12),
                   ),
                 ],
@@ -95,11 +100,13 @@ class DayWorkoutDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 children: [
+                  // TODO: Remove const from Icon to support dynamic ThemeController color updates.
                   const Icon(Icons.event, color: AppColors.gemGold, size: 28),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       formattedDate,
+                      // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                       style: const TextStyle(
                         color: AppColors.parchmentWhite,
                         fontSize: 24,
@@ -124,10 +131,12 @@ class DayWorkoutDetailScreen extends StatelessWidget {
                 ),
                 child: const Column(
                   children: [
+                    // TODO: Remove const from Icon to support dynamic ThemeController color updates.
                     Icon(Icons.fitness_center_outlined, color: AppColors.brassBorder, size: 48),
                     SizedBox(height: 12),
                     Text(
                       'No workouts logged on this date.',
+                      // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                       style: TextStyle(color: AppColors.brassBorder, fontSize: 16),
                     ),
                   ],
@@ -152,8 +161,10 @@ class DayWorkoutDetailScreen extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
+                          // TODO: Remove const from Icon to support dynamic ThemeController color updates.
                           const Icon(Icons.check_circle, color: AppColors.flameOrange, size: 22),
                           const SizedBox(width: 10),
+                          // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                           const Text(
                             'Completed Session',
                             style: TextStyle(
@@ -163,10 +174,12 @@ class DayWorkoutDetailScreen extends StatelessWidget {
                             ),
                           ),
                           const Spacer(),
+                          // TODO: Remove const from Icon to support dynamic ThemeController color updates.
                           const Icon(Icons.timer_outlined, color: AppColors.gemGold, size: 18),
                           const SizedBox(width: 6),
                           Text(
                             '${workout.durationMinutes} min',
+                            // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                             style: const TextStyle(
                               color: AppColors.gemGold,
                               fontSize: 14,

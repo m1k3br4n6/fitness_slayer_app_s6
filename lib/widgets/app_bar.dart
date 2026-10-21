@@ -65,6 +65,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: photoBytes == null
                   ? Text(
                 initial,
+                // TODO: Remove const from TextStyle to support dynamic ThemeController color updates.
                 style: const TextStyle(
                   color: AppColors.warmIvory,
                   fontWeight: FontWeight.bold,
