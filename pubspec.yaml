@@ -72,8 +72,10 @@ flutter:
   - assets/icons/
   - assets/
   - assets/spritesheets/attack/
+  - assets/spritesheets/backgrounds/
   - assets/spritesheets/idle/
   - assets/spritesheets/stock/
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
