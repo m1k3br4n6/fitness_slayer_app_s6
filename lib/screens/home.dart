@@ -17,6 +17,7 @@ import 'package:fitness_slayer_01/screens/game-features/shop.dart';
 import 'package:fitness_slayer_01/services/auth.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
+import 'package:fitness_slayer_01/screens/game-features/boss_battle.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -256,6 +257,28 @@ class _HomeState extends State<Home> {
 
                       // Empty spacer area for future campfire scenes, assets, GIFs, videos, or widgets
                       const Spacer(),
+
+                      const SizedBox(height: 12),
+
+                      // Boss battle button for Temp testing
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.flameOrange,
+                          foregroundColor: AppColors.parchmentWhite,
+                          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const BossBattleScreen()),
+                          );
+                        },
+                        child: Text('Boss battle', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 16)),
+                      ),
+                      const SizedBox(height: 12),
 
                       //daily challenge side quest button anchored at the bottom
                       ElevatedButton(
