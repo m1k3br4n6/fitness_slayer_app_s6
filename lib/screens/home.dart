@@ -23,7 +23,8 @@ import 'package:fitness_slayer_01/screens/game-features/boss_battle.dart';
 //Sprite Animator
 import 'package:fitness_slayer_01/services/sprite_animator.dart';
 
-const String campfireScene = 'assets/spritesheets/backgrounds/campsite_background_spritesheet.png';
+const String campfireScene =
+    'assets/spritesheets/backgrounds/campsite_background_spritesheet.png';
 
 //Campsite Height
 const double campsiteHeight = 300;
@@ -41,6 +42,7 @@ class _HomeState extends State<Home> {
 
   //bool for checking admin status
   bool isAdmin = false;
+
   //keeps track of active tab; defaults to Home in the middle
   int _currentIndex = 2;
 
@@ -50,17 +52,17 @@ class _HomeState extends State<Home> {
   int xpToNext = 100;
 
   @override
-  void initState() { //runs when stateful widget is first created
+  void initState() {
+    //runs when stateful widget is first created
     super.initState();
 
     //checks if current user is admin
-    final String uid = user?.uid ?? ''; //gets uid if user is not null, otherwise return empty string
-    if (uid == "6Iw3AiqlCObMc77PAbCLDsmaBbh2")
-    {
+    final String uid =
+        user?.uid ??
+        ''; //gets uid if user is not null, otherwise return empty string
+    if (uid == "6Iw3AiqlCObMc77PAbCLDsmaBbh2") {
       isAdmin = true;
-    }
-    else
-    {
+    } else {
       isAdmin = false;
     }
 
@@ -74,11 +76,7 @@ class _HomeState extends State<Home> {
   }
 
   //custom pixel art icon
-  Widget pixelIcon(
-      String path, {
-        bool selected = false,
-        double size = 57,
-      }) {
+  Widget pixelIcon(String path, {bool selected = false, double size = 57}) {
     //you can customize the sizes here without touching the pixel size
     return Image.asset(
       path,
@@ -96,13 +94,15 @@ class _HomeState extends State<Home> {
       children: [
         button,
         const SizedBox(height: 6),
-        Text(label, style: TextStyle(color: AppColors.mutedParchment, fontSize: 14)),
+        Text(
+          label,
+          style: TextStyle(color: AppColors.mutedParchment, fontSize: 14),
+        ),
       ],
     );
   }
 
   // campsite container
-
   Widget _buildCampsiteContainer() {
     return SizedBox(
       width: double.infinity,
@@ -111,24 +111,13 @@ class _HomeState extends State<Home> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            //background picture
-            Image.asset(
-              campfireScene,
-              fit: BoxFit.cover,
-              alignment: Alignment.bottomCenter,
-              filterQuality: FilterQuality.none,
-
+            SpriteAnimator.play(
+              'backgrounds/campsite_background_spritesheet',
+              scale: 1.2,
+              fps: 8,
+              pingPong: false,
+              frameCount: 6,
             ),
-
-            // TODO: add animations
-            SpriteAnimator.play('campsite_background_spritesheet', scale: 5),
-
-            // Positioned(
-            //   bottom: 60,
-            //   left: 0,
-            //   right: 0,
-            //   child: Center(child: ()),
-            // ),
 
             //welcome text
             const Positioned(
@@ -143,6 +132,32 @@ class _HomeState extends State<Home> {
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
+              ),
+            ),
+
+            //Slayer Sprite
+            Positioned(
+              left: 160,
+              right: 16,
+              bottom: 54,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // Slayer Sprite (Knight)
+                  AnimatedScale(
+                    scale: 1.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      //TODO: Load Sprites Dynamically from user ID
+                      child: SpriteAnimator.play(
+                        'idle/knight_idle_blue_spritesheet',
+                        scale: 1.9,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -198,13 +213,16 @@ class _HomeState extends State<Home> {
                                     maxHeight: 50,
                                   ),
                                   padding: EdgeInsets.zero,
-                                  icon: pixelIcon('assets/icons/notifications.png'),
+                                  icon: pixelIcon(
+                                    'assets/icons/notifications.png',
+                                  ),
                                   iconSize: 20,
                                   onPressed: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const WorkInProgressWarning(),
+                                        builder: (context) =>
+                                            const WorkInProgressWarning(),
                                       ),
                                     );
                                   },
@@ -232,7 +250,8 @@ class _HomeState extends State<Home> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const WorkInProgressWarning(),
+                                        builder: (context) =>
+                                            const WorkInProgressWarning(),
                                       ),
                                     );
                                   },
@@ -282,7 +301,8 @@ class _HomeState extends State<Home> {
                                     minimumSize: const Size(50, 50),
                                     padding: EdgeInsets.zero,
                                     foregroundColor: Colors.white,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -291,7 +311,8 @@ class _HomeState extends State<Home> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const BmiCalculator(),
+                                        builder: (context) =>
+                                            const BmiCalculator(),
                                       ),
                                     );
                                   },
@@ -328,7 +349,8 @@ class _HomeState extends State<Home> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => const adminDashboard(),
+                                          builder: (context) =>
+                                              const adminDashboard(),
                                         ),
                                       );
                                     },
@@ -354,10 +376,23 @@ class _HomeState extends State<Home> {
                           child: Column(
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Level $level', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 16)),
-                                  Text('$xp / $xpToNext XP', style: TextStyle(color: AppColors.mutedParchment, fontSize: 16)),
+                                  Text(
+                                    'Level $level',
+                                    style: TextStyle(
+                                      color: AppColors.parchmentWhite,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Text(
+                                    '$xp / $xpToNext XP',
+                                    style: TextStyle(
+                                      color: AppColors.mutedParchment,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 10),
@@ -395,14 +430,26 @@ class _HomeState extends State<Home> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const BossBattleScreen()),
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const BossBattleScreen(),
+                                ),
                               );
                             },
                             child: const Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text('Boss battle', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                Text('Unlocks at 20:00', style: TextStyle(fontSize: 14)),
+                                Text(
+                                  'Boss battle',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'Unlocks at 20:00',
+                                  style: TextStyle(fontSize: 14),
+                                ),
                               ],
                             ),
                           ),
@@ -415,7 +462,10 @@ class _HomeState extends State<Home> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.flameOrange,
                           foregroundColor: AppColors.parchmentWhite,
-                          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 28,
+                            vertical: 14,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -423,10 +473,18 @@ class _HomeState extends State<Home> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const SideQuest()),
+                            MaterialPageRoute(
+                              builder: (context) => const SideQuest(),
+                            ),
                           );
                         },
-                        child: Text('Daily Side Quest', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 16)),
+                        child: Text(
+                          'Daily Side Quest',
+                          style: TextStyle(
+                            color: AppColors.parchmentWhite,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 12),
                     ],
@@ -454,7 +512,10 @@ class _HomeState extends State<Home> {
           //logout button
           TextButton.icon(
             icon: Icon(Icons.person, color: AppColors.mutedParchment),
-            label: Text('Logout', style: TextStyle(color: AppColors.mutedParchment)),
+            label: Text(
+              'Logout',
+              style: TextStyle(color: AppColors.mutedParchment),
+            ),
             onPressed: () async {
               await _auth.signOut();
             },
@@ -465,10 +526,7 @@ class _HomeState extends State<Home> {
       backgroundColor: AppColors.obsidianBlack,
 
       // IndexedStack keeps state alive so switching tabs doesn't wipe your screen data
-      body: IndexedStack(
-        index: _currentIndex,
-        children: pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: pages),
 
       //bottom navbar with Home in the middle (index 2)
       bottomNavigationBar: NavigationBarTheme(
@@ -510,20 +568,14 @@ class _HomeState extends State<Home> {
             //home tab in middle
             NavigationDestination(
               icon: pixelIcon('assets/icons/home.png'),
-              selectedIcon: pixelIcon(
-                'assets/icons/home.png',
-                selected: true,
-              ),
+              selectedIcon: pixelIcon('assets/icons/home.png', selected: true),
               label: 'Home',
             ),
 
             //store tab
             NavigationDestination(
               icon: pixelIcon('assets/icons/store.png'),
-              selectedIcon: pixelIcon(
-                'assets/icons/store.png',
-                selected: true,
-              ),
+              selectedIcon: pixelIcon('assets/icons/store.png', selected: true),
               label: 'Store',
             ),
 
