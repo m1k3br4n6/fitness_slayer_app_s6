@@ -371,8 +371,7 @@ class _HomeState extends State<Home> {
             NavigationDestination(
               icon: pixelIcon('assets/icons/calendar.png'),
               selectedIcon: pixelIcon(
-                'assets/icons/calendar.png',
-                selected: true,
+                'assets/icons/calendar.png',                selected: true,
               ),
               label: 'Calendar',
             ),
