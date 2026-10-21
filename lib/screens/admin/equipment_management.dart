@@ -74,7 +74,7 @@ class _EquipmentListState extends State<EquipmentList> {
             height: 90,
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.indigo[400],
+              color: Colors.blue,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Image.asset(
