@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 //HOW TO USE (file na,e, without ".png")
 //SpriteAnimator.play('knight_idle')
 //SpriteAnimator.play('knight_idle, scale: 6')
-const String spriteFolder = '';
+const String spriteFolder = 'assets/spritesheets/';
 
 class SpriteAnimator extends StatefulWidget
 {
@@ -41,7 +41,7 @@ class _SpriteAnimatorState extends State<SpriteAnimator>
 
   Future<void> loadSheet() async
   {
-    String path = ''; /// insert path
+    String path = '$spriteFolder${widget.name}.png';
 
     var data = await rootBundle.load(path);
     var image = await decodeImageFromList(data.buffer.asUint8List());
@@ -99,7 +99,7 @@ Widget build(BuildContext context)
           left: -moveLeft,
           top: 0,
           child: Image.asset(
-            'sprite folder',
+            '$spriteFolder${widget.name}.png',
             width: sheetWidth,
             height: shownSize,
             fit: BoxFit.fill,
