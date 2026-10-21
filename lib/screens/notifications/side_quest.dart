@@ -96,8 +96,8 @@ class _SideQuestState extends State<SideQuest> {
       final xpGained = Random().nextInt(12) + 1;
       final coinsGained = Random().nextInt(8) + 1;
 
-      // The transaction reads the latest document, so nothing is overwritten
-      // by a stale snapshot from another screen or device
+      // Transaction: re-reads the latest user document before writing, so a stale
+      // snapshot or a double tap cannot overwrite XP or award a quest twice
       final awarded = await FirebaseFirestore.instance.runTransaction<bool>((transaction) async {
         final snapshot = await transaction.get(userRef);
         final data = snapshot.data() ?? <String, dynamic>{};

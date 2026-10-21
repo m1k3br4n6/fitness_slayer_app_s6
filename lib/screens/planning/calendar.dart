@@ -48,6 +48,7 @@ class _CalendarState extends State<Calendar> {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
+  // Reads the permanent side quest history so completed quests show on the calendar
   Stream<List<SideQuestEntry>> _getSideQuestStream(String uid) {
     if (_sideQuestStream == null || _sideQuestStreamUid != uid) {
       _sideQuestStreamUid = uid;
@@ -159,6 +160,7 @@ class _CalendarState extends State<Calendar> {
                               .where((w) => _isSameDay(w.dateCompleted, tileDate))
                               .toList();
 
+                          // A day counts as active if it has a logged workout or a completed side quest
                           final daySideQuests = allSideQuests
                               .where((q) => _isSameDay(q.dateCompleted, tileDate))
                               .toList();

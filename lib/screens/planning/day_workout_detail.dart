@@ -8,6 +8,7 @@ import 'package:fitness_slayer_01/theme/app_colors.dart';
 class DayWorkoutDetailScreen extends StatelessWidget {
   final DateTime date;
   final List<CompletedWorkout> workouts;
+  // Defaults to empty so any other screen that opens this one keeps working unchanged
   final List<SideQuestEntry> sideQuests;
 
   const DayWorkoutDetailScreen({

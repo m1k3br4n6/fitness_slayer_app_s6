@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// One completed side quest, read from users/{uid}/sideQuestLog in Firestore
 class SideQuestEntry {
   final String text;
   final int xp;
