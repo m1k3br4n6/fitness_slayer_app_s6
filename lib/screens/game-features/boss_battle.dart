@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
+import 'package:fitness_slayer_01/widgets/bar_sprite.dart';
 import 'package:fitness_slayer_01/services/boss_battle_service.dart';
 import 'package:fitness_slayer_01/services/sprite_animator.dart';
 
@@ -62,6 +63,8 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
     required Color barColor,
     required bool isTurn,
   }) {
+    final double hpRatio = maxHp > 0 ? (hp / maxHp).clamp(0.0, 1.0) : 0.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -72,7 +75,7 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
             Icon(
               isTurn ? Icons.play_arrow : Icons.person,
               color: isTurn ? nameColor : AppColors.parchmentWhite.withValues(alpha: 0.6),
-              size: 16,
+              size: 14,
             ),
             const SizedBox(width: 4),
             Expanded(
@@ -82,15 +85,15 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: nameColor,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 1.1,
+                  letterSpacing: 1.0,
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
 
         // HP bar & numerical ratio
         Row(
@@ -98,7 +101,7 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.favorite, color: barColor, size: 14),
+                Icon(Icons.favorite, color: barColor, size: 12),
                 const SizedBox(width: 4),
                 const Text(
                   'HP',
@@ -121,38 +124,60 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
           ],
         ),
         const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: maxHp > 0 ? (hp / maxHp).clamp(0.0, 1.0) : 0.0,
-            minHeight: 10,
-            backgroundColor: AppColors.woodFrame,
-            color: barColor,
+
+        // PIXEL ART HP BAR SPRITE
+        SizedBox(
+          width: double.infinity,
+          height: 18,
+          child: BarSpriteWidget(
+            barName: 'hp_bar_Sheet',
+            frameCount: 5,
+            progress: hpRatio,
+            isAttackBar: false,
           ),
         ),
+
         const SizedBox(height: 8),
 
-        // Damage stat label
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          decoration: BoxDecoration(
-            color: AppColors.woodFrame,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.flash_on, color: AppColors.gemGold, size: 14),
-              const SizedBox(width: 4),
-              Text(
-                'DMG: $damage',
-                style: const TextStyle(
-                  color: AppColors.parchmentWhite,
+        // ATK & DMG Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                isTurn ? 'ATTACKING...' : 'ATK',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: isTurn ? AppColors.gemGold : AppColors.parchmentWhite,
+                  fontSize: 10,
                   fontWeight: FontWeight.bold,
-                  fontSize: 11,
                 ),
               ),
-            ],
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'DMG: $damage',
+              style: const TextStyle(
+                color: AppColors.gemGold,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 3),
+
+        // PIXEL ART ATTACK BAR SPRITE
+        SizedBox(
+          width: double.infinity,
+          height: 25,
+          child: BarSpriteWidget(
+            barName: 'attack_bar_Sheet',
+            frameCount: 5,
+            isAttackBar: true,
+            isTurn: isTurn,
+            drainDuration: const Duration(milliseconds: 2000),
           ),
         ),
       ],
@@ -175,7 +200,7 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
 
               return Column(
                 children: [
-                  // TOP COMBAT STATUS BANNER (DEDICATED FIXED HEIGHT)
+                  // TOP COMBAT STATUS BANNER
                   SizedBox(
                     height: 52,
                     width: double.infinity,
@@ -232,7 +257,7 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
 
                   const SizedBox(height: 12),
 
-                  // 1. TOP HALF: THE COMBAT ARENA
+                  // TOP HALF COMBAT ARENA
                   Expanded(
                     flex: 5,
                     child: Container(
@@ -262,7 +287,7 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
                               ),
                             ),
 
-                            // SUBTLE ARENA VIGNETTE GRADIENT
+                            // ARENA GRADIENT
                             Positioned.fill(
                               child: Container(
                                 decoration: BoxDecoration(
@@ -288,7 +313,7 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  // Slayer Sprite (Knight - half the height of Orc)
+                                  // Slayer Sprite (Knight - half the height of boss)
                                   AnimatedScale(
                                     scale: isSlayerTurn ? 1.15 : 1.0,
                                     duration: const Duration(milliseconds: 300),
@@ -301,7 +326,7 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
                                     ),
                                   ),
 
-                                  // Boss Sprite (Orc)
+                                  // Boss Sprite
                                   Flexible(
                                     child: AnimatedScale(
                                       scale: isBossTurn ? 1.12 : 1.0,
@@ -326,7 +351,7 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
 
                   const SizedBox(height: 12),
 
-                  // 2. BOTTOM HALF: THE STATUS HUD PANEL
+                  // BOTTOM HALF STATUS HUD PANEL
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(14.0),

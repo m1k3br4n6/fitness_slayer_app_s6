@@ -73,6 +73,7 @@ flutter:
   - assets/
   - assets/spritesheets/attack/
   - assets/spritesheets/backgrounds/
+  - assets/spritesheets/bars/
   - assets/spritesheets/idle/
   - assets/spritesheets/stock/
 
