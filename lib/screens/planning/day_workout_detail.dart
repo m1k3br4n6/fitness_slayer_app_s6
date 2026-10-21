@@ -23,9 +23,6 @@ class DayWorkoutDetailScreen extends StatelessWidget {
   ];
 
   Widget _buildSideQuestSection() {
-    final totalXp = sideQuests.fold<int>(0, (sum, q) => sum + q.xp);
-    final totalCoins = sideQuests.fold<int>(0, (sum, q) => sum + q.coins);
-
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(16),
@@ -52,11 +49,6 @@ class DayWorkoutDetailScreen extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '+$totalXp XP, +$totalCoins GP earned',
-            style: const TextStyle(color: AppColors.gemGold, fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           ...sideQuests.map((quest) {
