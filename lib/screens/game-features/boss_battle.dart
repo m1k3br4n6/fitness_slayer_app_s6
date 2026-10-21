@@ -117,263 +117,309 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
 
                   const SizedBox(height: 12),
 
-                  // FIGHTING PLACE
+                  // DUNGEON BACKGROUND
                   Expanded(
-                    child: Center(
-                      child: SingleChildScrollView(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: AppColors.hearthPanel,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.woodFrame, width: 2),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Stack(
                           children: [
-                            // SLAYER CARD
-                            Expanded(
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                padding: const EdgeInsets.all(12.0),
-                                decoration: BoxDecoration(
-                                  color: AppColors.hearthPanel,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: isSlayerTurn ? AppColors.gemGold : AppColors.woodFrame,
-                                    width: isSlayerTurn ? 3.5 : 2,
-                                  ),
-
-                                  boxShadow: isSlayerTurn
-                                      ? [
-                                          BoxShadow(
-                                            color: AppColors.gemGold.withValues(alpha: 0.4),
-                                            blurRadius: 12,
-                                            spreadRadius: 2,
-                                          )
-                                        ]
-                                      : [],
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      _battleService.slayerName,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        color: AppColors.gemGold,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 1.1,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-
-                                    // Slayer Sprite
-                                    // TODO: Slayer idle/attack sprite animation
-                                    AspectRatio(
-                                      aspectRatio: 1.0,
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.slateBackdrop,
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: isSlayerTurn ? AppColors.gemGold : AppColors.brassBorder,
-                                            width: 1.5,
-                                          ),
-                                        ),
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: SpriteAnimator.play(
-                                            _battleService.slayerSpriteName,
-                                            scale: 2.5,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 12),
-
-                                    // Slayer Health Bar
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Row(
-                                              children: [
-                                                Icon(Icons.favorite, color: Colors.greenAccent, size: 14),
-                                                SizedBox(width: 4),
-                                                Text('HP', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 12, fontWeight: FontWeight.bold)),
-                                              ],
-                                            ),
-                                            Text(
-                                              '${_battleService.slayerHp}/${_battleService.slayerMaxHp}',
-                                              style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 12, fontWeight: FontWeight.bold),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 4),
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(6),
-                                          child: LinearProgressIndicator(
-                                            value: _battleService.slayerHp / _battleService.slayerMaxHp,
-                                            minHeight: 10,
-                                            backgroundColor: AppColors.woodFrame,
-                                            color: Colors.greenAccent,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    const SizedBox(height: 8),
-
-                                    // Slayer Damage Label
-                                    Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.woodFrame,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(Icons.flash_on, color: AppColors.gemGold, size: 16),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'DMG: ${_battleService.slayerDamage}',
-                                            style: const TextStyle(
-                                              color: AppColors.parchmentWhite,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                            // ANIMATED DUNGEON BACKGROUND SPRITESHEET
+                            Positioned.fill(
+                              child: FittedBox(
+                                fit: BoxFit.cover,
+                                alignment: Alignment.bottomCenter,
+                                clipBehavior: Clip.hardEdge,
+                                child: SpriteAnimator.play(
+                                  'backgrounds/dungeon_background_spritesheet',
+                                  scale: 1.0, 
+                                  fps: 8,
+                                  pingPong: false,
+                                  frameCount: 6,
                                 ),
                               ),
                             ),
 
-                            const SizedBox(width: 10),
-
-                            // BOSS CARD
-                            Expanded(
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                padding: const EdgeInsets.all(12.0),
+                            Positioned.fill(
+                              child: Container(
                                 decoration: BoxDecoration(
-                                  color: AppColors.hearthPanel,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: isBossTurn ? AppColors.crimsonRed : AppColors.woodFrame,
-                                    width: isBossTurn ? 3.5 : 2,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.black.withValues(alpha: 0.25),
+                                      Colors.transparent,
+                                      Colors.black.withValues(alpha: 0.35),
+                                    ],
                                   ),
-                                  boxShadow: isBossTurn
-                                      ? [
-                                          BoxShadow(
-                                            color: AppColors.crimsonRed.withValues(alpha: 0.4),
-                                            blurRadius: 12,
-                                            spreadRadius: 2,
-                                          )
-                                        ]
-                                      : [],
                                 ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
+                              ),
+                            ),
+
+                            // SLAYER & BOSS CARDS
+                            Center(
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      _battleService.bossName,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        color: AppColors.crimsonRed,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 1.1,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-
-                                    // Boss Sprite
-                                    // TODO:  Boss idle/attack sprite animation
-                                    AspectRatio(
-                                      aspectRatio: 1.0,
-                                      child: Container(
-                                        alignment: Alignment.center,
+                                    // SLAYER CARD
+                                    Expanded(
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 300),
+                                        padding: const EdgeInsets.all(12.0),
                                         decoration: BoxDecoration(
-                                          color: AppColors.slateBackdrop,
-                                          borderRadius: BorderRadius.circular(12),
+                                          color: AppColors.hearthPanel.withValues(alpha: 0.9),
+                                          borderRadius: BorderRadius.circular(16),
                                           border: Border.all(
-                                            color: isBossTurn ? AppColors.crimsonRed : AppColors.brassBorder,
-                                            width: 1.5,
+                                            color: isSlayerTurn ? AppColors.gemGold : AppColors.woodFrame,
+                                            width: isSlayerTurn ? 3.5 : 2,
                                           ),
+                                          boxShadow: isSlayerTurn
+                                              ? [
+                                                  BoxShadow(
+                                                    color: AppColors.gemGold.withValues(alpha: 0.4),
+                                                    blurRadius: 12,
+                                                    spreadRadius: 2,
+                                                  )
+                                                ]
+                                              : [],
                                         ),
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: SpriteAnimator.play(
-                                            _battleService.bossSpriteName,
-                                            scale: 2.5,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 12),
-
-                                    // Boss Health Bar
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            const Row(
+                                            Text(
+                                              _battleService.slayerName,
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                color: AppColors.gemGold,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 1.1,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+
+                                            // Slayer Sprite
+                                            AspectRatio(
+                                              aspectRatio: 1.0,
+                                              child: Container(
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.slateBackdrop,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: isSlayerTurn ? AppColors.gemGold : AppColors.brassBorder,
+                                                    width: 1.5,
+                                                  ),
+                                                ),
+                                                child: FittedBox(
+                                                  fit: BoxFit.scaleDown,
+                                                  child: SpriteAnimator.play(
+                                                    _battleService.slayerSpriteName,
+                                                    scale: 2.5,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 12),
+
+                                            // Slayer Health Bar
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Icon(Icons.favorite, color: AppColors.crimsonRed, size: 14),
-                                                SizedBox(width: 4),
-                                                Text('HP', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 12, fontWeight: FontWeight.bold)),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    const Row(
+                                                      children: [
+                                                        Icon(Icons.favorite, color: Colors.greenAccent, size: 14),
+                                                        SizedBox(width: 4),
+                                                        Text('HP', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 12, fontWeight: FontWeight.bold)),
+                                                      ],
+                                                    ),
+                                                    Text(
+                                                      '${_battleService.slayerHp}/${_battleService.slayerMaxHp}',
+                                                      style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 12, fontWeight: FontWeight.bold),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 4),
+                                                ClipRRect(
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  child: LinearProgressIndicator(
+                                                    value: _battleService.slayerHp / _battleService.slayerMaxHp,
+                                                    minHeight: 10,
+                                                    backgroundColor: AppColors.woodFrame,
+                                                    color: Colors.greenAccent,
+                                                  ),
+                                                ),
                                               ],
                                             ),
-                                            Text(
-                                              '${_battleService.bossHp}/${_battleService.bossMaxHp}',
-                                              style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 12, fontWeight: FontWeight.bold),
+
+                                            const SizedBox(height: 8),
+
+                                            // Slayer Damage Label
+                                            Container(
+                                              width: double.infinity,
+                                              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.woodFrame,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  const Icon(Icons.flash_on, color: AppColors.gemGold, size: 16),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    'DMG: ${_battleService.slayerDamage}',
+                                                    style: const TextStyle(
+                                                      color: AppColors.parchmentWhite,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 4),
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(6),
-                                          child: LinearProgressIndicator(
-                                            value: _battleService.bossHp / _battleService.bossMaxHp,
-                                            minHeight: 10,
-                                            backgroundColor: AppColors.woodFrame,
-                                            color: AppColors.crimsonRed,
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
 
-                                    const SizedBox(height: 8),
+                                    const SizedBox(width: 10),
 
-                                    // Boss Damage Label
-                                    Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.woodFrame,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(Icons.flash_on, color: AppColors.gemGold, size: 16),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'DMG: ${_battleService.bossDamage}',
-                                            style: const TextStyle(
-                                              color: AppColors.parchmentWhite,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
+                                    // BOSS CARD
+                                    Expanded(
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 300),
+                                        padding: const EdgeInsets.all(12.0),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.hearthPanel.withValues(alpha: 0.9),
+                                          borderRadius: BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: isBossTurn ? AppColors.crimsonRed : AppColors.woodFrame,
+                                            width: isBossTurn ? 3.5 : 2,
                                           ),
-                                        ],
+                                          boxShadow: isBossTurn
+                                              ? [
+                                                  BoxShadow(
+                                                    color: AppColors.crimsonRed.withValues(alpha: 0.4),
+                                                    blurRadius: 12,
+                                                    spreadRadius: 2,
+                                                  )
+                                                ]
+                                              : [],
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              _battleService.bossName,
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                color: AppColors.crimsonRed,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 1.1,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+
+                                            // Boss Sprite
+                                            AspectRatio(
+                                              aspectRatio: 1.0,
+                                              child: Container(
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.slateBackdrop,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: isBossTurn ? AppColors.crimsonRed : AppColors.brassBorder,
+                                                    width: 1.5,
+                                                  ),
+                                                ),
+                                                child: FittedBox(
+                                                  fit: BoxFit.scaleDown,
+                                                  child: SpriteAnimator.play(
+                                                    _battleService.bossSpriteName,
+                                                    scale: 2.5,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 12),
+
+                                            // Boss Health Bar
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    const Row(
+                                                      children: [
+                                                        Icon(Icons.favorite, color: AppColors.crimsonRed, size: 14),
+                                                        SizedBox(width: 4),
+                                                        Text('HP', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 12, fontWeight: FontWeight.bold)),
+                                                      ],
+                                                    ),
+                                                    Text(
+                                                      '${_battleService.bossHp}/${_battleService.bossMaxHp}',
+                                                      style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 12, fontWeight: FontWeight.bold),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 4),
+                                                ClipRRect(
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  child: LinearProgressIndicator(
+                                                    value: _battleService.bossHp / _battleService.bossMaxHp,
+                                                    minHeight: 10,
+                                                    backgroundColor: AppColors.woodFrame,
+                                                    color: AppColors.crimsonRed,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                            const SizedBox(height: 8),
+
+                                            // Boss Damage Label
+                                            Container(
+                                              width: double.infinity,
+                                              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.woodFrame,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  const Icon(Icons.flash_on, color: AppColors.gemGold, size: 14),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    'DMG: ${_battleService.bossDamage}',
+                                                    style: const TextStyle(
+                                                      color: AppColors.parchmentWhite,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ],
