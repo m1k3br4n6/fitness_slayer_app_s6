@@ -48,6 +48,22 @@ class BossBattleService extends ChangeNotifier {
 
   bool get isFinished => phase == BattlePhase.victory || phase == BattlePhase.defeat;
 
+  // Returns sprite sheet name for Slayer based on combat phase
+  String get slayerSpriteName {
+    if (phase == BattlePhase.slayerAttacking) {
+      return 'attack/knight_attack_blue_spritesheet';
+    }
+    return 'idle/knight_idle_blue_spritesheet';
+  }
+
+  // Returns sprite sheet name for Boss based on combat phase
+  String get bossSpriteName {
+    if (phase == BattlePhase.bossAttacking) {
+      return 'attack/orc_boss_attack_spritesheet';
+    }
+    return 'idle/orc_boss_idle_spritesheet';
+  }
+
   // INITIALIZATION & RESET
 
   // Resets character health bars and returns the state machine to idle.
@@ -81,7 +97,6 @@ class BossBattleService extends ChangeNotifier {
     while (slayerHp > 0 && bossHp > 0) {
 
       // SLAYER TURN
-      // TODO: Slayer attack sprite animation when phase becomes slayerAttacking
       phase = BattlePhase.slayerAttacking;
       currentMessage = '$slayerName prepares to strike $bossName!';
       notifyListeners();
@@ -110,7 +125,6 @@ class BossBattleService extends ChangeNotifier {
       if (phase != BattlePhase.slayerAttacking) return;
 
       // BOSS TURN
-      // TODO: Boss attack sprite animation when phase becomes bossAttacking
       phase = BattlePhase.bossAttacking;
       currentMessage = '$bossName prepares to counterattack $slayerName!';
       notifyListeners();
