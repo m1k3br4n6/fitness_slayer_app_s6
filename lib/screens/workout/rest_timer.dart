@@ -6,6 +6,7 @@ import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 
+import '../../providers/slayer_equipment_provider.dart';
 import '../../widgets/app_bar.dart';
 
 //Sprite Animator
@@ -345,6 +346,9 @@ class _RestTimerCardState extends State<RestTimerCard> {
   // mini game
 
   Widget _buildDungeonContainer() {
+
+    final equipmentState = context.watch<SlayerEquipmentProvider>();
+
     return Container(
       decoration: _panelDecoration(),
       child: ClipRRect(
@@ -394,9 +398,8 @@ class _RestTimerCardState extends State<RestTimerCard> {
                       duration: const Duration(milliseconds: 300),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        //TODO: Load Sprites Dynamically from user ID
                         child: SpriteAnimator.play(
-                          'attack/knight_attack_blue_spritesheet',
+                          equipmentState.attackSpritePath,
                           scale: 1.9,
                         ),
                       ),
