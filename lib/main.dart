@@ -11,6 +11,7 @@ import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/theme/app_theme.dart';
+import 'package:rxdart/rxdart.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,39 +34,43 @@ class MyApp extends StatelessWidget {
   //this widget is the root of the application.
   @override
   Widget build(BuildContext context) {
+    // TODO: Wrap MultiProvider child in Consumer<ThemeController> or add ThemeController provider to rebuild MaterialApp on theme change.
     return MultiProvider(
-        providers: [
-          StreamProvider<myUser?>.value( //stream actively listens for user related auth changes, uses myUser model
+      providers: [
+        StreamProvider<myUser?>.value( //stream actively listens for user related auth changes, uses myUser model
           value: AuthService().user, //stream we are going to listen to, accessing 'user' stream in auth class
           initialData: null,
-          ),
+        ),
 
-          //current user's Firestore document
-          // TODO: Check if StreamProvider holding DocumentSnapshot emits null on user logout so old user data is not retained.
-          StreamProvider<DocumentSnapshot?>.value(
-            // TODO: Ensure asyncExpand emits a null document snapshot when user changes to clear stale username state.
-            value: FirebaseAuth.instance.authStateChanges().asyncExpand((user) {
-              if (user == null) {
-                return Stream<DocumentSnapshot?>.value(null);
-              }
+        //current user's Firestore document
+        StreamProvider<DocumentSnapshot?>.value(
+          // switchMap cancels the previous user's document stream on every auth change,
+          // asyncExpand never did because a Firestore stream never completes
+          value: FirebaseAuth.instance.authStateChanges().switchMap<DocumentSnapshot?>((user) {
+            if (user == null) {
+              return Stream<DocumentSnapshot?>.value(null);
+            }
 
-              return FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots()
-                  .map<DocumentSnapshot?>((snapshot) => snapshot);}),
-            initialData: null,
-          ),
+            return FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots()
+                .map<DocumentSnapshot?>((snapshot) => snapshot);
+          }),
+          initialData: null,
+        ),
 
-          ChangeNotifierProvider( //actively listens for changes in the workout screen
+        ChangeNotifierProvider( //actively listens for changes in the workout screen
           create: (_) => WorkoutProvider(),
-          ),
+        ),
 
-          ChangeNotifierProvider(
-            create: (_) => WorkoutTimerProvider(),
-          ),
-        ],
-        child: MaterialApp(
-          theme: AppTheme.darkForgeTheme,
-          home: const Wrapper(), //wrapper should be either the home/main screen
-         ),
+        ChangeNotifierProvider(
+          create: (_) => WorkoutTimerProvider(),
+        ),
+        // TODO: Register ThemeController provider here to manage dark/light modes and custom colors.
+      ],
+      // TODO: Bind MaterialApp theme and darkTheme properties to active ThemeController palette.
+      child: MaterialApp(
+        theme: AppTheme.darkForgeTheme,
+        home: const Wrapper(), //wrapper should be either the home/main screen
+      ),
     ) ;
   }
 }
