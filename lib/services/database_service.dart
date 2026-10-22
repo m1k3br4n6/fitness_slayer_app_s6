@@ -57,6 +57,30 @@ class DatabaseService {
     });
   }
 
+  // Listens for changes to the equipped item and returns the full Equipment object
+  Stream<Equipment?> getEquippedItemStream(String userId) {
+    if (userId.isEmpty) return Stream.value(null);
+
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('slayer')
+        .doc('SO1')
+        .snapshots()
+        .asyncMap((slayerSnap) async {
+
+      final data = slayerSnap.data();
+      if (data == null || !data.containsKey('item_equipped')) {
+        return null;
+      }
+
+      final itemId = data['item_equipped'] as String;
+      if (itemId.isEmpty) return null;
+
+      return await getEquipmentById(itemId);
+    });
+  }
+
   // Listens for user progression data
   Stream<Map<String, dynamic>?> getUserDataStream(String userId) {
     if (userId.isEmpty) return Stream.value(null);

@@ -49,14 +49,6 @@ class BossBattleService extends ChangeNotifier {
 
   bool get isFinished => phase == BattlePhase.victory || phase == BattlePhase.defeat;
 
-  // Returns sprite sheet name for Slayer based on combat phase
-  String get slayerSpriteName {
-    if (phase == BattlePhase.slayerAttacking) {
-      return 'attack/knight_attack_blue_spritesheet';
-    }
-    return 'idle/knight_idle_blue_spritesheet';
-  }
-
   // Returns sprite sheet name for Boss based on combat phase
   String get bossSpriteName {
     if (phase == BattlePhase.bossAttacking) {

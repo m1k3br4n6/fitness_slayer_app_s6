@@ -23,6 +23,8 @@ import 'package:fitness_slayer_01/screens/game-features/boss_battle.dart';
 //Sprite Animator
 import 'package:fitness_slayer_01/services/sprite_animator.dart';
 
+import '../providers/slayer_equipment_provider.dart';
+
 const String campfireScene =
     'assets/spritesheets/backgrounds/campsite_background_spritesheet.png';
 
@@ -55,6 +57,7 @@ class _HomeState extends State<Home> {
   void initState() {
     //runs when stateful widget is first created
     super.initState();
+    final user = Provider.of<myUser?>(context, listen: false);
 
     //checks if current user is admin
     final String uid =
@@ -64,6 +67,10 @@ class _HomeState extends State<Home> {
       isAdmin = true;
     } else {
       isAdmin = false;
+    }
+
+    if (user != null) {
+      context.read<SlayerEquipmentProvider>().initializeListener(user.uid);
     }
 
     //checks users streak if needs reset

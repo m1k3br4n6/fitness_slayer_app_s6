@@ -8,6 +8,8 @@ import 'package:fitness_slayer_01/services/database_service.dart';
 import 'package:fitness_slayer_01/services/boss_battle_service.dart';
 import 'package:fitness_slayer_01/services/sprite_animator.dart';
 
+import '../../providers/slayer_equipment_provider.dart';
+
 class BossBattleScreen extends StatefulWidget {
   const BossBattleScreen({super.key});
 
@@ -191,6 +193,8 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
   Widget build(BuildContext context) {
     final user = Provider.of<myUser?>(context);
     final uid = user?.uid ?? '';
+    final equipmentState = context.watch<SlayerEquipmentProvider>();
+
 
     return StreamBuilder<BossBattleData>(
       stream: DatabaseService().getBossBattleDataStream(uid),
@@ -215,6 +219,10 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
                 builder: (context, _) {
                   final isSlayerTurn = _battleService.phase == BattlePhase.slayerAttacking;
                   final isBossTurn = _battleService.phase == BattlePhase.bossAttacking;
+
+                  final currentSlayerSprite = isSlayerTurn
+                      ? equipmentState.attackSpritePath
+                      : equipmentState.idleSpritePath;
 
                   return Column(
                     children: [
@@ -338,7 +346,7 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
                                         child: FittedBox(
                                           fit: BoxFit.scaleDown,
                                           child: SpriteAnimator.play(
-                                            _battleService.slayerSpriteName,
+                                            currentSlayerSprite,
                                             scale: 2.8,
                                           ),
                                         ),
