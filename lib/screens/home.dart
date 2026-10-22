@@ -275,7 +275,7 @@ class _HomeState extends State<Home> {
                                   padding: EdgeInsets.zero,
                                   icon: Icon(Icons.menu_book),
                                   color: AppColors.parchmentWhite,
-                                  iconSize: 25,
+                                  iconSize: 28,
                                   onPressed: () {
                                     Navigator.push(
                                       context,
@@ -286,7 +286,7 @@ class _HomeState extends State<Home> {
                                   },
                                 ),
                               ),
-                              'Journal',
+                              'About',
                             ),
 
                             withLabel(
@@ -325,7 +325,7 @@ class _HomeState extends State<Home> {
                                   ),
                                 ),
                               ),
-                              'BMI',
+                              'Calculator',
                             ),
 
                             //admin only: equipment crud page button
