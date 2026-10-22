@@ -1,3 +1,4 @@
+import 'package:fitness_slayer_01/providers/slayer_equipment_provider.dart';
 import 'package:fitness_slayer_01/screens/wrapper.dart';
 import 'package:fitness_slayer_01/services/notification_service.dart';
 import 'package:flutter/material.dart';
@@ -63,11 +64,15 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => WorkoutTimerProvider(),
         ),
+
+        ChangeNotifierProvider(
+            create: (_) => SlayerEquipmentProvider()
+        ),
       ],
       child: MaterialApp(
         theme: AppTheme.darkForgeTheme,
         home: const Wrapper(), //wrapper should be either the home/main screen
       ),
-    ) ;
+    );
   }
 }
