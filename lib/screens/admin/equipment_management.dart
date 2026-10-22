@@ -16,10 +16,13 @@ class EquipmentList extends StatefulWidget {
 class _EquipmentListState extends State<EquipmentList> {
   bool loading = false;
 
+  //get firestore collection 'equipment_items'
   final CollectionReference<Map<String, dynamic>> equipmentCollection =
   FirebaseFirestore.instance.collection('equipment_items');
 
+  //asks the user to confirm before deleting equipment item via alert dialog popup
   Future<void> _deleteEquipment(String itemId, String itemName,) async {
+    //confirm is true, false or null
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -33,10 +36,12 @@ class _EquipmentListState extends State<EquipmentList> {
           style: const TextStyle(color: AppColors.parchmentWhite),
         ),
         actions: [
+          //close without confirming deletion
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel'),
           ),
+          //close and confirm deletion
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text(
@@ -48,10 +53,17 @@ class _EquipmentListState extends State<EquipmentList> {
       ),
     );
 
-    await DatabaseService().deleteEquipment(itemId);
+    //only if confirm true, delete equipment
+    if (confirm == true)
+      {
+        //delete equipment item through database service method
+        await DatabaseService().deleteEquipment(itemId);
+      }
   }
 
+  //builds equipment card widget for an equipment item
   Widget _buildEquipmentCard(String itemId, Map<String, dynamic> data,) {
+    //retrieves the equipment details from the Firestore document.
     final String name = data['name'].toString();
     final String description = data['description'].toString();
     final String spritePath = data['sprite_image_path'];
@@ -140,7 +152,7 @@ class _EquipmentListState extends State<EquipmentList> {
 
   @override
   Widget build(BuildContext context) {
-    return loading ? Loading() : Scaffold(
+    return loading ? Loading() : Scaffold( //if loading is true, display loading screen
       backgroundColor: AppColors.obsidianBlack,
       appBar: const MyAppBar(),
       body: Padding(
@@ -150,7 +162,7 @@ class _EquipmentListState extends State<EquipmentList> {
         ),
         child: Column(
           children: [
-            //add equipment button
+            //'add equipment' button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.flameOrange,
@@ -186,7 +198,8 @@ class _EquipmentListState extends State<EquipmentList> {
             const SizedBox(height: 20),
 
             //live equipment list from Firestore
-            Expanded(
+            Expanded( //expanded takes up remaining available space in a row or column
+              //stream listens for data changes, updates UI : when item is added / deleted
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: equipmentCollection.snapshots(),
                 builder: (context, snapshot) {
@@ -199,12 +212,15 @@ class _EquipmentListState extends State<EquipmentList> {
                     );
                   }
 
+                  //displays loading screen while waiting dor data
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Loading();
                   }
 
+                  //retrieves equipment doc from snapshot
                   final equipment = snapshot.data?.docs ?? [];
 
+                  //if no equipment, display message
                   if (equipment.isEmpty) {
                     return const Center(
                       child: Text(
@@ -214,15 +230,12 @@ class _EquipmentListState extends State<EquipmentList> {
                     );
                   }
 
+                  //scrollable list of equipment card widgets
                   return ListView.builder(
                     itemCount: equipment.length,
                     itemBuilder: (context, index) {
                       final doc = equipment[index];
-
-                      return _buildEquipmentCard(
-                        doc.id,
-                        doc.data(),
-                      );
+                      return _buildEquipmentCard(doc.id, doc.data(),);
                     },
                   );
                 },

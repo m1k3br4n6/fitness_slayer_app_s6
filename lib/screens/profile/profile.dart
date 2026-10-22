@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
-int _xpForNextLevel(int level) => (level < 1 ? 1 : level) * 100;
+int _xpForNextLevel(int level) => 100;
 
 int _intField(Map<String, dynamic> data, String key) =>
     (data[key] as num?)?.toInt() ?? 0;

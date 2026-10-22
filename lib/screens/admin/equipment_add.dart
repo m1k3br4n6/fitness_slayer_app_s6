@@ -40,6 +40,7 @@ class _addEquipmentState extends State<addEquipment> {
           child: Column(
             children: <Widget>[
 
+              //id
               TextFormField(
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'ID', hintStyle: const TextStyle(
@@ -55,6 +56,7 @@ class _addEquipmentState extends State<addEquipment> {
 
               SizedBox(height: 20.0),
 
+              //name
               TextFormField(
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Name', hintStyle: const TextStyle(
@@ -70,6 +72,7 @@ class _addEquipmentState extends State<addEquipment> {
 
               SizedBox(height: 20.0),
 
+              //description
               TextFormField(
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Description', hintStyle: const TextStyle(
@@ -87,6 +90,7 @@ class _addEquipmentState extends State<addEquipment> {
 
               SizedBox(height: 20.0),
 
+              //stock image 32x32
               TextFormField(
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Stock Image Name (.png)', hintStyle: const TextStyle(
@@ -102,6 +106,7 @@ class _addEquipmentState extends State<addEquipment> {
 
               SizedBox(height: 20.0),
 
+              //attack sprite sheet
               TextFormField(
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Attack Sprite Sheet Image Name (.png)', hintStyle: const TextStyle(
@@ -117,6 +122,7 @@ class _addEquipmentState extends State<addEquipment> {
 
               SizedBox(height: 20.0),
 
+              //idle sprite sheet
               TextFormField(
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Idle Sprite Sheet Image Name (.png)', hintStyle: const TextStyle(
@@ -132,6 +138,7 @@ class _addEquipmentState extends State<addEquipment> {
 
               SizedBox(height: 20.0),
 
+              //atk bonus
               TextFormField(
                 keyboardType: TextInputType.number,
                 style: const TextStyle(color: Colors.black),
@@ -150,6 +157,7 @@ class _addEquipmentState extends State<addEquipment> {
 
               const SizedBox(height: 20.0),
 
+              //hp bonus
               TextFormField(
                 keyboardType: TextInputType.number,
                 style: const TextStyle(color: Colors.black),
@@ -168,6 +176,7 @@ class _addEquipmentState extends State<addEquipment> {
 
               const SizedBox(height: 20.0),
 
+              //prince <- int because coins, not decimal value currency
               TextFormField(
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 style: const TextStyle(color: Colors.black),
@@ -186,6 +195,7 @@ class _addEquipmentState extends State<addEquipment> {
 
               const SizedBox(height: 20.0),
 
+              //submit button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.flameOrange,
@@ -195,24 +205,12 @@ class _addEquipmentState extends State<addEquipment> {
                   if (_formKey.currentState?.validate() ?? false)
                   {
                     setState(() => loading = true);
+                    await DatabaseService().updateEquipment(id, name, description, spriteImagePath, attackSheetPath, idleSheetPath, atkBonus, hpBonus, price,);
 
-                    await DatabaseService().updateEquipment(
-                      id,
-                      name,
-                      description,
-                      spriteImagePath,
-                      attackSheetPath,
-                      idleSheetPath,
-                      atkBonus,
-                      hpBonus,
-                      price,
-                    );
-
-                    Navigator.pop(context); // Return to previous page
+                    Navigator.pop(context); //return to previous page
                   }
                 },
               ),
-
             ],
           ),
         ),
