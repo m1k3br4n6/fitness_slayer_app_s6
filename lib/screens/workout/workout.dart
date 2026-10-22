@@ -15,7 +15,7 @@ import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/widgets/cards/workout_timer_card.dart';
 import 'package:fitness_slayer_01/widgets/timers/mini_rest_timer.dart';
 
-import '../game-features/slayer.dart';
+import '../workout/rest_timer.dart';
 
 class WorkoutView extends StatefulWidget {
   final VoidCallback? onWorkoutFinished;
@@ -29,6 +29,7 @@ class WorkoutView extends StatefulWidget {
 class _WorkoutViewState extends State<WorkoutView> {
   bool _isSubmitting = false;
   double? _fabYPosition;
+
   // Sensitivity for fab change if needed i like it loose
   final double _fabSensitivity = 2.5;
 
@@ -46,9 +47,7 @@ class _WorkoutViewState extends State<WorkoutView> {
   Future<void> _navigateAndAddExercise() async {
     final selectedExercise = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ExerciseSearchScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const ExerciseSearchScreen()),
     );
 
     if (selectedExercise != null && mounted) {
@@ -63,7 +62,10 @@ class _WorkoutViewState extends State<WorkoutView> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.forgeSlate,
-        title: const Text('Cancel Workout?', style: TextStyle(color: AppColors.warmIvory)),
+        title: const Text(
+          'Cancel Workout?',
+          style: TextStyle(color: AppColors.warmIvory),
+        ),
         content: const Text(
           'Are you sure you want to cancel? Progress for this session will be lost.',
           style: TextStyle(color: AppColors.parchmentBeige),
@@ -71,11 +73,20 @@ class _WorkoutViewState extends State<WorkoutView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('NO', style: TextStyle(color: AppColors.parchmentBeige)),
+            child: const Text(
+              'NO',
+              style: TextStyle(color: AppColors.parchmentBeige),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('CANCEL WORKOUT', style: TextStyle(color: AppColors.crimsonWine, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'CANCEL WORKOUT',
+              style: TextStyle(
+                color: AppColors.crimsonWine,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -93,7 +104,8 @@ class _WorkoutViewState extends State<WorkoutView> {
     final timerProvider = context.read<WorkoutTimerProvider>();
 
     final user = context.read<myUser?>();
-    final String currentUserId = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+    final String currentUserId =
+        user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
 
     if (currentUserId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -106,12 +118,19 @@ class _WorkoutViewState extends State<WorkoutView> {
           ),
           content: const Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: AppColors.emberOrange, size: 22),
+              Icon(
+                Icons.warning_amber_rounded,
+                color: AppColors.emberOrange,
+                size: 22,
+              ),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Please sign in to save your workout.',
-                  style: TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: AppColors.parchmentWhite,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -132,12 +151,19 @@ class _WorkoutViewState extends State<WorkoutView> {
           ),
           content: const Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: AppColors.emberOrange, size: 22),
+              Icon(
+                Icons.warning_amber_rounded,
+                color: AppColors.emberOrange,
+                size: 22,
+              ),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Add some exercises before finishing!',
-                  style: TextStyle(color: AppColors.parchmentWhite, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: AppColors.parchmentWhite,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -174,7 +200,8 @@ class _WorkoutViewState extends State<WorkoutView> {
       await DatabaseService().saveWorkout(currentUserId, completedWorkout);
 
       // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore
-      final UserStatsResult stats = await DatabaseService().updateUserStatsForWorkout(currentUserId, completedWorkout);
+      final UserStatsResult stats = await DatabaseService()
+          .updateUserStatsForWorkout(currentUserId, completedWorkout);
 
       // Schedule notification reminder to maintain streak
       await NotificationService().scheduleStreakReminder(hoursDelay: 24);
@@ -193,7 +220,11 @@ class _WorkoutViewState extends State<WorkoutView> {
             ),
             content: Row(
               children: [
-                const Icon(Icons.check_circle_rounded, color: AppColors.gemGold, size: 24),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.gemGold,
+                  size: 24,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -228,7 +259,11 @@ class _WorkoutViewState extends State<WorkoutView> {
             ),
             content: Row(
               children: [
-                const Icon(Icons.error_outline_rounded, color: AppColors.crimsonWine, size: 24),
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: AppColors.crimsonWine,
+                  size: 24,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -267,7 +302,9 @@ class _WorkoutViewState extends State<WorkoutView> {
                     children: [
                       const WorkoutTimerCard(),
 
-                      ...workoutData.activeExercises.asMap().entries.map((entry) {
+                      ...workoutData.activeExercises.asMap().entries.map((
+                        entry,
+                      ) {
                         int index = entry.key;
                         ActiveExercise activeEx = entry.value;
 
@@ -282,7 +319,9 @@ class _WorkoutViewState extends State<WorkoutView> {
                           equipment: activeEx.exercise.equipment,
                           instructions: activeEx.exercise.instructions,
                           onDelete: () {
-                            context.read<WorkoutProvider>().removeExercise(index);
+                            context.read<WorkoutProvider>().removeExercise(
+                              index,
+                            );
                           },
                         );
                       }),
@@ -293,16 +332,26 @@ class _WorkoutViewState extends State<WorkoutView> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.forgeSlate,
                           foregroundColor: AppColors.warmIvory,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 2,
                         ),
-                        icon: const Icon(Icons.add_rounded, color: AppColors.emberOrange),
+                        icon: const Icon(
+                          Icons.add_rounded,
+                          color: AppColors.emberOrange,
+                        ),
                         label: const Text(
                           'Add Exercise',
-                          style: TextStyle(color: AppColors.warmIvory, fontSize: 16, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: AppColors.warmIvory,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         onPressed: _navigateAndAddExercise,
                       ),
@@ -322,10 +371,18 @@ class _WorkoutViewState extends State<WorkoutView> {
                             ),
                             elevation: 2,
                           ),
-                          icon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.warmIvory, size: 24),
+                          icon: const Icon(
+                            Icons.check_circle_outline_rounded,
+                            color: AppColors.warmIvory,
+                            size: 24,
+                          ),
                           label: const Text(
                             'Finish Workout',
-                            style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: AppColors.warmIvory,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           onPressed: _isSubmitting ? null : _finishWorkout,
                         ),
@@ -346,10 +403,18 @@ class _WorkoutViewState extends State<WorkoutView> {
                             ),
                             elevation: 2,
                           ),
-                          icon: const Icon(Icons.cancel_outlined, color: AppColors.warmIvory, size: 24),
+                          icon: const Icon(
+                            Icons.cancel_outlined,
+                            color: AppColors.warmIvory,
+                            size: 24,
+                          ),
                           label: const Text(
                             'Cancel Workout',
-                            style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: AppColors.warmIvory,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           onPressed: _cancelWorkout,
                         ),
@@ -364,12 +429,15 @@ class _WorkoutViewState extends State<WorkoutView> {
           ],
         ),
 
-        // FAB FOR SLAYER PAGE
+        // FAB FOR Rest PAGE
         Builder(
           builder: (context) {
             final screenHeight = MediaQuery.of(context).size.height;
             final defaultTop = screenHeight * 0.4;
-            final currentTop = (_fabYPosition ?? defaultTop).clamp(70.0, screenHeight - 160.0);
+            final currentTop = (_fabYPosition ?? defaultTop).clamp(
+              70.0,
+              screenHeight - 160.0,
+            );
 
             return Positioned(
               left: 8,
@@ -377,28 +445,44 @@ class _WorkoutViewState extends State<WorkoutView> {
               child: GestureDetector(
                 onVerticalDragUpdate: (details) {
                   setState(() {
-                    _fabYPosition = (currentTop + details.delta.dy * _fabSensitivity)
-                        .clamp(70.0, screenHeight - 160.0);
+                    _fabYPosition =
+                        (currentTop + details.delta.dy * _fabSensitivity).clamp(
+                          70.0,
+                          screenHeight - 160.0,
+                        );
                   });
                 },
                 child: FloatingActionButton(
-                  heroTag: 'slayerFab',
-                  backgroundColor: AppColors.forgeSlate,
-                  foregroundColor: AppColors.questGold,
-                  elevation: 6,
+                  key: const Key('RestFab'),
+                  heroTag: 'RestFab',
+                  backgroundColor: isRestRemaining
+                      ? AppColors.forgeSlate
+                      : AppColors.forgeSlate.withValues(alpha: 0.5),
+                  foregroundColor: isRestRemaining
+                      ? AppColors.questGold
+                      : AppColors.questGold.withValues(alpha: 0.35),
+                  elevation: isRestRemaining ? 6 : 0,
+                  disabledElevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(color: AppColors.hearthBorder, width: 1.5),
+                    side: BorderSide(
+                      color: isRestRemaining
+                          ? AppColors.hearthBorder
+                          : AppColors.hearthBorder.withValues(alpha: 0.35),
+                      width: 1.5,
+                    ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Slayer(),
-                      ),
-                    );
-                  },
-                  child: const Icon(Icons.shield_outlined, size: 28),
+                  onPressed: isRestRemaining
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RestTimerCard(),
+                            ),
+                          );
+                        }
+                      : null,
+                  child: const Icon(Icons.shield_sharp, size: 28),
                 ),
               ),
             );

@@ -25,6 +25,7 @@ import '../providers/slayer_equipment_provider.dart';
 const String campfireScene =
     'assets/spritesheets/backgrounds/campsite_background_spritesheet.png';
 
+
 //Campsite Height
 const double campsiteHeight = 300;
 
@@ -54,7 +55,6 @@ class _HomeState extends State<Home> {
   void initState() {
     //runs when stateful widget is first created
     super.initState();
-    final user = Provider.of<myUser?>(context, listen: false);
 
     //checks if current user is admin
     final String uid =
@@ -66,8 +66,8 @@ class _HomeState extends State<Home> {
       isAdmin = false;
     }
 
-    if (user != null) {
-      context.read<SlayerEquipmentProvider>().initializeListener(user.uid);
+    if (uid.isNotEmpty) {
+      context.read<SlayerEquipmentProvider>().initializeListener(uid);
     }
 
     //checks users streak if needs reset
@@ -286,7 +286,7 @@ class _HomeState extends State<Home> {
                                   padding: EdgeInsets.zero,
                                   icon: Icon(Icons.menu_book),
                                   color: AppColors.parchmentWhite,
-                                  iconSize: 25,
+                                  iconSize: 28,
                                   onPressed: () {
                                     Navigator.push(
                                       context,
@@ -297,7 +297,7 @@ class _HomeState extends State<Home> {
                                   },
                                 ),
                               ),
-                              'Journal',
+                              'About',
                             ),
 
                             withLabel(
@@ -336,7 +336,7 @@ class _HomeState extends State<Home> {
                                   ),
                                 ),
                               ),
-                              'BMI',
+                              'Calculator',
                             ),
 
                             //admin only: equipment crud page button

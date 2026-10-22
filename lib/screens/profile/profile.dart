@@ -12,11 +12,10 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
+//return the xp needed for the next level
 int _xpForNextLevel(int level) => 100;
 
-int _intField(Map<String, dynamic> data, String key) =>
-    (data[key] as num?)?.toInt() ?? 0;
-
+//open the placeholder page
 void _openWip(BuildContext context, String title) {
   Navigator.push(
     context,
@@ -31,9 +30,11 @@ class Profile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //get user doc from provider
     final userDoc = Provider.of<DocumentSnapshot?>(context);
     final user = Provider.of<myUser?>(context);
 
+    //show loading screen until user info is available
     if (userDoc == null || user == null) {
       return Scaffold(
         backgroundColor: AppColors.obsidianBlack,
@@ -41,23 +42,23 @@ class Profile extends StatelessWidget {
       );
     }
 
-    final data = userDoc.exists
-        ? (userDoc.data() as Map<String, dynamic>? ??
-        <String, dynamic>{})
-        : <String, dynamic>{};
+    //converts firestore doc data into map
+    final data = userDoc.exists ? (userDoc.data() as Map<String, dynamic>?
+        ?? <String, dynamic>{}) : <String, dynamic>{};
 
+    //reads profile details, using defaults for missing values
     final username = (data['username'] as String?) ?? 'Slayer';
-    final level = _intField(data, 'level');
-    final xp = _intField(data, 'xp');
-    final coins = _intField(data, 'coin');
-    final streak = _intField(data, 'streak');
+    final level = (data['level'] as num?)?.toInt() ?? 0;
+    final xp = (data['xp'] as num?)?.toInt() ?? 0;
+    final coins = (data['coin'] as num?)?.toInt() ?? 0;
+    final streak = (data['streak'] as num?)?.toInt() ?? 0;
 
+    //calculates progress bar value
     final xpNeeded = _xpForNextLevel(level);
-    final xpProgress =
-    (xp / xpNeeded).clamp(0.0, 1.0).toDouble();
+    final xpProgress = (xp / xpNeeded).clamp(0.0, 1.0).toDouble();
 
-    final initial =
-    username.isNotEmpty ? username[0].toUpperCase() : '?';
+    //uses username's first letter if no profile photo is available
+    final initial = username.isNotEmpty ? username[0].toUpperCase() : '?';
 
     final photoBase64 = data['photoBase64'] as String?;
 
@@ -69,7 +70,7 @@ class Profile extends StatelessWidget {
           children: [
             const SizedBox(height: 8),
 
-            // Avatar, username and level
+            //avatar, username and level
             _ProfileAvatar(
               uid: user.uid,
               initial: initial,
@@ -97,7 +98,7 @@ class Profile extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // XP progress
+            //xp progress towards the next level
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -143,7 +144,7 @@ class Profile extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Quick stats
+            //display user streak, coins and completed workouts
             Row(
               children: [
                 Expanded(
@@ -171,29 +172,16 @@ class Profile extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Slayer summary and customize button.
-            // Reads the Slayer name from users/{uid}/slayer/SO1.
+            //slayer summary and customize button.
+            //reads slayer name from slayer subcollection
             StreamBuilder<
                 DocumentSnapshot<Map<String, dynamic>>>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(user.uid)
-                  .collection('slayer')
-                  .doc('SO1')
-                  .snapshots(),
+              stream: FirebaseFirestore.instance.collection('users').doc(user.uid).collection('slayer').doc('SO1').snapshots(),
               builder: (context, slayerSnapshot) {
-                final slayerData =
-                    slayerSnapshot.data?.data() ??
-                        <String, dynamic>{};
-
-                final slayerName =
-                    (slayerData['slayer_name'] as String?)
-                        ?.trim() ??
-                        '';
-
-                final displayedName = slayerName.isEmpty
-                    ? 'Your Slayer'
-                    : slayerName;
+                //uses an empty map if the Slayer document has no data yet.
+                final slayerData = slayerSnapshot.data?.data() ?? <String, dynamic>{};
+                final slayerName = (slayerData['slayer_name'] as String?)?.trim() ?? '';
+                final displayedName = slayerName.isEmpty ? 'Your Slayer' : slayerName;
 
                 return Container(
                   width: double.infinity,
@@ -247,7 +235,8 @@ class Profile extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Shortcuts to pages still in development
+            //shortcuts (pages still in development)
+            //fitness stats
             _ShortcutTile(
               icon: Icons.insights,
               label: 'Fitness Stats',
@@ -256,6 +245,7 @@ class Profile extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
+            //badges / achievements
             _ShortcutTile(
               icon: Icons.emoji_events,
               label: 'Badges',
@@ -263,6 +253,7 @@ class Profile extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
+            //friends
             _ShortcutTile(
               icon: Icons.people,
               label: 'Friends',
@@ -275,6 +266,7 @@ class Profile extends StatelessWidget {
   }
 }
 
+//reusable tile for stats
 class _StatTile extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -327,35 +319,32 @@ class _StatTile extends StatelessWidget {
   }
 }
 
+//displays the number of completed workouts
 class _WorkoutCountTile extends StatefulWidget {
   final String uid;
 
   const _WorkoutCountTile({required this.uid});
 
   @override
-  State<_WorkoutCountTile> createState() =>
-      _WorkoutCountTileState();
+  State<_WorkoutCountTile> createState() => _WorkoutCountTileState();
 }
 
-class _WorkoutCountTileState
-    extends State<_WorkoutCountTile> {
+class _WorkoutCountTileState extends State<_WorkoutCountTile> {
   late Stream<QuerySnapshot<Map<String, dynamic>>> _workouts;
 
-  Stream<QuerySnapshot<Map<String, dynamic>>>
-  _openStream() {
-    return FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.uid)
-        .collection('workoutsCompleted')
-        .snapshots();
+  //stream of user's completed workouts
+  Stream<QuerySnapshot<Map<String, dynamic>>> _openStream() {
+    return FirebaseFirestore.instance.collection('users').doc(widget.uid).collection('workoutsCompleted').snapshots();
   }
 
+  //sets up open completed workout stream when widget is first created
   @override
   void initState() {
     super.initState();
     _workouts = _openStream();
   }
 
+  //refreshes the stream if the widget receives a different user ID.
   @override
   void didUpdateWidget(
       covariant _WorkoutCountTile oldWidget,
@@ -369,14 +358,10 @@ class _WorkoutCountTileState
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<
-        QuerySnapshot<Map<String, dynamic>>>(
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _workouts,
       builder: (context, snapshot) {
-        final count = snapshot.hasData
-            ? '${snapshot.data!.docs.length}'
-            : '-';
-
+        final count = snapshot.hasData ? '${snapshot.data!.docs.length}' : '-';
         return _StatTile(
           icon: Icons.fitness_center,
           color: AppColors.questGold,
@@ -388,6 +373,7 @@ class _WorkoutCountTileState
   }
 }
 
+//reusable clickable row for navigating to another section.
 class _ShortcutTile extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -426,7 +412,7 @@ class _ShortcutTile extends StatelessWidget {
   }
 }
 
-// Profile picture: choose from gallery or camera, or remove it.
+//profile picture: choose from gallery or camera, or remove it.
 class _ProfileAvatar extends StatefulWidget {
   final String uid;
   final String initial;
@@ -447,7 +433,7 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
   final ImagePicker _picker = ImagePicker();
   bool _busy = false;
 
-  // Cache decoded bytes to avoid unnecessary image decoding.
+  //cache decoded bytes to avoid unnecessary image decoding.
   String? _decodedFrom;
   Uint8List? _bytes;
 
@@ -663,19 +649,17 @@ class _ProfileAvatarState extends State<_ProfileAvatar> {
   }
 }
 
-// Displays the currently equipped outfit from Firestore.
+//displays the currently equipped outfit from Firestore.
 class _EquippedOutfitName extends StatefulWidget {
   final String uid;
 
   const _EquippedOutfitName({required this.uid});
 
   @override
-  State<_EquippedOutfitName> createState() =>
-      _EquippedOutfitNameState();
+  State<_EquippedOutfitName> createState() => _EquippedOutfitNameState();
 }
 
-class _EquippedOutfitNameState
-    extends State<_EquippedOutfitName> {
+class _EquippedOutfitNameState extends State<_EquippedOutfitName> {
   late Future<List<StoreItem>> _catalogFuture;
 
   @override
@@ -697,11 +681,7 @@ class _EquippedOutfitNameState
 
   @override
   Widget build(BuildContext context) {
-    final slayerRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.uid)
-        .collection('slayer')
-        .doc('SO1');
+    final slayerRef = FirebaseFirestore.instance.collection('users').doc(widget.uid).collection('slayer').doc('SO1');
 
     return StreamBuilder<
         DocumentSnapshot<Map<String, dynamic>>>(

@@ -12,6 +12,7 @@ import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/theme/app_theme.dart';
+import 'package:rxdart/rxdart.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,40 +36,43 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          StreamProvider<myUser?>.value( //stream actively listens for user related auth changes, uses myUser model
+      providers: [
+        StreamProvider<myUser?>.value( //stream actively listens for user related auth changes, uses myUser model
           value: AuthService().user, //stream we are going to listen to, accessing 'user' stream in auth class
           initialData: null,
-          ),
+        ),
 
-          //current user's Firestore document
-          StreamProvider<DocumentSnapshot?>.value(
-            value: FirebaseAuth.instance.authStateChanges().asyncExpand((user) {
-              if (user == null) {
-                return Stream<DocumentSnapshot?>.value(null);
-              }
+        //current user's Firestore document
+        StreamProvider<DocumentSnapshot?>.value(
+          // switchMap cancels the previous user's document stream on every auth change.
+          // asyncExpand never moved on because a Firestore stream never completes.
+          value: FirebaseAuth.instance.authStateChanges().switchMap<DocumentSnapshot?>((user) {
+            if (user == null) {
+              return Stream<DocumentSnapshot?>.value(null);
+            }
 
-              return FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots()
-                  .map<DocumentSnapshot?>((snapshot) => snapshot);}),
-            initialData: null,
-          ),
+            return FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots()
+                .map<DocumentSnapshot?>((snapshot) => snapshot);
+          }),
+          initialData: null,
+        ),
 
-          ChangeNotifierProvider( //actively listens for changes in the workout screen
+        ChangeNotifierProvider( //actively listens for changes in the workout screen
           create: (_) => WorkoutProvider(),
-          ),
+        ),
 
-          ChangeNotifierProvider(
-            create: (_) => WorkoutTimerProvider(),
-          ),
+        ChangeNotifierProvider(
+          create: (_) => WorkoutTimerProvider(),
+        ),
 
-          ChangeNotifierProvider(
-              create: (_) => SlayerEquipmentProvider()
-          ),
-        ],
-        child: MaterialApp(
-          theme: AppTheme.darkForgeTheme,
-          home: const Wrapper(), //wrapper should be either the home/main screen
-         ),
-    ) ;
+        ChangeNotifierProvider(
+            create: (_) => SlayerEquipmentProvider()
+        ),
+      ],
+      child: MaterialApp(
+        theme: AppTheme.darkForgeTheme,
+        home: const Wrapper(), //wrapper should be either the home/main screen
+      ),
+    );
   }
 }

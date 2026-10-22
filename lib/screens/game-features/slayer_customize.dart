@@ -14,28 +14,35 @@ class SlayerCustomize extends StatefulWidget {
 }
 
 class _SlayerCustomizeState extends State<SlayerCustomize> {
+  //controls the Slayer name text field.
   final TextEditingController _nameController = TextEditingController();
+  //used to validate the form.
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  //provides access to Firestore.
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   bool _loadingData = true;
   bool _saving = false;
   bool _loadFailed = false;
-  String? _loadedUid;
-  String? _outfitId;
-  List<StoreItem> _outfits = [];
+  String? _loadedUid; //Id of user whose customization was loaded
+  String? _outfitId; //currently selected outfit Id
+  List<StoreItem> _ownedOutfits = []; //outfits the user owns
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    //gets current user
     final user = Provider.of<myUser?>(context);
     final uid = user?.uid;
-    if (uid != null && uid != _loadedUid) {
+    //loads customization data when a user becomes available or changes.
+    if (uid != null && uid != _loadedUid)
+    {
       _loadedUid = uid;
       _loadCustomization(uid);
     }
   }
 
+  //loads slayer's saved name, owned and equipped outfits
   Future<void> _loadCustomization(String uid) async {
     if (!mounted) return;
 
@@ -45,6 +52,7 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
     });
 
     try {
+      //users firestore documents
       final userRef = _db.collection('users').doc(uid);
       final slayerRef = userRef.collection('slayer').doc('SO1');
 
@@ -62,15 +70,13 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
       final equippedId = slayerData['item_equipped'] as String?;
       final ownedIds = inventorySnapshot.docs.map((doc) => doc.id).toSet();
       final ownedOutfits = catalog.where((item) => ownedIds.contains(item.id)).toList();
-
-      final validEquippedId = ownedOutfits.any((item) => item.id == equippedId,)
-          ? equippedId
-          : null;
+      final validEquippedId = ownedOutfits.any((item) => item.id == equippedId,) ? equippedId : null;
 
       if (!mounted) return;
 
+      //updates screen with loaded customization data
       setState(() {
-        _outfits = ownedOutfits;
+        _ownedOutfits = ownedOutfits;
         _outfitId = validEquippedId;
         _nameController.text = savedName.isNotEmpty ? savedName : 'Slayer';
         _loadingData = false;
@@ -81,6 +87,7 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
 
       if (!mounted) return;
 
+      //stops loading and displays error screen
       setState(() {
         _loadingData = false;
         _loadFailed = true;
@@ -88,12 +95,13 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
     }
   }
 
+  //validates and saves the Slayer's name and selected outfit.
   Future<void> _save(String uid) async {
     if (!_formKey.currentState!.validate()) return;
 
     final slayerName = _nameController.text.trim();
 
-    if (_outfitId != null && !_outfits.any((item) => item.id == _outfitId)) {
+    if (_outfitId != null && !_ownedOutfits.any((item) => item.id == _outfitId)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('You do not own the selected outfit.'),
@@ -134,19 +142,23 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
     }
   }
 
+
   @override
   void dispose() {
+    //dispose text controller when screen is removed
     _nameController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    //gets current user and their id
     final user = Provider.of<myUser?>(context);
     final uid = user?.uid;
+    //finds selected outfit from user's owned outfits
     StoreItem? selected;
 
-    for (final outfit in _outfits) {
+    for (final outfit in _ownedOutfits) {
       if (outfit.id == _outfitId) {
         selected = outfit;
         break;
@@ -156,6 +168,7 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
     return Scaffold(
       backgroundColor: AppColors.obsidianBlack,
       appBar: MyAppBar(),
+      //displays loading, error, or customization content
       body: _loadingData ? const Center(
         child: CircularProgressIndicator(
           color: AppColors.questGold,
@@ -236,6 +249,7 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    //display current slayer name in preview
                     Text(
                       _nameController.text.trim().isEmpty ? 'Slayer' : _nameController.text.trim(),
                       textAlign: TextAlign.center,
@@ -350,7 +364,7 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                           setState(() => _outfitId = value);
                         },
                         child: Column(
-                          children: _outfits.map((outfit) {
+                          children: _ownedOutfits.map((outfit) {
                             final isSelected =
                                 outfit.id == _outfitId;
 

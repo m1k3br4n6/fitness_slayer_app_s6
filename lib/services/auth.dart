@@ -63,6 +63,7 @@ class AuthService {
   }
 
   //4. sign out
+  // TODO: Verify if signOut needs to trigger state reset or document snapshot stream cleanup on account switch.
   Future signOut() async {
     try {
       return await _auth.signOut();
