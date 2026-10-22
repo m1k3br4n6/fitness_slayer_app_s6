@@ -11,6 +11,7 @@ import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/theme/app_theme.dart';
+import 'package:rxdart/rxdart.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +43,7 @@ class MyApp extends StatelessWidget {
 
           //current user's Firestore document
           StreamProvider<DocumentSnapshot?>.value(
-            value: FirebaseAuth.instance.authStateChanges().asyncExpand((user) {
+            value: FirebaseAuth.instance.authStateChanges().switchMap<DocumentSnapshot?>((user) {
               if (user == null) {
                 return Stream<DocumentSnapshot?>.value(null);
               }
