@@ -32,6 +32,7 @@ class _ShopState extends State<Shop> {
 
   //handles purchase process for selected item
   Future<void> _buy(StoreItem item, String uid) async {
+    //confirmed can return true, false or null
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
