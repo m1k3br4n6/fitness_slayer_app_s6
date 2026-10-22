@@ -24,14 +24,6 @@ class _RegisterState extends State<Register> {
   final passwordConfirmController = TextEditingController();
   final slayerNameController = TextEditingController();
 
-/*  String email = '';
-  String password = '';
-  String passwordConfirm = '';
-  String username = '';
-  String slayerName = '';
-  String error = '';
-*/
-
   @override
   void dispose()
   {
