@@ -16,26 +16,23 @@ class Shop extends StatefulWidget {
 }
 
 class _ShopState extends State<Shop> {
-  String? _buyingItemId;
-  late Future<List<StoreItem>> _catalogFuture;
+  String? itemId; //id of item currently being purchased
+  late Future<List<StoreItem>> catalog; //used to load shop catalog
 
   @override
   void initState() {
     super.initState();
-    _catalogFuture = StoreItem.fetchCatalog();
+    catalog = StoreItem.fetchCatalog(); //loads shop catalog when screen is created
   }
 
-  void _retryCatalogLoad() {
-    setState(() {
-      _catalogFuture = StoreItem.fetchCatalog();
-    });
-  }
-
+  //displays toast message at bottom of screen
   void _toast(String message) {ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(content: Text(message)),
   );}
 
+  //handles purchase process for selected item
   Future<void> _buy(StoreItem item, String uid) async {
+    //asks user to confirm purchase
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -46,10 +43,12 @@ class _ShopState extends State<Shop> {
           style: const TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
+          //closes and cancels
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
           ),
+          //closes and confirms
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Buy', style: TextStyle(color: AppColors.gold, fontWeight: FontWeight.bold)),
@@ -58,23 +57,32 @@ class _ShopState extends State<Shop> {
       ),
     );
 
-    if (confirmed != true || !mounted) return;
+    //default message in case purchase is cancelled
+    String message = '';
 
-    setState(() => _buyingItemId = item.id);
-    final result = await StoreService(uid: uid).purchase(item);
-    if (!mounted) return;
-    setState(() => _buyingItemId = null);
+    //only continues purchase if user confirms
+    if (confirmed == true)
+    {
+        setState(() => itemId = item.id); //show item being purchased
+        final result = await StoreService(uid: uid).purchase(item); //purchase item through store service
+        //message is based on purchase result returned by store service
+        message = switch (result) {
+          PurchaseResult.success => 'You bought ${item.name}! Tap Equip to wear it.',
+          PurchaseResult.notEnoughCoins => 'Not enough coins.',
+          PurchaseResult.alreadyOwned => 'You already own this item.',
+          PurchaseResult.userNotFound => "Couldn't find your profile data.",
+          PurchaseResult.failed => 'Something went wrong. Please try again.',
+        };
+    }
 
-    final message = switch (result) {
-      PurchaseResult.success => 'You bought ${item.name}! Tap Equip to wear it.',
-      PurchaseResult.notEnoughCoins => 'Not enough coins.',
-      PurchaseResult.alreadyOwned => 'You already own this item.',
-      PurchaseResult.userNotFound => "Couldn't find your profile data.",
-      PurchaseResult.failed => 'Something went wrong. Please try again.',
-    };
-    _toast(message);
+    //displays appropriate message
+    if (message != '')
+      {
+        _toast(message);
+      }
   }
 
+  //equips item user owns
   Future<void> _equip(StoreItem item, String uid) async {
     try {
       await DatabaseService().setEquipped(uid, item.id);
@@ -88,9 +96,11 @@ class _ShopState extends State<Shop> {
 
   @override
   Widget build(BuildContext context) {
+    //retrieve user model and Firestore doc
     final userDoc = Provider.of<DocumentSnapshot?>(context);
     final user = Provider.of<myUser?>(context);
 
+    //displays loading screen until user data is available
     if (userDoc == null || user == null) {
       return Scaffold(
         backgroundColor: AppColors.background,
@@ -98,19 +108,16 @@ class _ShopState extends State<Shop> {
       );
     }
 
-    final userData =
-        userDoc.data() as Map<String, dynamic>? ?? <String, dynamic>{};
-
-    final coins = (userData['coin'] as num?)?.toInt() ?? 0;
-
-    final userRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid);
+    //get user data and coins
+    final userData = userDoc.data() as Map<String, dynamic>? ?? <String, dynamic>{};
+    final coins = (userData['coin'] as num?)?.toInt() ?? 0; //default coins 0
+    final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
         children: [
+          //coin balance
           _CoinBalance(coins: coins),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -128,13 +135,14 @@ class _ShopState extends State<Shop> {
           ),
           Expanded(
             child: FutureBuilder<List<StoreItem>>(
-              future: _catalogFuture,
+              future: catalog,
               builder: (context, catalogSnapshot) {
                 if (catalogSnapshot.connectionState ==
                     ConnectionState.waiting) {
                   return Loading();
                 }
 
+                //error message if loading fails
                 if (catalogSnapshot.hasError) {
                   return Center(
                     child: Column(
@@ -146,18 +154,13 @@ class _ShopState extends State<Shop> {
                             color: AppColors.textSecondary,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        ElevatedButton(
-                          onPressed: _retryCatalogLoad,
-                          child: const Text('Retry'),
-                        ),
                       ],
                     ),
                   );
                 }
 
+                //retrieves catalog items or empty list
                 final items = catalogSnapshot.data ?? <StoreItem>[];
-
                 if (items.isEmpty) {
                   return const Center(
                     child: Text(
@@ -169,6 +172,7 @@ class _ShopState extends State<Shop> {
                   );
                 }
 
+                //listens for changes to user's inventory
                 return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: userRef.collection('inventory').snapshots(),
                   builder: (context, inventorySnapshot) {
@@ -187,16 +191,12 @@ class _ShopState extends State<Shop> {
                       return Loading();
                     }
 
-                    final ownedIds = inventorySnapshot.data!.docs
-                        .map((doc) => doc.id)
-                        .toSet();
+                    //gets inventory equipment item IDs
+                    final ownedIds = inventorySnapshot.data!.docs.map((doc) => doc.id).toSet();
 
-
+                    //listens for changes to slayer's equipped item
                     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                      stream: userRef
-                          .collection('slayer')
-                          .doc('SO1')
-                          .snapshots(),
+                      stream: userRef.collection('slayer').doc('SO1').snapshots(),
                       builder: (context, slayerSnapshot) {
                         if (slayerSnapshot.hasError) {
                           return const Center(
@@ -213,10 +213,11 @@ class _ShopState extends State<Shop> {
                           return Loading();
                         }
 
+                        //gets Id of currently equipped item
                         final slayerData = slayerSnapshot.data!.data();
-                        final equippedItemId =
-                        slayerData?['item_equipped'] as String?;
+                        final equippedItemId = slayerData?['item_equipped'] as String?;
 
+                        //build scrollable grid containing shop items
                         return GridView.builder(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                           gridDelegate:
@@ -228,16 +229,17 @@ class _ShopState extends State<Shop> {
                           ),
                           itemCount: items.length,
                           itemBuilder: (context, index) {
-                            final item = items[index];
+                            final item = items[index]; //gets item at current grid position
                             final isOwned = ownedIds.contains(item.id);
 
+                            //builds item card
                             return _ItemCard(
                               item: item,
                               coins: coins,
                               isOwned: isOwned,
                               isEquipped: equippedItemId == item.id,
-                              isBuying: _buyingItemId == item.id,
-                              isBusy: _buyingItemId != null,
+                              isBuying: itemId == item.id,
+                              isBusy: itemId != null,
                               onBuy: () => _buy(item, user.uid),
                               onEquip: () => _equip(item, user.uid),
                             );
@@ -256,6 +258,7 @@ class _ShopState extends State<Shop> {
   }
 }
 
+//displays user's current coin balance
 class _CoinBalance extends StatelessWidget {
   final int coins;
   const _CoinBalance({required this.coins});
@@ -294,6 +297,7 @@ class _CoinBalance extends StatelessWidget {
   }
 }
 
+//item card class
 class _ItemCard extends StatelessWidget {
   final StoreItem item;
   final int coins;
@@ -315,10 +319,11 @@ class _ItemCard extends StatelessWidget {
     required this.onEquip,
   });
 
-  Widget _art() {
+  //image format
+  Widget art() {
     if (item.imagePath.isEmpty) {
       return const Text(
-        'Image missing',
+        'Image missing from path',
         style: TextStyle(
           color: AppColors.textSecondary,
           fontSize: 10,
@@ -376,7 +381,7 @@ class _ItemCard extends StatelessWidget {
           CircleAvatar(
             radius: 40,
             backgroundColor: AppColors.container,
-            child: _art(),
+            child: art(),
           ),
           const SizedBox(height: 8),
           Text(
