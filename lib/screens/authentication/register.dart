@@ -16,13 +16,32 @@ class _RegisterState extends State<Register> {
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
   bool loading = false;
+  String error = '';
 
-  String email = '';
+  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final passwordConfirmController = TextEditingController();
+  final slayerNameController = TextEditingController();
+
+/*  String email = '';
   String password = '';
   String passwordConfirm = '';
   String username = '';
   String slayerName = '';
   String error = '';
+*/
+
+  @override
+  void dispose()
+  {
+    usernameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    passwordConfirmController.dispose();
+    slayerNameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +85,7 @@ class _RegisterState extends State<Register> {
 
               //Username input field
               TextFormField(
+                controller: usernameController,
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Username', hintStyle: const TextStyle(
                   color: Colors.blueGrey,
@@ -73,15 +93,13 @@ class _RegisterState extends State<Register> {
                 validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 16
                     ? 'Username should be between 6 - 16 characters long'
                     : null,
-                onChanged: (val) {
-                  username = val;
-                },
               ),
 
               SizedBox(height: 20.0),
 
               //Email input field
               TextFormField(
+                controller: emailController,
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Email', hintStyle: const TextStyle(
                   color: Colors.blueGrey,
@@ -89,17 +107,13 @@ class _RegisterState extends State<Register> {
                 validator: (val) => val == null || val.isEmpty
                     ? 'Please enter an email'
                     : null,
-                onChanged: (val) {
-                  setState(() {
-                    email = val;
-                  });
-                },
               ),
 
               SizedBox(height: 20.0),
 
               //Password input field
               TextFormField(
+                controller: passwordController,
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Password', hintStyle: const TextStyle(
                   color: Colors.blueGrey,
@@ -108,30 +122,21 @@ class _RegisterState extends State<Register> {
                 validator: (val) => val == null || val.length < 6
                     ? 'Password should be 6+ characters long'
                     : null,
-                onChanged: (val) {
-                  setState(() {
-                    password = val;
-                  });
-                },
               ),
 
               SizedBox(height: 20.0),
 
               //Confirm password input field
               TextFormField(
+                controller: passwordConfirmController,
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'Confirm Password', hintStyle: const TextStyle(
                   color: Colors.blueGrey,
                 ),),
                 obscureText: true,
-                validator: (val) => val == null || val.length < 6 || val != password
+                validator: (val) => val == null || val.length < 6 || val != passwordController.text
                     ? 'Must match password'
                     : null,
-                onChanged: (val) {
-                  setState(() {
-                    passwordConfirm = val;
-                  });
-                },
               ),
               SizedBox(height: 20.0),
 
@@ -167,18 +172,14 @@ class _RegisterState extends State<Register> {
               SizedBox(height: 12.0),
 
               TextFormField(
+                controller: slayerNameController,
                 style: const TextStyle(color: Colors.black),
                 decoration: textInputFieldDecoration.copyWith(hintText: 'e.g. Fernando', hintStyle: const TextStyle(
                   color: Colors.blueGrey,
                 ),),
-                validator: (val) => val == null || val.isEmpty || val.length < 6 || val.length > 16
+                validator: (val) => val == null || val.isEmpty || val.length < 3 || val.length > 16
                     ? 'Their name must be between 3 - 16 characters long'
                     : null,
-                onChanged: (val) {
-                  setState(() {
-                    slayerName = val;
-                  });
-                },
               ),
 
               SizedBox(height: 20.0),
@@ -193,7 +194,7 @@ class _RegisterState extends State<Register> {
                   if (_formKey.currentState?.validate() ?? false)
                   {
                     setState(() => loading = true);
-                    dynamic result = await _auth.registerWithEmailAndPassword(username, email, password, slayerName);
+                    dynamic result = await _auth.registerWithEmailAndPassword(usernameController.text.trim(), emailController.text.trim(), passwordController.text, slayerNameController.text.trim());
                     if (result == null) {
                       setState(() {
                         error = 'Please supply valid email';
