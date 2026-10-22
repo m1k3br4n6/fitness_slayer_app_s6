@@ -32,54 +32,69 @@ class _ShopState extends State<Shop> {
 
   //handles purchase process for selected item
   Future<void> _buy(StoreItem item, String uid) async {
-    //asks user to confirm purchase
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Buy this item?', style: TextStyle(color: AppColors.textPrimary)),
+        title: const Text(
+          'Buy this item?',
+          style: TextStyle(color: AppColors.textPrimary),
+        ),
         content: Text(
           '${item.name} costs ${item.price} coins.',
           style: const TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
-          //closes and cancels
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
-          //closes and confirms
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Buy', style: TextStyle(color: AppColors.gold, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Buy',
+              style: TextStyle(
+                color: AppColors.gold,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
     );
 
-    //default message in case purchase is cancelled
-    String message = '';
+    if (confirmed != true || !mounted) return;
 
-    //only continues purchase if user confirms
-    if (confirmed == true)
-    {
-        setState(() => itemId = item.id); //show item being purchased
-        final result = await StoreService(uid: uid).purchase(item); //purchase item through store service
-        //message is based on purchase result returned by store service
-        message = switch (result) {
-          PurchaseResult.success => 'You bought ${item.name}! Tap Equip to wear it.',
-          PurchaseResult.notEnoughCoins => 'Not enough coins.',
-          PurchaseResult.alreadyOwned => 'You already own this item.',
-          PurchaseResult.userNotFound => "Couldn't find your profile data.",
-          PurchaseResult.failed => 'Something went wrong. Please try again.',
-        };
+    setState(() => itemId = item.id);
+
+    String message = 'Something went wrong. Please try again.';
+
+    try {
+      final result = await StoreService(uid: uid).purchase(item);
+
+      message = switch (result) {
+        PurchaseResult.success =>
+        'You bought ${item.name}! Tap Equip to wear it.',
+        PurchaseResult.notEnoughCoins => 'Not enough coins.',
+        PurchaseResult.alreadyOwned => 'You already own this item.',
+        PurchaseResult.userNotFound => "Couldn't find your profile data.",
+        PurchaseResult.failed =>
+        'Something went wrong. Please try again.',
+      };
+    } catch (e) {
+      message = 'Something went wrong. Please try again.';
+    } finally {
+      if (mounted) {
+        setState(() => itemId = null);
+      }
     }
 
-    //displays appropriate message
-    if (message != '')
-      {
-        _toast(message);
-      }
+    if (mounted) {
+      _toast(message);
+    }
   }
 
   //equips item user owns
