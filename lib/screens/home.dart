@@ -1,11 +1,8 @@
 import 'package:fitness_slayer_01/screens/admin/admin_dashboard.dart';
-import 'package:fitness_slayer_01/screens/admin/equipment_management.dart';
 import 'package:fitness_slayer_01/screens/extra-features/info.dart';
 import 'package:fitness_slayer_01/screens/extra-features/work_in_progress_warning.dart';
-import 'package:fitness_slayer_01/screens/notifications/notifications.dart';
 import 'package:fitness_slayer_01/screens/notifications/side_quest.dart';
 import 'package:fitness_slayer_01/screens/planning/calendar.dart';
-import 'package:fitness_slayer_01/screens/settings/settings.dart';
 import 'package:fitness_slayer_01/screens/planning/workout_planning.dart';
 import 'package:fitness_slayer_01/screens/profile/profile.dart';
 import 'package:fitness_slayer_01/screens/extra-features/bmi_calculator.dart';
@@ -111,6 +108,9 @@ class _HomeState extends State<Home> {
 
   // campsite container
   Widget _buildCampsiteContainer() {
+
+    final equipmentState = context.watch<SlayerEquipmentProvider>();
+
     return SizedBox(
       width: double.infinity,
       height: campsiteHeight,
@@ -152,15 +152,19 @@ class _HomeState extends State<Home> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   // Slayer Sprite (Knight)
-                  AnimatedScale(
-                    scale: 1.0,
-                    duration: const Duration(milliseconds: 300),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      //TODO: Load Sprites Dynamically from user ID
-                      child: SpriteAnimator.play(
-                        'idle/knight_idle_blue_spritesheet',
-                        scale: 1.9,
+                  AnimatedOpacity(
+                    opacity: equipmentState.isLoading ? 0.0 : 1.0,
+                    duration: const Duration(milliseconds: 400), // Smooth fade-in
+                    curve: Curves.easeOut,
+                    child: AnimatedScale(
+                      scale: 1.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: SpriteAnimator.play(
+                          equipmentState.idleSpritePath,
+                          scale: 1.9,
+                        ),
                       ),
                     ),
                   ),
