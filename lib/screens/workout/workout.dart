@@ -15,6 +15,8 @@ import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/widgets/cards/workout_timer_card.dart';
 import 'package:fitness_slayer_01/widgets/timers/mini_rest_timer.dart';
 
+import '../game-features/slayer.dart';
+
 class WorkoutView extends StatefulWidget {
   final VoidCallback? onWorkoutFinished;
 
@@ -26,6 +28,9 @@ class WorkoutView extends StatefulWidget {
 
 class _WorkoutViewState extends State<WorkoutView> {
   bool _isSubmitting = false;
+  double? _fabYPosition;
+  // Sensitivity for fab change if needed i like it loose
+  final double _fabSensitivity = 2.5;
 
   @override
   void initState() {
@@ -249,110 +254,157 @@ class _WorkoutViewState extends State<WorkoutView> {
     final timerData = context.watch<WorkoutTimerProvider>();
     bool isRestRemaining = timerData.restSecondsRemaining > 0;
 
-    return Column(
+    return Stack(
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Column(
-                children: [
-                  const WorkoutTimerCard(),
+        // WORKOUT MAIN STUFF
+        Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Column(
+                    children: [
+                      const WorkoutTimerCard(),
 
-                  ...workoutData.activeExercises.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    ActiveExercise activeEx = entry.value;
+                      ...workoutData.activeExercises.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        ActiveExercise activeEx = entry.value;
 
-                    return ExerciseCard(
-                      exerciseIndex: index,
-                      exerciseId: activeEx.exercise.id,
-                      exerciseName: activeEx.exercise.name,
-                      primaryMuscles: activeEx.exercise.primaryMuscles,
-                      mechanic: activeEx.exercise.mechanic,
-                      force: activeEx.exercise.force,
-                      category: activeEx.exercise.category,
-                      equipment: activeEx.exercise.equipment,
-                      instructions: activeEx.exercise.instructions,
-                      onDelete: () {
-                        context.read<WorkoutProvider>().removeExercise(index);
-                      },
-                    );
-                  }),
+                        return ExerciseCard(
+                          exerciseIndex: index,
+                          exerciseId: activeEx.exercise.id,
+                          exerciseName: activeEx.exercise.name,
+                          primaryMuscles: activeEx.exercise.primaryMuscles,
+                          mechanic: activeEx.exercise.mechanic,
+                          force: activeEx.exercise.force,
+                          category: activeEx.exercise.category,
+                          equipment: activeEx.exercise.equipment,
+                          instructions: activeEx.exercise.instructions,
+                          onDelete: () {
+                            context.read<WorkoutProvider>().removeExercise(index);
+                          },
+                        );
+                      }),
 
-                  const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.forgeSlate,
-                      foregroundColor: AppColors.warmIvory,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                    ),
-                    icon: const Icon(Icons.add_rounded, color: AppColors.emberOrange),
-                    label: const Text(
-                      'Add Exercise',
-                      style: TextStyle(color: AppColors.warmIvory, fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
-                    onPressed: _navigateAndAddExercise,
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Finish Workout button
-                  SizedBox(
-                    width: 260,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.emberOrange,
-                        foregroundColor: AppColors.warmIvory,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.forgeSlate,
+                          foregroundColor: AppColors.warmIvory,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
                         ),
-                        elevation: 2,
-                      ),
-                      icon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.warmIvory, size: 24),
-                      label: const Text(
-                        'Finish Workout',
-                        style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      onPressed: _isSubmitting ? null : _finishWorkout,
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // Cancel Workout button below Finish
-                  SizedBox(
-                    width: 260,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.crimsonWine,
-                        foregroundColor: AppColors.warmIvory,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        icon: const Icon(Icons.add_rounded, color: AppColors.emberOrange),
+                        label: const Text(
+                          'Add Exercise',
+                          style: TextStyle(color: AppColors.warmIvory, fontSize: 16, fontWeight: FontWeight.w600),
                         ),
-                        elevation: 2,
+                        onPressed: _navigateAndAddExercise,
                       ),
-                      icon: const Icon(Icons.cancel_outlined, color: AppColors.warmIvory, size: 24),
-                      label: const Text(
-                        'Cancel Workout',
-                        style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      onPressed: _cancelWorkout,
-                    ),
-                  ),
 
-                  const SizedBox(height: 16),
-                ],
+                      const SizedBox(height: 24),
+
+                      // Finish Workout button
+                      SizedBox(
+                        width: 260,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.emberOrange,
+                            foregroundColor: AppColors.warmIvory,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
+                          ),
+                          icon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.warmIvory, size: 24),
+                          label: const Text(
+                            'Finish Workout',
+                            style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: _isSubmitting ? null : _finishWorkout,
+                        ),
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      // Cancel Workout button below Finish
+                      SizedBox(
+                        width: 260,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.crimsonWine,
+                            foregroundColor: AppColors.warmIvory,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
+                          ),
+                          icon: const Icon(Icons.cancel_outlined, color: AppColors.warmIvory, size: 24),
+                          label: const Text(
+                            'Cancel Workout',
+                            style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: _cancelWorkout,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
+
+        // FAB FOR SLAYER PAGE
+        Builder(
+          builder: (context) {
+            final screenHeight = MediaQuery.of(context).size.height;
+            final defaultTop = screenHeight * 0.4;
+            final currentTop = (_fabYPosition ?? defaultTop).clamp(70.0, screenHeight - 160.0);
+
+            return Positioned(
+              left: 8,
+              top: currentTop,
+              child: GestureDetector(
+                onVerticalDragUpdate: (details) {
+                  setState(() {
+                    _fabYPosition = (currentTop + details.delta.dy * _fabSensitivity)
+                        .clamp(70.0, screenHeight - 160.0);
+                  });
+                },
+                child: FloatingActionButton(
+                  heroTag: 'slayerFab',
+                  backgroundColor: AppColors.forgeSlate,
+                  foregroundColor: AppColors.questGold,
+                  elevation: 6,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: AppColors.hearthBorder, width: 1.5),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Slayer(),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.shield_outlined, size: 28),
+                ),
+              ),
+            );
+          },
+        ),
+
         if (isRestRemaining) const MiniRestTimer(),
       ],
     );
