@@ -38,7 +38,17 @@ class _SideQuestState extends State<SideQuest> {
     '15-Second Neck Stretch',
     '10 Standing Calf Raises',
     '10 Cobra Stretches',
-    '10 Seated Torso Twists',
+    '10 Seated Torso Twists'
+    '10 Bodyweight Squats',
+    '5 Wall Push-ups',
+    '10 Hip Circles',
+    '15-Second Overhead Reach' ,
+    '10 Alternating High Knees',
+    '10 Standing Glute Kicks',
+    '15-Second Doorframe Chest Stretch',
+    '10 Wrist Circles',
+    '10 Side Lunges',
+    '15-Second Standing Quad Stretch',
   ];
 
   bool _isClaiming = false;
