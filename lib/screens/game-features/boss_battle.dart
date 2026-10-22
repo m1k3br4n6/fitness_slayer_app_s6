@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/widgets/bar_sprite.dart';
+import 'package:fitness_slayer_01/services/database_service.dart';
 import 'package:fitness_slayer_01/services/boss_battle_service.dart';
-import 'package:fitness_slayer_01/services/boss_progression_service.dart';
 import 'package:fitness_slayer_01/services/sprite_animator.dart';
 
 class BossBattleScreen extends StatefulWidget {
@@ -191,40 +189,19 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Sync user level and account creation week with BossBattleService
-    final userDoc = Provider.of<DocumentSnapshot?>(context);
     final user = Provider.of<myUser?>(context);
-    final uid = user?.uid ?? userDoc?.id ?? '';
+    final uid = user?.uid ?? '';
 
-    if (userDoc != null && userDoc.exists) {
-      final data = userDoc.data() as Map<String, dynamic>? ?? {};
-      final level = (data['level'] as num?)?.toInt() ?? 1;
-
-      final regDate = FirebaseAuth.instance.currentUser?.metadata.creationTime;
-      final weekNumber = BossProgressionService.calculateWeekNumber(regDate);
-
-      _battleService.updateProgressionStats(
-        slayerLevel: level,
-        weekNumber: weekNumber,
-      );
-    }
-
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: uid.isNotEmpty
-          ? FirebaseFirestore.instance
-              .collection('users')
-              .doc(uid)
-              .collection('slayer')
-              .doc('SO1')
-              .snapshots()
-          : null,
-      builder: (context, slayerSnapshot) {
-        if (slayerSnapshot.hasData && slayerSnapshot.data!.exists) {
-          final slayerData = slayerSnapshot.data!.data() ?? {};
-          final slayerName = (slayerData['slayer_name'] as String?)?.trim();
-          if (slayerName != null && slayerName.isNotEmpty) {
-            _battleService.slayerName = slayerName;
-          }
+    return StreamBuilder<BossBattleData>(
+      stream: DatabaseService().getBossBattleDataStream(uid),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final data = snapshot.data!;
+          _battleService.updateProgressionStats(
+            slayerLevel: data.level,
+            weekNumber: data.weekNumber,
+            slayerNameInput: data.slayerName,
+          );
         }
 
         return Scaffold(
@@ -498,9 +475,9 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
                 },
               ),
             ),
-          ),
+          )
         );
-      },
-    );
+        },
+      );
   }
 }

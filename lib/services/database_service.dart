@@ -1,11 +1,83 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
+import 'package:fitness_slayer_01/services/boss_progression_service.dart';
 import 'package:fitness_slayer_01/services/user_stats.dart';
 import 'package:fitness_slayer_01/services/streak_service.dart';
 import '../models/routine.dart';
 import 'package:fitness_slayer_01/models/equipment.dart';
 
+class BossBattleData {
+  final int level;
+  final String slayerName;
+  final int weekNumber;
+
+  const BossBattleData({
+    required this.level,
+    required this.slayerName,
+    required this.weekNumber,
+  });
+}
+
 class DatabaseService {
+
+  //Stream for level, slayer name and week number for boss battle
+  Stream<BossBattleData> getBossBattleDataStream(String userId) {
+
+    final regDate = FirebaseAuth.instance.currentUser?.metadata.creationTime;
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final slayerRef = userRef.collection('slayer').doc('SO1');
+
+    return userRef.snapshots().asyncExpand((userSnap) {
+      final userData = userSnap.data() ?? {};
+      final level = (userData['level'] as num?)?.toInt() ?? 1;
+      final username = (userData['username'] as String?) ?? 'SLAYER';
+
+      DateTime? docRegDate;
+      final rawCreatedAt = userData['createdAt'];
+      if (rawCreatedAt is Timestamp) {
+        docRegDate = rawCreatedAt.toDate();
+      } else if (rawCreatedAt is DateTime) {
+        docRegDate = rawCreatedAt;
+      }
+      docRegDate ??= regDate;
+
+      final calculatedWeek = BossProgressionService.calculateWeekNumber(docRegDate);
+
+      return slayerRef.snapshots().map((slayerSnap) {
+        final slayerData = slayerSnap.data() ?? {};
+        final customName = (slayerData['slayer_name'] as String?)?.trim();
+
+        return BossBattleData(
+          level: level,
+          slayerName: (customName != null && customName.isNotEmpty) ? customName : username,
+          weekNumber: calculatedWeek,
+        );
+      });
+    });
+  }
+
+  // Listens for user progression data
+  Stream<Map<String, dynamic>?> getUserDataStream(String userId) {
+    if (userId.isEmpty) return Stream.value(null);
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .snapshots()
+        .map((doc) => doc.data());
+  }
+
+  // Listens for slayer name
+  Stream<Map<String, dynamic>?> getSlayerDataStream(String userId) {
+    if (userId.isEmpty) return Stream.value(null);
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('slayer')
+        .doc('SO1')
+        .snapshots()
+        .map((doc) => doc.data());
+  }
 
   Future<void> updateUserData(String userId, String username, int coin, int streak, int xp, int level) async {
     await FirebaseFirestore.instance.collection('users').doc(userId).set({
