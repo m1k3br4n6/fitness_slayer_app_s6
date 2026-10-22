@@ -34,7 +34,6 @@ class MyApp extends StatelessWidget {
   //this widget is the root of the application.
   @override
   Widget build(BuildContext context) {
-    // TODO: Wrap MultiProvider child in Consumer<ThemeController> or add ThemeController provider to rebuild MaterialApp on theme change.
     return MultiProvider(
       providers: [
         StreamProvider<myUser?>.value( //stream actively listens for user related auth changes, uses myUser model
@@ -44,8 +43,8 @@ class MyApp extends StatelessWidget {
 
         //current user's Firestore document
         StreamProvider<DocumentSnapshot?>.value(
-          // switchMap cancels the previous user's document stream on every auth change,
-          // asyncExpand never did because a Firestore stream never completes
+          // switchMap cancels the previous user's document stream on every auth change.
+          // asyncExpand never moved on because a Firestore stream never completes.
           value: FirebaseAuth.instance.authStateChanges().switchMap<DocumentSnapshot?>((user) {
             if (user == null) {
               return Stream<DocumentSnapshot?>.value(null);
@@ -64,9 +63,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => WorkoutTimerProvider(),
         ),
-        // TODO: Register ThemeController provider here to manage dark/light modes and custom colors.
       ],
-      // TODO: Bind MaterialApp theme and darkTheme properties to active ThemeController palette.
       child: MaterialApp(
         theme: AppTheme.darkForgeTheme,
         home: const Wrapper(), //wrapper should be either the home/main screen
