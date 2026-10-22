@@ -18,8 +18,7 @@ class Slayer extends StatelessWidget {
               'Slayer Page',
               style: TextStyle(color: AppColors.parchmentWhite, fontSize: 20),
             ),
-          ],
-        ),
+          ],        ),
       ),
     );
   }

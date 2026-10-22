@@ -23,8 +23,7 @@ import 'package:fitness_slayer_01/screens/game-features/boss_battle.dart';
 //Sprite Animator
 import 'package:fitness_slayer_01/services/sprite_animator.dart';
 
-const String campfireScene =
-    'assets/spritesheets/backgrounds/campsite_background_spritesheet.png';
+
 
 //Campsite Height
 const double campsiteHeight = 300;
