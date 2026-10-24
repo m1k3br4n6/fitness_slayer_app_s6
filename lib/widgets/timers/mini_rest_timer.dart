@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
-import 'package:fitness_slayer_01/screens/workout/rest_timer.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
+
+import '../../screens/workout/rest_page.dart';
 
 class MiniRestTimer extends StatelessWidget {
   const MiniRestTimer({super.key});
@@ -20,7 +21,7 @@ class MiniRestTimer extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const RestTimerCard(),
+                builder: (context) => const RestTimerScreen(),
               ),
             );
           },

@@ -74,6 +74,7 @@ flutter:
   - assets/icons/
   - assets/
   - assets/sounds/
+  - assets/sounds/workout_fighting_sounds/
   - assets/spritesheets/attack/
   - assets/spritesheets/backgrounds/
   - assets/spritesheets/bars/
