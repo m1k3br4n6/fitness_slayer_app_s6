@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:fitness_slayer_01/services/boss_progression_service.dart';
 
+import 'audio_service.dart';
+
 // Current phase of the combat state machine, enum allows the UI to know which character is currently active
 enum BattlePhase {
   idle,
@@ -129,6 +131,7 @@ class BossBattleService extends ChangeNotifier {
       phase = BattlePhase.slayerAttacking;
       currentMessage = '$slayerName prepares to strike $bossName!';
       notifyListeners();
+      SoundService.playSwordSwing(2400);
 
       // Pause for 800ms so the user sees Slayer is attacking
       await Future.delayed(const Duration(milliseconds: 800));
@@ -144,6 +147,7 @@ class BossBattleService extends ChangeNotifier {
       if (bossHp <= 0) {
         phase = BattlePhase.victory;
         _addLog('VICTORY! $bossName has been slain!', phase);
+        SoundService.stopAll();
         notifyListeners();
         return; // End combat script on victory
       }
@@ -157,6 +161,7 @@ class BossBattleService extends ChangeNotifier {
       phase = BattlePhase.bossAttacking;
       currentMessage = '$bossName prepares to counterattack $slayerName!';
       notifyListeners();
+      SoundService.playOrcSwing(2400);
 
       // Pause for 800ms so the user sees Boss is attacking
       await Future.delayed(const Duration(milliseconds: 800));
@@ -172,6 +177,7 @@ class BossBattleService extends ChangeNotifier {
       if (slayerHp <= 0) {
         phase = BattlePhase.defeat;
         _addLog('DEFEAT! $slayerName has fallen in battle...', phase);
+        SoundService.stopAll();
         notifyListeners();
         return; // End combat script on defeat
       }
