@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
 import 'package:fitness_slayer_01/services/boss_progression_service.dart';
+import 'package:fitness_slayer_01/services/exp_service.dart';
 import 'package:fitness_slayer_01/services/user_stats.dart';
 import 'package:fitness_slayer_01/services/streak_service.dart';
 import '../models/routine.dart';
@@ -19,7 +20,55 @@ class BossBattleData {
   });
 }
 
+class BossBattleXpResult {
+  final int initialXp;
+  final int earnedXp;
+  final int newXp;
+  final int newLevel;
+
+  const BossBattleXpResult({
+    required this.initialXp,
+    required this.earnedXp,
+    required this.newXp,
+    required this.newLevel,
+  });
+}
+
 class DatabaseService {
+
+  // Awards XP reward (+30 for victory, 0 for defeat) for completing a Boss Battle.
+  Future<BossBattleXpResult?> awardBossBattleXp({
+    required String userId,
+    required bool isVictory,
+  }) async {
+    if (userId.isEmpty) return null;
+
+    final xpEarned = ExpService.calculateBossBattleXp(isVictory: isVictory);
+
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final docSnap = await userRef.get();
+    if (!docSnap.exists) return null;
+
+    final data = docSnap.data() ?? {};
+    final currentXp = (data['xp'] as num?)?.toInt() ?? 0;
+    final currentLevel = (data['level'] as num?)?.toInt() ?? 1;
+
+    final xpAndLevel = ExpService.calculateNewXpAndLevel(currentXp, currentLevel, xpEarned);
+
+    if (xpEarned > 0) {
+      await userRef.set({
+        'xp': xpAndLevel['xp'],
+        'level': xpAndLevel['level'],
+      }, SetOptions(merge: true));
+    }
+
+    return BossBattleXpResult(
+      initialXp: currentXp,
+      earnedXp: xpEarned,
+      newXp: currentXp + xpEarned,
+      newLevel: xpAndLevel['level']!,
+    );
+  }
 
   //Stream for level, slayer name and week number for boss battle
   Stream<BossBattleData> getBossBattleDataStream(String userId) {

@@ -9,7 +9,6 @@ import 'package:fitness_slayer_01/screens/extra-features/bmi_calculator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/services/database_service.dart';
 import 'package:fitness_slayer_01/screens/game-features/shop.dart';
 import 'package:fitness_slayer_01/services/auth.dart';

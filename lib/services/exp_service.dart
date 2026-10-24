@@ -29,6 +29,11 @@ class ExpService {
     return setsPoints + exercisesPoints + volumePoints;
   }
 
+  // Calculates XP earned from a Boss Battle (+30 XP for victory, 0 for defeat)
+  static int calculateBossBattleXp({required bool isVictory}) {
+    return isVictory ? 30 : 0;
+  }
+
   // Calculates new XP and Level
   static Map<String, int> calculateNewXpAndLevel(int currentXp, int currentLevel, int xpEarned) {
     int updatedXp = currentXp + xpEarned;

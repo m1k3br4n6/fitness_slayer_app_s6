@@ -1,3 +1,4 @@
+import 'package:fitness_slayer_01/providers/EXP_bar.dart';
 import 'package:fitness_slayer_01/providers/slayer_equipment_provider.dart';
 import 'package:fitness_slayer_01/screens/wrapper.dart';
 import 'package:fitness_slayer_01/services/notification_service.dart';
@@ -67,6 +68,10 @@ class MyApp extends StatelessWidget {
 
         ChangeNotifierProvider(
             create: (_) => SlayerEquipmentProvider()
+        ),
+
+        ChangeNotifierProvider(
+            create: (_) => ExpBarProvider()
         ),
       ],
       child: MaterialApp(

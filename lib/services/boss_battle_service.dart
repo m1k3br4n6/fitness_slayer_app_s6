@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:fitness_slayer_01/services/boss_progression_service.dart';
 
-import '../providers/slayer_equipment_provider.dart';
 import 'audio_service.dart';
 
 // Current phase of the combat state machine, enum allows the UI to know which character is currently active
