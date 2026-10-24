@@ -8,6 +8,8 @@ import 'package:fitness_slayer_01/providers/EXP_bar.dart';
 import 'package:fitness_slayer_01/services/database_service.dart';
 import 'package:fitness_slayer_01/services/sprite_animator.dart';
 
+import '../../services/audio_service.dart';
+
 class LevelUpPage extends StatefulWidget {
   final bool isVictory;
   final String bossName;
@@ -59,11 +61,16 @@ class _LevelUpPageState extends State<LevelUpPage> {
       expBarProvider.setStaticExp(result.initialXp, 100);
 
       if (result.earnedXp > 0) {
-        // Animate +30 XP filling smoothly on the EXP bar
-        await Future.delayed(const Duration(milliseconds: 350));
+        // Animate +30 XP filling smoothly on the EXP bar and play level gain audio
+        SoundService.playVictory(1200);
+        await Future.delayed(const Duration(milliseconds: 1500));
         if (mounted) {
+          SoundService.playEXPGain(1200);
           expBarProvider.animateExpGain(result.initialXp, result.newXp, 100);
         }
+      }
+      else {
+        SoundService.playDefeat(1200);
       }
     } catch (e) {
       debugPrint('Error processing boss battle XP: $e');

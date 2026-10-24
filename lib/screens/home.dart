@@ -20,6 +20,7 @@ import 'package:fitness_slayer_01/screens/game-features/boss_battle.dart';
 import 'package:fitness_slayer_01/services/sprite_animator.dart';
 
 import '../providers/slayer_equipment_provider.dart';
+import 'game-features/level_up_page.dart';
 
 const String campfireScene =
     'assets/spritesheets/backgrounds/campsite_background_spritesheet.png';
@@ -497,6 +498,25 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                       const SizedBox(height: 12),
+                      // Test Level Up Page (Victory)
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.greenAccent[700],
+                          foregroundColor: Colors.white,
+                        ),
+                        label: const Text('Test Level Up Page'),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LevelUpPage(
+                                isVictory: true,
+                                bossName: 'NOSFERATU ZODD',
+                              ),
+                            ),
+                          );
+                        },
+                      )
                     ],
                   ),
                 ),

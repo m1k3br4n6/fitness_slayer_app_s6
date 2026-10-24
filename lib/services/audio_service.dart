@@ -57,6 +57,45 @@ class SoundService {
     }
   }
 
+  static Future<void> playEXPGain(int durationMs) async {
+    try {
+      // repeat sound until round ends
+      await _sfxCommonSounds.setReleaseMode(ReleaseMode.loop);
+      await _sfxCommonSounds.play(AssetSource('sounds/level_gain.wav'));
+      await Future.delayed(Duration(milliseconds: durationMs));
+
+    } finally {
+      // stop when time is out
+      await _sfxCommonSounds.stop();
+    }
+  }
+
+  static Future<void> playDefeat(int durationMs) async {
+    try {
+      // repeat sound until round ends
+      await _sfxCommonSounds.setReleaseMode(ReleaseMode.loop);
+      await _sfxCommonSounds.play(AssetSource('sounds/defeat.wav'));
+      await Future.delayed(Duration(milliseconds: durationMs));
+
+    } finally {
+      // stop when time is out
+      await _sfxCommonSounds.stop();
+    }
+  }
+
+  static Future<void> playVictory(int durationMs) async {
+    try {
+      // repeat sound until round ends
+      await _sfxCommonSounds.setReleaseMode(ReleaseMode.loop);
+      await _sfxCommonSounds.play(AssetSource('sounds/victory.wav'));
+      await Future.delayed(Duration(milliseconds: durationMs));
+
+    } finally {
+      // stop when time is out
+      await _sfxCommonSounds.stop();
+    }
+  }
+
   static Future<void> stopAll() async {
     await _sfxPlayerAttack.stop();
     await _sfxPlayerOrcAttack.stop();
