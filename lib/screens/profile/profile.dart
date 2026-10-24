@@ -4,6 +4,7 @@ import 'package:fitness_slayer_01/models/store_item.dart';
 import 'package:fitness_slayer_01/screens/common/work_in_progress.dart';
 import 'package:fitness_slayer_01/screens/game-features/slayer_customize.dart';
 import 'package:fitness_slayer_01/services/database_service.dart';
+import 'package:fitness_slayer_01/services/sprite_animator.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,8 @@ class Profile extends StatelessWidget {
 
     //calculates progress bar value
     final xpNeeded = _xpForNextLevel(level);
-    final xpProgress = (xp / xpNeeded).clamp(0.0, 1.0).toDouble();
+    final xpRatio = (xp / xpNeeded).clamp(0.0, 1.0).toDouble();
+    final xpFrame = (xpRatio * 7).round().clamp(0, 7);
 
     //uses username's first letter if no profile photo is available
     final initial = username.isNotEmpty ? username[0].toUpperCase() : '?';
@@ -98,7 +100,7 @@ class Profile extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            //xp progress towards the next level
+            //xp progress towards the next level using static pixel art EXP bar
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -108,39 +110,45 @@ class Profile extends StatelessWidget {
                   color: AppColors.hearthBorder,
                 ),
               ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Experience',
-                        style: TextStyle(
-                          color: AppColors.warmIvory,
-                          fontWeight: FontWeight.w600,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Experience',
+                          style: TextStyle(
+                            color: AppColors.warmIvory,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '$xp / $xpNeeded XP',
-                        style: const TextStyle(
-                          color: AppColors.parchmentBeige,
+                        Text(
+                          '$xp / $xpNeeded XP',
+                          style: const TextStyle(
+                            color: AppColors.parchmentBeige,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
-                      value: xpProgress,
-                      minHeight: 12,
-                      backgroundColor: AppColors.hearthStone,
-                      color: AppColors.emberOrange,
+                      ],
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: FittedBox(
+                        fit: BoxFit.fill,
+                        alignment: Alignment.centerLeft,
+                        child: SpriteAnimator.play(
+                          'bars/xp_bar_Sheet',
+                          scale: 0.5,
+                          frameCount: 8,
+                          staticFrame: xpFrame,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+
             ),
             const SizedBox(height: 16),
 

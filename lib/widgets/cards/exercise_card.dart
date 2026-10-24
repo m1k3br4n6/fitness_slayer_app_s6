@@ -1,3 +1,4 @@
+import 'package:fitness_slayer_01/services/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -220,6 +221,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
 
                     if (!currentSet.isCompleted) {
                       context.read<WorkoutTimerProvider>().startRest(120);
+                      SoundService.playCommon("pop", 180);
                     }
 
                     context.read<WorkoutProvider>().toggleSetCompletion(widget.exerciseIndex, index);

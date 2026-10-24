@@ -46,6 +46,7 @@ dependencies:
   timezone: ^0.11.2
   image_picker: ^1.1.2
   rxdart: ^0.28.0
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +73,7 @@ flutter:
   assets:
   - assets/icons/
   - assets/
+  - assets/sounds/
   - assets/spritesheets/attack/
   - assets/spritesheets/backgrounds/
   - assets/spritesheets/bars/

@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:fitness_slayer_01/services/boss_progression_service.dart';
+
+import 'audio_service.dart';
 
 // Current phase of the combat state machine, enum allows the UI to know which character is currently active
 enum BattlePhase {
@@ -28,6 +31,7 @@ class BossBattleService extends ChangeNotifier {
   bool _isDisposed = false;
 
   // CHARACTER STATS initialized from BossProgressionService
+  String currentEquipment = 'knight';
   String slayerName = 'SLAYER';
   int slayerHp = BossProgressionService.slayerBaseHp;
   int slayerMaxHp = BossProgressionService.slayerBaseHp;
@@ -49,12 +53,15 @@ class BossBattleService extends ChangeNotifier {
 
   bool get isFinished => phase == BattlePhase.victory || phase == BattlePhase.defeat;
 
+  // Randomly chooses boss to fight
+  final String _bossType = Random().nextBool() ? 'orc_boss' : 'skeleton_boss';
+
   // Returns sprite sheet name for Boss based on combat phase
   String get bossSpriteName {
     if (phase == BattlePhase.bossAttacking) {
-      return 'attack/orc_boss_attack_spritesheet';
+      return 'attack/${_bossType}_attack_spritesheet';
     }
-    return 'idle/orc_boss_idle_spritesheet';
+    return 'idle/${_bossType}_idle_spritesheet';
   }
 
   @override
@@ -108,10 +115,11 @@ class BossBattleService extends ChangeNotifier {
 
   // COMBAT SCRIPT
 
-  Future<void> startBattleScript() async {
+  Future<void> startBattleScript(String equippedClass) async {
     if (isBattleActive || _isDisposed) return;
 
     //Reset health bars to full when starting a new fight
+    currentEquipment = equippedClass;
     slayerHp = slayerMaxHp;
     bossHp = bossMaxHp;
     combatLogs.clear();
@@ -129,6 +137,9 @@ class BossBattleService extends ChangeNotifier {
       phase = BattlePhase.slayerAttacking;
       currentMessage = '$slayerName prepares to strike $bossName!';
       notifyListeners();
+      if (equippedClass == "Knight") {SoundService.playSwordSwing(2400);}
+      if (equippedClass == "Mage") {SoundService.playMageAtk(2400);}
+
 
       // Pause for 800ms so the user sees Slayer is attacking
       await Future.delayed(const Duration(milliseconds: 800));
@@ -144,6 +155,8 @@ class BossBattleService extends ChangeNotifier {
       if (bossHp <= 0) {
         phase = BattlePhase.victory;
         _addLog('VICTORY! $bossName has been slain!', phase);
+        SoundService.stopAll();
+        SoundService.playCommon("death",1000);
         notifyListeners();
         return; // End combat script on victory
       }
@@ -157,6 +170,7 @@ class BossBattleService extends ChangeNotifier {
       phase = BattlePhase.bossAttacking;
       currentMessage = '$bossName prepares to counterattack $slayerName!';
       notifyListeners();
+      SoundService.playOrcSwing(2400);
 
       // Pause for 800ms so the user sees Boss is attacking
       await Future.delayed(const Duration(milliseconds: 800));
@@ -172,6 +186,8 @@ class BossBattleService extends ChangeNotifier {
       if (slayerHp <= 0) {
         phase = BattlePhase.defeat;
         _addLog('DEFEAT! $slayerName has fallen in battle...', phase);
+        SoundService.stopAll();
+        SoundService.playCommon("death",1000);
         notifyListeners();
         return; // End combat script on defeat
       }

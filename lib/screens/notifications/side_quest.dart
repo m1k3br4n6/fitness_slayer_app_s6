@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
+import 'package:fitness_slayer_01/services/audio_service.dart';
 import 'package:fitness_slayer_01/services/streak_service.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/widgets/loading.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 const int _dailyQuestCount = 5;
@@ -92,7 +92,7 @@ class _SideQuestState extends State<SideQuest> {
       }) async {
     if (_isClaiming) return;
 
-    SystemSound.play(SystemSoundType.click);
+    SoundService.playCommon("complete_sideQuest",600);
     setState(() => _isClaiming = true);
 
     try {
