@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/models/store_item.dart';
+import 'package:fitness_slayer_01/services/audio_service.dart';
 import 'package:fitness_slayer_01/services/database_service.dart';
 import 'package:fitness_slayer_01/services/store_service.dart';
 import 'package:fitness_slayer_01/widgets/loading.dart';
@@ -73,6 +74,9 @@ class _ShopState extends State<Shop> {
 
     String message = 'Something went wrong. Please try again.';
 
+    if (confirmed == true){
+      SoundService.playBuyEquipment(600);
+    }
     try {
       final result = await StoreService(uid: uid).purchase(item);
 
@@ -103,6 +107,7 @@ class _ShopState extends State<Shop> {
     try {
       await DatabaseService().setEquipped(uid, item.id);
       if (!mounted) return;
+      SoundService.playEquipEquipment(600);
       _toast('${item.name} equipped!');
     } catch (e) {
       if (!mounted) return;

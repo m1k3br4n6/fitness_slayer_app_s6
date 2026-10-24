@@ -96,6 +96,32 @@ class SoundService {
     }
   }
 
+  static Future<void> playBuyEquipment(int durationMs) async {
+    try {
+      // repeat sound until round ends
+      await _sfxCommonSounds.setReleaseMode(ReleaseMode.loop);
+      await _sfxCommonSounds.play(AssetSource('sounds/buy.wav'));
+      await Future.delayed(Duration(milliseconds: durationMs));
+
+    } finally {
+      // stop when time is out
+      await _sfxCommonSounds.stop();
+    }
+  }
+
+  static Future<void> playEquipEquipment(int durationMs) async {
+    try {
+      // repeat sound until round ends
+      await _sfxCommonSounds.setReleaseMode(ReleaseMode.stop);
+      await _sfxCommonSounds.play(AssetSource('sounds/equip.wav'));
+      await Future.delayed(Duration(milliseconds: durationMs));
+
+    } finally {
+      // stop when time is out
+      await _sfxCommonSounds.stop();
+    }
+  }
+
   static Future<void> stopAll() async {
     await _sfxPlayerAttack.stop();
     await _sfxPlayerOrcAttack.stop();
