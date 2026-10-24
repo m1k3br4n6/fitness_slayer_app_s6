@@ -60,9 +60,9 @@ class DungeonScene extends StatelessWidget {
             // SLAYER
             Positioned(
               left: 40,
-              bottom: 25,
+              bottom: 50,
               child: AnimatedScale(
-                scale: 1.0,
+                scale: 1.5,
                 duration: const Duration(milliseconds: 300),
                 child: SpriteAnimator.play(
                   equipmentState.attackSpritePath,
@@ -73,28 +73,28 @@ class DungeonScene extends StatelessWidget {
 
             // Slime
             Positioned(
-              right: 120,
+              right: 130,
               bottom: 25,
               child: AnimatedScale(
                 scale: 1.0,
                 duration: const Duration(milliseconds: 300),
                 child: SpriteAnimator.play(
                   'attack/slime_attack_spritesheet',
-                  scale: 0.22,
+                  scale: 0.3,
                 ),
               ),
             ),
 
             // Wisp (Flying)
             Positioned(
-              right: 40,
+              right: 30,
               bottom: 75,
               child: AnimatedScale(
                 scale: 1.0,
                 duration: const Duration(milliseconds: 300),
                 child: SpriteAnimator.play(
                   'attack/wisp_attack_spritesheet',
-                  scale: 0.22,
+                  scale: 0.3,
                 ),
               ),
             ),
@@ -108,7 +108,7 @@ class DungeonScene extends StatelessWidget {
                 duration: const Duration(milliseconds: 300),
                 child: SpriteAnimator.play(
                   'attack/ghost_attack_spritesheet',
-                  scale: 0.14,
+                  scale: 0.2,
                 ),
               ),
             ),

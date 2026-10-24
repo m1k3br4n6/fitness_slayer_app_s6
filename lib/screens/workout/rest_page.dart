@@ -1,14 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../providers/slayer_equipment_provider.dart';
+import '../../services/ambient_battle_service.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/timers/rest_timer.dart';
 import 'dungeon_fighting.dart';
 
-class RestTimerScreen extends StatelessWidget {
+class RestTimerScreen extends StatefulWidget {
   const RestTimerScreen({super.key});
 
   @override
+  State<RestTimerScreen> createState() => _RestTimerScreenState();
+}
+
+class _RestTimerScreenState extends State<RestTimerScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Start combat when screen opens
+    final equipment = Provider.of<SlayerEquipmentProvider>(context, listen: false).equippedClass;
+    AmbientBattleService.startAmbientCombat(equipment);
+  }
+
+  @override
+  void dispose() {
+    // Stop audio when leaving the page
+    AmbientBattleService.stopAmbientCombat();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: const MyAppBar(),
       backgroundColor: AppColors.slateBackdrop,

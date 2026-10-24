@@ -4,6 +4,8 @@ import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 
+import '../../services/ambient_battle_service.dart';
+
 class TimerWidget extends StatefulWidget {
   const TimerWidget({super.key});
 
@@ -128,6 +130,7 @@ class _TimerWidgetState extends State<TimerWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // PAUSE / RESUME BUTTON
               _buildControlButton(
                 icon: timerData.isRestPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
                 label: timerData.isRestPaused ? 'Resume' : 'Pause',
@@ -135,23 +138,28 @@ class _TimerWidgetState extends State<TimerWidget> {
                   if (timerData.isRestPaused) {
                     context.read<WorkoutTimerProvider>().resumeRest();
                     _countDownController.resume();
+                    AmbientBattleService.startAmbientCombat();
                   } else {
                     context.read<WorkoutTimerProvider>().pauseRest();
                     _countDownController.pause();
+                    AmbientBattleService.stopAmbientCombat();
                   }
                 },
               ),
               const SizedBox(width: 12),
+
+              // RESTART BUTTON
               _buildControlButton(
                 icon: Icons.refresh_rounded,
                 label: 'Restart',
                 onTap: () {
                   context.read<WorkoutTimerProvider>().restartRest(_totalRestDuration);
                   _countDownController.restart(duration: _totalRestDuration);
+                  AmbientBattleService.startAmbientCombat();
                 },
               ),
             ],
-          ),
+          )
         ],
       ),
     );
