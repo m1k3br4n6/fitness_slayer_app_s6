@@ -156,7 +156,7 @@ class BossBattleService extends ChangeNotifier {
         phase = BattlePhase.victory;
         _addLog('VICTORY! $bossName has been slain!', phase);
         SoundService.stopAll();
-        SoundService.playDeath(1000);
+        SoundService.playCommon("death",1000);
         notifyListeners();
         return; // End combat script on victory
       }
@@ -187,7 +187,7 @@ class BossBattleService extends ChangeNotifier {
         phase = BattlePhase.defeat;
         _addLog('DEFEAT! $slayerName has fallen in battle...', phase);
         SoundService.stopAll();
-        SoundService.playDeath(1000);
+        SoundService.playCommon("death",1000);
         notifyListeners();
         return; // End combat script on defeat
       }

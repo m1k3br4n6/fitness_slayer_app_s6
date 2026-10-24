@@ -62,15 +62,15 @@ class _LevelUpPageState extends State<LevelUpPage> {
 
       if (result.earnedXp > 0) {
         // Animate +30 XP filling smoothly on the EXP bar and play level gain audio
-        SoundService.playVictory(1200);
+        SoundService.playCommon("victory",1200);
         await Future.delayed(const Duration(milliseconds: 1500));
         if (mounted) {
-          SoundService.playEXPGain(1200);
+          SoundService.playCommon("level_gain",1200);
           expBarProvider.animateExpGain(result.initialXp, result.newXp, 100);
         }
       }
       else {
-        SoundService.playDefeat(1200);
+        SoundService.playCommon("defeat",1200);
       }
     } catch (e) {
       debugPrint('Error processing boss battle XP: $e');

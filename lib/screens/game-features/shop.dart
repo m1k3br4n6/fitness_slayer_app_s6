@@ -75,7 +75,7 @@ class _ShopState extends State<Shop> {
     String message = 'Something went wrong. Please try again.';
 
     if (confirmed == true){
-      SoundService.playBuyEquipment(600);
+      SoundService.playCommon("buy",600);
     }
     try {
       final result = await StoreService(uid: uid).purchase(item);
@@ -107,7 +107,7 @@ class _ShopState extends State<Shop> {
     try {
       await DatabaseService().setEquipped(uid, item.id);
       if (!mounted) return;
-      SoundService.playEquipEquipment(600);
+      SoundService.playCommon("equip",600);
       _toast('${item.name} equipped!');
     } catch (e) {
       if (!mounted) return;
