@@ -473,8 +473,9 @@ class _BossBattleScreenState extends State<BossBattleScreen> {
                           onPressed: _battleService.isBattleActive
                               ? null
                               : () {
-                                  _battleService.startBattleScript();
-                                },
+                            final equipment = Provider.of<SlayerEquipmentProvider>(context, listen: false).equippedClass;
+                            _battleService.startBattleScript(equipment);
+                          },
                         ),
                       ),
                       const SizedBox(height: 4),

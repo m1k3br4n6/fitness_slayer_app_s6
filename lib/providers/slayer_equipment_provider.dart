@@ -18,6 +18,10 @@ class SlayerEquipmentProvider extends ChangeNotifier {
     return rawPath.replaceAll('assets/spritesheets/', '').replaceAll('.png', '');
   }
 
+  String get equippedClass {
+    return currentEquipment?.classType?? 'knight';
+  }
+
   void initializeListener(String userId) {
     _subscription?.cancel();
     isLoading = true;

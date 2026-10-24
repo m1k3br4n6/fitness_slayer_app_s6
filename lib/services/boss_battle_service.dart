@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:fitness_slayer_01/services/boss_progression_service.dart';
 
+import '../providers/slayer_equipment_provider.dart';
 import 'audio_service.dart';
 
 // Current phase of the combat state machine, enum allows the UI to know which character is currently active
@@ -31,6 +32,7 @@ class BossBattleService extends ChangeNotifier {
   bool _isDisposed = false;
 
   // CHARACTER STATS initialized from BossProgressionService
+  String currentEquipment = 'knight';
   String slayerName = 'SLAYER';
   int slayerHp = BossProgressionService.slayerBaseHp;
   int slayerMaxHp = BossProgressionService.slayerBaseHp;
@@ -114,10 +116,11 @@ class BossBattleService extends ChangeNotifier {
 
   // COMBAT SCRIPT
 
-  Future<void> startBattleScript() async {
+  Future<void> startBattleScript(String equippedClass) async {
     if (isBattleActive || _isDisposed) return;
 
     //Reset health bars to full when starting a new fight
+    currentEquipment = equippedClass;
     slayerHp = slayerMaxHp;
     bossHp = bossMaxHp;
     combatLogs.clear();
@@ -135,7 +138,9 @@ class BossBattleService extends ChangeNotifier {
       phase = BattlePhase.slayerAttacking;
       currentMessage = '$slayerName prepares to strike $bossName!';
       notifyListeners();
-      SoundService.playSwordSwing(2400);
+      if (equippedClass == "Knight") {SoundService.playSwordSwing(2400);}
+      if (equippedClass == "Mage") {SoundService.playMageAtk(2400);}
+
 
       // Pause for 800ms so the user sees Slayer is attacking
       await Future.delayed(const Duration(milliseconds: 800));
@@ -152,6 +157,7 @@ class BossBattleService extends ChangeNotifier {
         phase = BattlePhase.victory;
         _addLog('VICTORY! $bossName has been slain!', phase);
         SoundService.stopAll();
+        SoundService.playDeath(1000);
         notifyListeners();
         return; // End combat script on victory
       }
@@ -182,6 +188,7 @@ class BossBattleService extends ChangeNotifier {
         phase = BattlePhase.defeat;
         _addLog('DEFEAT! $slayerName has fallen in battle...', phase);
         SoundService.stopAll();
+        SoundService.playDeath(1000);
         notifyListeners();
         return; // End combat script on defeat
       }

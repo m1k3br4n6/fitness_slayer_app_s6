@@ -5,6 +5,7 @@ class Equipment {
   final String spriteImagePath;
   final String attackSheetPath;
   final String idleSheetPath;
+  final String classType;
   final int atkBonus;
   final int hpBonus;
   final int price;
@@ -16,6 +17,7 @@ class Equipment {
     required this.spriteImagePath,
     required this.attackSheetPath,
     required this.idleSheetPath,
+    required this.classType,
     required this.atkBonus,
     required this.hpBonus,
     required this.price,

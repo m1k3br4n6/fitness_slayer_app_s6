@@ -166,6 +166,7 @@ class DatabaseService {
       spriteImagePath: data['sprite_image_path'],
       attackSheetPath: data['attack_sheet_path'],
       idleSheetPath: data['idle_sheet_path'],
+      classType: data['class_type'],
       atkBonus: (data['atk_bonus'] as num).toInt(),
       hpBonus: (data['hp_bonus'] as num).toInt(),
       price: (data['price'] as num).toInt(),
