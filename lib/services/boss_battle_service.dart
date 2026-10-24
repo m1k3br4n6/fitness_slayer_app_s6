@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:fitness_slayer_01/services/boss_progression_service.dart';
 
@@ -51,12 +52,15 @@ class BossBattleService extends ChangeNotifier {
 
   bool get isFinished => phase == BattlePhase.victory || phase == BattlePhase.defeat;
 
+  // Randomly chooses boss to fight
+  final String _bossType = Random().nextBool() ? 'orc_boss' : 'skeleton_boss';
+
   // Returns sprite sheet name for Boss based on combat phase
   String get bossSpriteName {
     if (phase == BattlePhase.bossAttacking) {
-      return 'attack/orc_boss_attack_spritesheet';
+      return 'attack/${_bossType}_attack_spritesheet';
     }
-    return 'idle/orc_boss_idle_spritesheet';
+    return 'idle/${_bossType}_idle_spritesheet';
   }
 
   @override
