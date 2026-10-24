@@ -1,3 +1,4 @@
+import 'package:fitness_slayer_01/screens/workout/rest_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
@@ -15,7 +16,6 @@ import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/widgets/cards/workout_timer_card.dart';
 import 'package:fitness_slayer_01/widgets/timers/mini_rest_timer.dart';
 
-import '../workout/rest_timer.dart';
 
 class WorkoutView extends StatefulWidget {
   final VoidCallback? onWorkoutFinished;
@@ -477,7 +477,7 @@ class _WorkoutViewState extends State<WorkoutView> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const RestTimerCard(),
+                              builder: (context) => const RestTimerScreen(),
                             ),
                           );
                         }
