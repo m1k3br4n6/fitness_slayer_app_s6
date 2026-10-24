@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
-
 import '../../services/ambient_battle_service.dart';
 
 class TimerWidget extends StatefulWidget {
@@ -16,6 +15,76 @@ class TimerWidget extends StatefulWidget {
 class _TimerWidgetState extends State<TimerWidget> {
   final CountDownController _countDownController = CountDownController();
   final int _totalRestDuration = 120;
+
+  void _showRestCompleteDialog() {
+    AmbientBattleService.stopAmbientCombat();
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevents closing by tapping outside
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: AppColors.hearthPanel,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: AppColors.woodFrame, width: 2),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.timer_off_rounded, color: AppColors.gemGold, size: 48),
+                const SizedBox(height: 16),
+                const Text(
+                  'REST COMPLETE',
+                  style: TextStyle(
+                    color: AppColors.gemGold,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Time to get back to the fight!',
+                  style: TextStyle(
+                    color: AppColors.parchmentWhite,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.flameOrange,
+                      foregroundColor: AppColors.parchmentWhite,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.fitness_center_rounded, color: AppColors.parchmentWhite),
+                    label: const Text(
+                      'RESUME WORKOUT',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                      Navigator.of(context).pop(); // Go back to the workout page
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +161,7 @@ class _TimerWidgetState extends State<TimerWidget> {
                 }
               }),
               const SizedBox(width: 20),
+
               CircularCountDownTimer(
                 controller: _countDownController,
                 width: 100,
@@ -113,7 +183,11 @@ class _TimerWidgetState extends State<TimerWidget> {
                   fontFeatures: [FontFeature.tabularFigures()],
                 ),
                 textFormat: CountdownTextFormat.MM_SS,
+                onComplete: () {
+                  _showRestCompleteDialog();
+                },
               ),
+
               const SizedBox(width: 20),
               _buildTimeAdjustButton('+10s', Icons.add_rounded, () {
                 final timerProvider = context.read<WorkoutTimerProvider>();
@@ -130,7 +204,6 @@ class _TimerWidgetState extends State<TimerWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // PAUSE / RESUME BUTTON
               _buildControlButton(
                 icon: timerData.isRestPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
                 label: timerData.isRestPaused ? 'Resume' : 'Pause',
@@ -147,8 +220,6 @@ class _TimerWidgetState extends State<TimerWidget> {
                 },
               ),
               const SizedBox(width: 12),
-
-              // RESTART BUTTON
               _buildControlButton(
                 icon: Icons.refresh_rounded,
                 label: 'Restart',
@@ -159,7 +230,7 @@ class _TimerWidgetState extends State<TimerWidget> {
                 },
               ),
             ],
-          )
+          ),
         ],
       ),
     );

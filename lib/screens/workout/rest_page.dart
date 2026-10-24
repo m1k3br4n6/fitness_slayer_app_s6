@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:provider/provider.dart';
+import 'package:fitness_slayer_01/theme/app_colors.dart';
+import 'package:fitness_slayer_01/providers/workout_timer.dart';
 import '../../providers/slayer_equipment_provider.dart';
 import '../../services/ambient_battle_service.dart';
 import '../../widgets/app_bar.dart';
+import '../../widgets/campsite_scene.dart';
 import '../../widgets/timers/rest_timer.dart';
 import 'dungeon_fighting.dart';
 
@@ -18,14 +20,22 @@ class _RestTimerScreenState extends State<RestTimerScreen> {
   @override
   void initState() {
     super.initState();
-    // Start combat when screen opens
-    final equipment = Provider.of<SlayerEquipmentProvider>(context, listen: false).equippedClass;
-    AmbientBattleService.startAmbientCombat(equipment);
+
+    // Read providers after screen build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final equipment = Provider.of<SlayerEquipmentProvider>(context, listen: false).equippedClass;
+      final timerData = Provider.of<WorkoutTimerProvider>(context, listen: false);
+
+      // start fighting if timer not null or paused
+      if (!timerData.isRestPaused) {
+        AmbientBattleService.startAmbientCombat(equipment);
+      }
+    });
   }
 
   @override
   void dispose() {
-    // Stop audio when leaving the page
+    // Stop battle if user leaves page
     AmbientBattleService.stopAmbientCombat();
     super.dispose();
   }
@@ -33,25 +43,30 @@ class _RestTimerScreenState extends State<RestTimerScreen> {
   @override
   Widget build(BuildContext context) {
 
+    final timerData = context.watch<WorkoutTimerProvider>();
+
     return Scaffold(
       appBar: const MyAppBar(),
       backgroundColor: AppColors.slateBackdrop,
-      body: const Column(
+      body: Column(
         children: [
-          Padding(
+          const Padding(
             padding: EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 12.0),
             child: TimerWidget(),
           ),
 
           Expanded(
-            flex: 10,
+            flex: 6,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
-              child: DungeonScene(),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              // if rest is paused swap scenes
+              child: timerData.isRestPaused
+                  ? const CampsiteScene()
+                  : const DungeonScene(),
             ),
           ),
 
-          Spacer(flex: 5),
+          const Spacer(flex: 5),
         ],
       ),
     );
