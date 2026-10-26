@@ -47,11 +47,12 @@ dependencies:
   image_picker: ^1.1.2
   rxdart: ^0.28.0
   audioplayers: ^6.8.1
-  flutter_launcher_icons: ^0.14.4
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
