@@ -75,8 +75,14 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: AppTheme.darkForgeTheme,
-        home: const Wrapper(), //wrapper should be either the home/main screen
+        home: const Banner(
+          message: 'DEMO',
+          location: BannerLocation.topEnd,
+          color: Colors.red,
+          child: Wrapper(),
+        ),
       ),
     );
   }
