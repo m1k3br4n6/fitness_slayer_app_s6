@@ -17,14 +17,23 @@ import 'package:rxdart/rxdart.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //initialize firebase --> to use auth and firestore
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  
+  try {
+    //initialize firebase --> to use auth and firestore
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  final notificationService = NotificationService();
-  await notificationService.init();
-  await notificationService.requestPermissions();
+    final notificationService = NotificationService();
+    await notificationService.init();
+    
+    // Request permissions without awaiting to avoid blocking the app startup.
+    // On some devices, awaiting a permission request before runApp can cause the app to hang.
+    notificationService.requestPermissions();
+  } catch (e) {
+    // Log the error but allow the app to run so it doesn't get stuck on the splash screen.
+    debugPrint("Initialization error: $e");
+  }
 
   runApp(const MyApp()); //when app starts, runs MyApp()
 }
