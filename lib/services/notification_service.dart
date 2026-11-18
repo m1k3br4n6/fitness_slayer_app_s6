@@ -18,10 +18,10 @@ class NotificationService {
       tz.setLocalLocation(tz.getLocation('UTC'));
     }
 
-    // The resource name must match the one defined in pubspec.yaml under flutter_launcher_icons.
-    // The plugin expects just the resource name (e.g., 'launcher_icon'), not the '@mipmap/' prefix.
+    // In Android, mipmap resources must include the '@mipmap/' prefix; without it,
+    // the plugin searches res/drawable where launcher_icon does not exist.
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('launcher_icon');
+        AndroidInitializationSettings('@mipmap/launcher_icon');
 
     const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
       requestAlertPermission: true,
