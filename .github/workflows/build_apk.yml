@@ -33,5 +33,5 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fitness-slayer-apk
+          name: fitness-slayer-${{ github.ref_name }}-${{ github.sha }}
           path: build/app/outputs/flutter-apk/app-release.apk
