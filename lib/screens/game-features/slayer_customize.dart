@@ -55,18 +55,13 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
         StoreItem.fetchCatalog(),
       ]);
 
-      final slayerData =
-          results[0] as Map<String, dynamic>? ?? <String, dynamic>{};
+      final slayerData = results[0] as Map<String, dynamic>? ?? <String, dynamic>{};
       final savedName = (slayerData['slayer_name'] as String?)?.trim() ?? '';
       final equippedId = slayerData['item_equipped'] as String?;
       final ownedIds = results[1] as Set<String>;
       final catalog = results[2] as List<StoreItem>;
-      final ownedOutfits = catalog
-          .where((item) => ownedIds.contains(item.id))
-          .toList();
-      final validEquippedId = ownedOutfits.any((item) => item.id == equippedId)
-          ? equippedId
-          : null;
+      final ownedOutfits = catalog.where((item) => ownedIds.contains(item.id)).toList();
+      final validEquippedId = ownedOutfits.any((item) => item.id == equippedId) ? equippedId : null;
 
       if (!mounted) return;
 
@@ -97,36 +92,25 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
 
     final slayerName = _nameController.text.trim();
 
-    if (_outfitId != null &&
-        !_ownedOutfits.any((item) => item.id == _outfitId)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You do not own the selected outfit.')),
-      );
+    if (_outfitId != null && !_ownedOutfits.any((item) => item.id == _outfitId)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('You do not own the selected outfit.')));
       return;
     }
 
     setState(() => _saving = true);
 
     try {
-      await DatabaseService().saveSlayerCustomization(
-        uid,
-        slayerName,
-        _outfitId,
-      );
+      await DatabaseService().saveSlayerCustomization(uid, slayerName, _outfitId);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Slayer customization saved!')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Slayer customization saved!')));
       Navigator.pop(context);
     } catch (e) {
       debugPrint('Failed to save Slayer customization: $e');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save customization. Please try again.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to save customization. Please try again.')));
     } finally {
       if (mounted) {
         setState(() => _saving = false);
@@ -148,7 +132,6 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
     final uid = user?.uid;
     //finds selected outfit from user's owned outfits
     StoreItem? selected;
-
     for (final outfit in _ownedOutfits) {
       if (outfit.id == _outfitId) {
         selected = outfit;
@@ -161,9 +144,7 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
       appBar: MyAppBar(),
       //displays loading, error, or customization content
       body: _loadingData
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.questGold),
-            )
+          ? const Center(child: CircularProgressIndicator(color: AppColors.questGold))
           : _loadFailed
           ? Center(
               child: Padding(
@@ -171,11 +152,7 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 44,
-                      color: AppColors.emberOrange,
-                    ),
+                    const Icon(Icons.error_outline, size: 44, color: AppColors.emberOrange),
                     const SizedBox(height: 12),
                     const Text(
                       'Could not load your customization.',
@@ -184,9 +161,7 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: uid == null
-                          ? null
-                          : () => _loadCustomization(uid),
+                      onPressed: uid == null ? null : () => _loadCustomization(uid),
                       child: const Text('Try Again'),
                     ),
                   ],
@@ -217,14 +192,9 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                             decoration: BoxDecoration(
                               color: AppColors.darkTavernGreen,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: AppColors.parchmentBeige,
-                                width: 2,
-                              ),
+                              border: Border.all(color: AppColors.parchmentBeige, width: 2),
                             ),
-                            child:
-                                selected != null &&
-                                    selected.imagePath.isNotEmpty
+                            child: selected != null && selected.imagePath.isNotEmpty
                                 ? Image.asset(
                                     selected.imagePath,
                                     fit: BoxFit.contain,
@@ -236,18 +206,12 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                                       );
                                     },
                                   )
-                                : const Icon(
-                                    Icons.person,
-                                    size: 80,
-                                    color: AppColors.warmIvory,
-                                  ),
+                                : const Icon(Icons.person, size: 80, color: AppColors.warmIvory),
                           ),
                           const SizedBox(height: 16),
                           //display current slayer name in preview
                           Text(
-                            _nameController.text.trim().isEmpty
-                                ? 'Slayer'
-                                : _nameController.text.trim(),
+                            _nameController.text.trim().isEmpty ? 'Slayer' : _nameController.text.trim(),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: AppColors.warmIvory,
@@ -275,11 +239,7 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                         children: [
                           const Text(
                             'Slayer Name',
-                            style: TextStyle(
-                              color: AppColors.warmIvory,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
@@ -287,36 +247,26 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                             style: const TextStyle(color: Colors.black),
                             decoration: InputDecoration(
                               hintText: 'Enter your Slayer name',
-                              hintStyle: const TextStyle(
-                                color: Colors.blueGrey,
-                              ),
+                              hintStyle: const TextStyle(color: Colors.blueGrey),
                               filled: true,
                               fillColor: Colors.white,
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.hearthBorder,
-                                ),
+                                borderSide: const BorderSide(color: AppColors.hearthBorder),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.flameOrange,
-                                  width: 3,
-                                ),
+                                borderSide: const BorderSide(color: AppColors.flameOrange, width: 3),
                               ),
                             ),
                             validator: (value) {
                               final name = value?.trim() ?? '';
-
                               if (name.isEmpty) {
                                 return 'Please enter a valid Slayer name';
                               }
-
                               if (name.length < 3 || name.length > 16) {
                                 return 'Name must be between 3 - 16 characters';
                               }
-
                               return null;
                             },
                             onChanged: (_) => setState(() {}),
@@ -340,57 +290,51 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                         children: [
                           const Text(
                             'Choose Your Outfit',
-                            style: TextStyle(
-                              color: AppColors.warmIvory,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 12),
+                          if (_ownedOutfits.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                'No outfits purchased yet. Visit the Armory Store to unlock outfits!',
+                                style: TextStyle(color: AppColors.parchmentBeige),
+                              ),
+                            )
+                          else
+                            RadioGroup<String>(
+                              groupValue: _outfitId,
+                              onChanged: (value) {
+                                setState(() => _outfitId = value);
+                              },
+                              child: Column(
+                                children: _ownedOutfits.map((outfit) {
+                                  final isSelected = outfit.id == _outfitId;
 
-                          RadioGroup<String>(
-                            groupValue: _outfitId,
-                            onChanged: (value) {
-                              setState(() => _outfitId = value);
-                            },
-                            child: Column(
-                              children: _ownedOutfits.map((outfit) {
-                                final isSelected = outfit.id == _outfitId;
-
-                                return Card(
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  color: isSelected
-                                      ? AppColors.hearthStone
-                                      : AppColors.forgeSlate,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    side: BorderSide(
-                                      color: isSelected
-                                          ? AppColors.questGold
-                                          : AppColors.hearthBorder,
-                                      width: isSelected ? 2 : 1.5,
-                                    ),
-                                  ),
-                                  clipBehavior: Clip.antiAlias,
-                                  child: RadioListTile<String>(
-                                    value: outfit.id,
-                                    activeColor: AppColors.questGold,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    title: Text(
-                                      outfit.name,
-                                      style: const TextStyle(
-                                        color: AppColors.warmIvory,
-                                        fontWeight: FontWeight.bold,
+                                  return Card(
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    color: isSelected ? AppColors.hearthStone : AppColors.forgeSlate,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      side: BorderSide(
+                                        color: isSelected ? AppColors.questGold : AppColors.hearthBorder,
+                                        width: isSelected ? 2 : 1.5,
                                       ),
                                     ),
-                                  ),
-                                );
-                              }).toList(),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: RadioListTile<String>(
+                                      value: outfit.id,
+                                      activeColor: AppColors.questGold,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      title: Text(
+                                        outfit.name,
+                                        style: const TextStyle(color: AppColors.warmIvory, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -401,23 +345,15 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: _saving || uid == null
-                            ? null
-                            : () => _save(uid),
+                        onPressed: _saving || uid == null ? null : () => _save(uid),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.flameOrange,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         label: Text(
                           _saving ? 'Saving...' : 'Save Changes',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
                     ),

@@ -84,11 +84,7 @@ class _SideQuestState extends State<SideQuest> {
     Overlay.of(context).insert(overlayEntry);
   }
 
-  Future<void> _completeQuest(
-    String uid,
-    int questIndex, {
-    Offset? buttonCenter,
-  }) async {
+  Future<void> _completeQuest(String uid, int questIndex, {Offset? buttonCenter}) async {
     if (_isClaiming) return;
 
     SoundService.playCommon("complete_sideQuest", 600);
@@ -103,20 +99,13 @@ class _SideQuestState extends State<SideQuest> {
       );
 
       if (result.awarded && mounted) {
-        _showFloatingLoot(
-          buttonCenter ?? const Offset(200, 300),
-          result.xpGained,
-          result.coinsGained,
-        );
+        _showFloatingLoot(buttonCenter ?? const Offset(200, 300), result.xpGained, result.coinsGained);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Failed to complete quest: $e',
-              style: const TextStyle(color: AppColors.crimsonWine),
-            ),
+            content: Text('Failed to complete quest: $e', style: const TextStyle(color: AppColors.crimsonWine)),
           ),
         );
       }
@@ -127,20 +116,13 @@ class _SideQuestState extends State<SideQuest> {
     }
   }
 
-  Widget _buildQuestCard({
-    required _Quest quest,
-    required bool isDone,
-    required String uid,
-  }) {
+  Widget _buildQuestCard({required _Quest quest, required bool isDone, required String uid}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDone ? AppColors.gold : AppColors.border,
-          width: isDone ? 1.5 : 1,
-        ),
+        border: Border.all(color: isDone ? AppColors.gold : AppColors.border, width: isDone ? 1.5 : 1),
       ),
       child: Row(
         children: [
@@ -166,34 +148,20 @@ class _SideQuestState extends State<SideQuest> {
           Builder(
             builder: (btnContext) => ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: isDone
-                    ? AppColors.container
-                    : AppColors.primary,
+                backgroundColor: isDone ? AppColors.container : AppColors.primary,
                 foregroundColor: AppColors.warmIvory,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               onPressed: isDone
                   ? null
                   : () {
                       Offset? buttonCenter;
-                      final renderBox =
-                          btnContext.findRenderObject() as RenderBox?;
+                      final renderBox = btnContext.findRenderObject() as RenderBox?;
                       if (renderBox != null) {
-                        buttonCenter = renderBox.localToGlobal(
-                          renderBox.size.center(Offset.zero),
-                        );
+                        buttonCenter = renderBox.localToGlobal(renderBox.size.center(Offset.zero));
                       }
-                      _completeQuest(
-                        uid,
-                        quest.index,
-                        buttonCenter: buttonCenter,
-                      );
+                      _completeQuest(uid, quest.index, buttonCenter: buttonCenter);
                     },
               child: Text(
                 isDone ? 'Completed' : 'Complete',
@@ -215,20 +183,14 @@ class _SideQuestState extends State<SideQuest> {
     final user = Provider.of<myUser?>(context);
 
     if (userDoc == null || user == null) {
-      return Scaffold(
-        appBar: const MyAppBar(),
-        backgroundColor: AppColors.background,
-        body: const Loading(),
-      );
+      return Scaffold(appBar: const MyAppBar(), backgroundColor: AppColors.background, body: const Loading());
     }
 
     final Map<String, dynamic> userData = userDoc.exists
         ? (userDoc.data() as Map<String, dynamic>? ?? <String, dynamic>{})
         : <String, dynamic>{};
     final now = DateTime.now();
-    final completedQuests = List<String>.from(
-      userData['completedSideQuests'] ?? [],
-    );
+    final completedQuests = List<String>.from(userData['completedSideQuests'] ?? []);
 
     final activeQuests = <_Quest>[];
     final finishedQuests = <_Quest>[];
@@ -257,11 +219,7 @@ class _SideQuestState extends State<SideQuest> {
               child: Text(
                 'Slayer Quest Board',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.warmIvory,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: AppColors.warmIvory, fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 16),
@@ -273,21 +231,14 @@ class _SideQuestState extends State<SideQuest> {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: allCleared ? AppColors.gold : AppColors.border,
-                  width: 1.5,
-                ),
+                border: Border.all(color: allCleared ? AppColors.gold : AppColors.border, width: 1.5),
               ),
               child: Column(
                 children: [
                   if (allCleared) ...[
                     const Text(
                       'Notice Board Cleared!',
-                      style: TextStyle(
-                        color: AppColors.warmIvory,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: AppColors.warmIvory, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 6),
                   ],
@@ -296,10 +247,7 @@ class _SideQuestState extends State<SideQuest> {
                         ? 'All $_dailyQuestCount daily quests completed for today. Come back tomorrow for more quests!'
                         : '$completedCount / $_dailyQuestCount Quests Completed Today',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: AppColors.parchmentBeige,
-                      fontSize: 13,
-                    ),
+                    style: const TextStyle(color: AppColors.parchmentBeige, fontSize: 13),
                   ),
                   const SizedBox(height: 10),
                   ClipRRect(
@@ -322,90 +270,33 @@ class _SideQuestState extends State<SideQuest> {
             if (activeQuests.isNotEmpty) ...[
               const Text(
                 'Active Quests',
-                style: TextStyle(
-                  color: AppColors.warmIvory,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: AppColors.warmIvory, fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               ...activeQuests.map((quest) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
-                  child: _buildQuestCard(
-                    quest: quest,
-                    isDone: false,
-                    uid: user.uid,
-                  ),
+                  child: _buildQuestCard(quest: quest, isDone: false, uid: user.uid),
                 );
               }),
             ],
-
             if (finishedQuests.isNotEmpty) ...[
               const SizedBox(height: 12),
               const Divider(color: Colors.white12),
               const SizedBox(height: 12),
               Text(
                 'Completed Today ($completedCount / $_dailyQuestCount)',
-                style: const TextStyle(
-                  color: AppColors.parchmentBeige,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(color: AppColors.parchmentBeige, fontSize: 15, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               ...finishedQuests.map((quest) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
-                  child: _buildQuestCard(
-                    quest: quest,
-                    isDone: true,
-                    uid: user.uid,
-                  ),
+                  child: _buildQuestCard(quest: quest, isDone: true, uid: user.uid),
                 );
               }),
             ],
-
             const SizedBox(height: 24),
-
-            /*
-             Testing reset button, disabled.
-             Note: the flat 5 XP / 3 coin refund
-             does not match the random 1-12 XP / 1-8 coin rewards, so the real
-             amounts would need to be stored per quest before re-enabling this.
-            */
-            /*
-            Center(
-              child: TextButton.icon(
-                icon: const Icon(Icons.refresh, color: AppColors.crimsonRed, size: 18),
-                label: const Text('Reset Quests & XP/Coins (Testing)', style: TextStyle(color: AppColors.crimsonRed, fontSize: 13)),
-                onPressed: () async {
-                  final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-
-                  int currentXp = (userData['xp'] as num?)?.toInt() ?? 0;
-                  int currentCoin = (userData['coin'] as num?)?.toInt() ?? 0;
-
-                  int xpToDeduct = finishedQuests.length * 5;
-                  int coinsToDeduct = finishedQuests.length * 3;
-
-                  int newXp = (currentXp - xpToDeduct).clamp(0, 999999);
-                  int newCoin = (currentCoin - coinsToDeduct).clamp(0, 999999);
-
-                  await userRef.set({
-                    'completedSideQuests': [],
-                    'xp': newXp,
-                    'coin': newCoin,
-                  }, SetOptions(merge: true));
-
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Quests reset to 0/$_dailyQuestCount (-$xpToDeduct XP, -$coinsToDeduct Coins)')),
-                    );
-                  }
-                },
-              ),
-            ),
-            */
           ],
         ),
       ),
@@ -455,11 +346,7 @@ class _CountdownLabelState extends State<_CountdownLabel> {
   Widget build(BuildContext context) {
     return Text(
       'Next Quests In: ${_formatRemaining()}',
-      style: const TextStyle(
-        color: AppColors.gold,
-        fontSize: 13,
-        fontWeight: FontWeight.bold,
-      ),
+      style: const TextStyle(color: AppColors.gold, fontSize: 13, fontWeight: FontWeight.bold),
     );
   }
 }
@@ -482,23 +369,20 @@ class _FloatingLootOverlay extends StatefulWidget {
   State<_FloatingLootOverlay> createState() => _FloatingLootOverlayState();
 }
 
-class _FloatingLootOverlayState extends State<_FloatingLootOverlay>
-    with SingleTickerProviderStateMixin {
-  static const double _bubbleSize = 52;
-  static const double _bubbleGap = 8;
-  static const double _totalWidth = _bubbleSize * 2 + _bubbleGap;
-
+class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<double> _translateAnimation;
 
+  static const double _bubbleSize = 52;
+  static const double _bubbleGap = 8;
+  static const double _totalWidth = _bubbleSize * 2 + _bubbleGap;
+
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    );
+
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400));
 
     // Fully opaque for most of the animation, fading only near the end
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
@@ -528,10 +412,7 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay>
   Widget build(BuildContext context) {
     // Centers the pair of bubbles on the button while keeping them on screen
     final screenWidth = MediaQuery.of(context).size.width;
-    final leftPosition = (widget.buttonCenter.dx - _totalWidth / 2).clamp(
-      12.0,
-      screenWidth - _totalWidth - 12.0,
-    );
+    final leftPosition = (widget.buttonCenter.dx - _totalWidth / 2).clamp(12.0, screenWidth - _totalWidth - 12.0);
 
     return Positioned(
       left: leftPosition,
@@ -546,15 +427,9 @@ class _FloatingLootOverlayState extends State<_FloatingLootOverlay>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _LootBubble(
-                    label: '+${widget.xpGained}XP',
-                    color: AppColors.primary,
-                  ),
+                  _LootBubble(label: '+${widget.xpGained}XP', color: AppColors.primary),
                   const SizedBox(width: _bubbleGap),
-                  _LootBubble(
-                    label: '+${widget.coinsGained}GP',
-                    color: AppColors.gold,
-                  ),
+                  _LootBubble(label: '+${widget.coinsGained}GP', color: AppColors.gold),
                 ],
               ),
             ),
@@ -582,16 +457,8 @@ class _LootBubble extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: color, width: 2),
         boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.4),
-            blurRadius: 10,
-            spreadRadius: 1,
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.5),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
+          BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 10, spreadRadius: 1),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 6, offset: const Offset(0, 3)),
         ],
       ),
       child: Text(

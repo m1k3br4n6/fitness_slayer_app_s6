@@ -21,14 +21,12 @@ class _BmiCalculatorState extends State<BmiCalculator> {
   double calculatedBMI = 0;
   String message = "";
   IconData arrowIcon = Icons.arrow_upward;
-
   String infotext =
       "BMI (Body Mass Index) is a commonly used international standard to measure the degree of obesity and health of the human body. It is calculated by dividing weight (Kg) by the square of height (m)";
 
   //grab user's previous bmi-related stats
   Future<void> getLatestBMI() async {
     final user = FirebaseAuth.instance.currentUser;
-
     if (user != null) {
       String userId = user.uid;
       final bmiData = await DatabaseService().getUserBMI(userId);
@@ -81,13 +79,7 @@ class _BmiCalculatorState extends State<BmiCalculator> {
             children: <Widget>[
               SizedBox(height: 10.0),
               //age slider
-              Text(
-                'Age: $age years',
-                style: const TextStyle(
-                  color: AppColors.parchmentWhite,
-                  fontSize: 16,
-                ),
-              ),
+              Text('Age: $age years', style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 16)),
               Slider(
                 value: age.toDouble(),
                 min: 16,
@@ -104,10 +96,7 @@ class _BmiCalculatorState extends State<BmiCalculator> {
               //weight slider
               Text(
                 'Weight: ${weight.toStringAsFixed(1)} kg',
-                style: const TextStyle(
-                  color: AppColors.parchmentWhite,
-                  fontSize: 16,
-                ),
+                style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 16),
               ),
               Slider(
                 value: weight,
@@ -125,10 +114,7 @@ class _BmiCalculatorState extends State<BmiCalculator> {
               //height slider
               Text(
                 'Height: ${height.toStringAsFixed(2)} m',
-                style: const TextStyle(
-                  color: AppColors.parchmentWhite,
-                  fontSize: 16,
-                ),
+                style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 16),
               ),
               Slider(
                 value: height,
@@ -146,13 +132,8 @@ class _BmiCalculatorState extends State<BmiCalculator> {
 
               //calculate BMI when button pressed and update values
               ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.flameOrange,
-                ),
-                child: Text(
-                  'Calculate BMI',
-                  style: TextStyle(color: AppColors.parchmentWhite),
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.flameOrange),
+                child: Text('Calculate BMI', style: TextStyle(color: AppColors.parchmentWhite)),
                 onPressed: () async {
                   setState(() {
                     calculatedBMI = weight / (height * height);
@@ -182,13 +163,7 @@ class _BmiCalculatorState extends State<BmiCalculator> {
 
                   final user = FirebaseAuth.instance.currentUser;
                   if (user != null) {
-                    await DatabaseService().updateBMI(
-                      user.uid,
-                      calculatedBMI,
-                      age,
-                      weight,
-                      height,
-                    );
+                    await DatabaseService().updateBMI(user.uid, calculatedBMI, age, weight, height);
                   }
 
                   getLatestBMI();
@@ -201,10 +176,7 @@ class _BmiCalculatorState extends State<BmiCalculator> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(16)),
                 child: Column(
                   children: [
                     Row(
@@ -212,20 +184,13 @@ class _BmiCalculatorState extends State<BmiCalculator> {
                       children: [
                         Text(
                           calculatedBMI.toStringAsFixed(1),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 42,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: const TextStyle(color: Colors.white, fontSize: 42, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(width: 8),
                         Icon(arrowIcon, color: Colors.white, size: 32),
                       ],
                     ),
-                    Text(
-                      message,
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
-                    ),
+                    Text(message, style: const TextStyle(color: Colors.white, fontSize: 18)),
                   ],
                 ),
               ),
@@ -235,27 +200,12 @@ class _BmiCalculatorState extends State<BmiCalculator> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.darkTavernGreen,
-                  borderRadius: BorderRadius.circular(1),
-                ),
+                decoration: BoxDecoration(color: AppColors.darkTavernGreen, borderRadius: BorderRadius.circular(1)),
                 child: Column(
                   children: [
-                    const Text(
-                      'Learn about BMI',
-                      style: TextStyle(
-                        color: AppColors.parchmentWhite,
-                        fontSize: 18,
-                      ),
-                    ),
+                    const Text('Learn about BMI', style: TextStyle(color: AppColors.parchmentWhite, fontSize: 18)),
                     const SizedBox(height: 8),
-                    Text(
-                      infotext,
-                      style: const TextStyle(
-                        color: AppColors.parchmentWhite,
-                        fontSize: 15,
-                      ),
-                    ),
+                    Text(infotext, style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 15)),
                   ],
                 ),
               ),

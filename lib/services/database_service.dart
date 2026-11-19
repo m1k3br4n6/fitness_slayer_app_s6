@@ -3,25 +3,21 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_slayer_01/models/completed_workout.dart';
+import 'package:fitness_slayer_01/models/equipment.dart';
 import 'package:fitness_slayer_01/models/side_quest_entry.dart';
 import 'package:fitness_slayer_01/services/boss_progression_service.dart';
 import 'package:fitness_slayer_01/services/exp_service.dart';
-import 'package:fitness_slayer_01/services/user_stats.dart';
 import 'package:fitness_slayer_01/services/streak_service.dart';
+import 'package:fitness_slayer_01/services/user_stats.dart';
 import 'package:flutter/foundation.dart';
 import '../models/routine.dart';
-import 'package:fitness_slayer_01/models/equipment.dart';
 
 class BossBattleData {
   final int level;
   final String slayerName;
   final int weekNumber;
 
-  const BossBattleData({
-    required this.level,
-    required this.slayerName,
-    required this.weekNumber,
-  });
+  const BossBattleData({required this.level, required this.slayerName, required this.weekNumber});
 }
 
 class BossBattleXpResult {
@@ -40,35 +36,19 @@ class BossBattleXpResult {
 
 class DatabaseService {
   // Awards XP reward (+30 for victory, 0 for defeat) for completing a Boss Battle.
-  Future<BossBattleXpResult?> awardBossBattleXp({
-    required String userId,
-    required bool isVictory,
-  }) async {
+  Future<BossBattleXpResult?> awardBossBattleXp({required String userId, required bool isVictory}) async {
     if (userId.isEmpty) return null;
-
     final xpEarned = ExpService.calculateBossBattleXp(isVictory: isVictory);
-
     final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
     final docSnap = await userRef.get();
     if (!docSnap.exists) return null;
-
     final data = docSnap.data() ?? {};
     final currentXp = (data['xp'] as num?)?.toInt() ?? 0;
     final currentLevel = (data['level'] as num?)?.toInt() ?? 1;
-
-    final xpAndLevel = ExpService.calculateNewXpAndLevel(
-      currentXp,
-      currentLevel,
-      xpEarned,
-    );
-
+    final xpAndLevel = ExpService.calculateNewXpAndLevel(currentXp, currentLevel, xpEarned);
     if (xpEarned > 0) {
-      await userRef.set({
-        'xp': xpAndLevel['xp'],
-        'level': xpAndLevel['level'],
-      }, SetOptions(merge: true));
+      await userRef.set({'xp': xpAndLevel['xp'], 'level': xpAndLevel['level']}, SetOptions(merge: true));
     }
-
     return BossBattleXpResult(
       initialXp: currentXp,
       earnedXp: xpEarned,
@@ -82,12 +62,10 @@ class DatabaseService {
     final regDate = FirebaseAuth.instance.currentUser?.metadata.creationTime;
     final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
     final slayerRef = userRef.collection('slayer').doc('SO1');
-
     return userRef.snapshots().asyncExpand((userSnap) {
       final userData = userSnap.data() ?? {};
       final level = (userData['level'] as num?)?.toInt() ?? 1;
       final username = (userData['username'] as String?) ?? 'SLAYER';
-
       DateTime? docRegDate;
       final rawCreatedAt = userData['createdAt'];
       if (rawCreatedAt is Timestamp) {
@@ -96,20 +74,13 @@ class DatabaseService {
         docRegDate = rawCreatedAt;
       }
       docRegDate ??= regDate;
-
-      final calculatedWeek = BossProgressionService.calculateWeekNumber(
-        docRegDate,
-      );
-
+      final calculatedWeek = BossProgressionService.calculateWeekNumber(docRegDate);
       return slayerRef.snapshots().map((slayerSnap) {
         final slayerData = slayerSnap.data() ?? {};
         final customName = (slayerData['slayer_name'] as String?)?.trim();
-
         return BossBattleData(
           level: level,
-          slayerName: (customName != null && customName.isNotEmpty)
-              ? customName
-              : username,
+          slayerName: (customName != null && customName.isNotEmpty) ? customName : username,
           weekNumber: calculatedWeek,
         );
       });
@@ -119,7 +90,6 @@ class DatabaseService {
   // Listens for changes to the equipped item and returns the full Equipment object
   Stream<Equipment?> getEquippedItemStream(String userId) {
     if (userId.isEmpty) return Stream.value(null);
-
     return FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
@@ -142,11 +112,7 @@ class DatabaseService {
   // Listens for user progression data
   Stream<Map<String, dynamic>?> getUserDataStream(String userId) {
     if (userId.isEmpty) return Stream.value(null);
-    return FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .snapshots()
-        .map((doc) => doc.data());
+    return FirebaseFirestore.instance.collection('users').doc(userId).snapshots().map((doc) => doc.data());
   }
 
   // Listens for slayer name
@@ -161,14 +127,7 @@ class DatabaseService {
         .map((doc) => doc.data());
   }
 
-  Future<void> updateUserData(
-    String userId,
-    String username,
-    int coin,
-    int streak,
-    int xp,
-    int level,
-  ) async {
+  Future<void> updateUserData(String userId, String username, int coin, int streak, int xp, int level) async {
     await FirebaseFirestore.instance.collection('users').doc(userId).set({
       'username': username,
       'coin': coin,
@@ -178,24 +137,13 @@ class DatabaseService {
     }, SetOptions(merge: true));
   }
 
-  Future<void> updateSlayerData(
-    String userId,
-    String slayerName,
-    String item,
-    int hp,
-    int atk,
-  ) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('slayer')
-        .doc('SO1')
-        .set({
-          'slayer_name': slayerName,
-          'item_equipped': item,
-          'hp': hp,
-          'atk': atk,
-        }, SetOptions(merge: true));
+  Future<void> updateSlayerData(String userId, String slayerName, String item, int hp, int atk) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('slayer').doc('SO1').set({
+      'slayer_name': slayerName,
+      'item_equipped': item,
+      'hp': hp,
+      'atk': atk,
+    }, SetOptions(merge: true));
   }
 
   // Saves the profile photo
@@ -206,24 +154,13 @@ class DatabaseService {
   }
 
   /// Saves the latest BMI and the measurements used to calculate it.
-  Future<void> updateBMI(
-    String userId,
-    double latestBMI,
-    int prevAge,
-    double prevWeight,
-    double prevHeight,
-  ) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('BMI')
-        .doc('userBMI')
-        .set({
-          'latestBMI': latestBMI,
-          'prev_age': prevAge,
-          'prev_weight': prevWeight,
-          'prev_height': prevHeight,
-        }, SetOptions(merge: true));
+  Future<void> updateBMI(String userId, double latestBMI, int prevAge, double prevWeight, double prevHeight) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('BMI').doc('userBMI').set({
+      'latestBMI': latestBMI,
+      'prev_age': prevAge,
+      'prev_weight': prevWeight,
+      'prev_height': prevHeight,
+    }, SetOptions(merge: true));
   }
 
   Future<void> updateEquipment(
@@ -237,31 +174,25 @@ class DatabaseService {
     int hpBonus,
     int price,
   ) async {
-    await FirebaseFirestore.instance
-        .collection('equipment_items')
-        .doc(itemId)
-        .set({
-          'name': name,
-          'description': description,
-          'sprite_image_path': spriteImagePath,
-          'attack_sheet_path': attackSheetPath,
-          'idle_sheet_path': idleSheetPath,
-          'price': price,
-          'hp_bonus': hpBonus,
-          'atk_bonus': atkBonus,
-        }, SetOptions(merge: true));
+    await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).set({
+      'name': name,
+      'description': description,
+      'sprite_image_path': spriteImagePath,
+      'attack_sheet_path': attackSheetPath,
+      'idle_sheet_path': idleSheetPath,
+      'price': price,
+      'hp_bonus': hpBonus,
+      'atk_bonus': atkBonus,
+    }, SetOptions(merge: true));
   }
 
   Future<Equipment?> getEquipmentById(String itemId) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('equipment_items')
-        .doc(itemId)
-        .get();
+    final doc = await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).get();
     if (!doc.exists || doc.data() == null) {
       return null; //return null if doc not found or is null
     }
-    final data = doc
-        .data()!; //! indicates that the doc will indeed exist and not be null
+    final data = doc.data()!; //! indicates that the doc will indeed exist and not be null
+
     //return equipment model instance loaded with equipment data
     return Equipment(
       id: doc.id,
@@ -278,19 +209,13 @@ class DatabaseService {
   }
 
   Future<void> deleteEquipment(String itemId) async {
-    await FirebaseFirestore.instance
-        .collection('equipment_items')
-        .doc(itemId)
-        .delete();
+    await FirebaseFirestore.instance.collection('equipment_items').doc(itemId).delete();
   }
 
   Future<void> addToInventory(String userId, String itemId) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('inventory')
-        .doc(itemId)
-        .set({'item_id': itemId}, SetOptions(merge: true));
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('inventory').doc(itemId).set({
+      'item_id': itemId,
+    }, SetOptions(merge: true));
   }
 
   Future<bool> hasItemInInventory(String userId, String itemId) async {
@@ -307,12 +232,9 @@ class DatabaseService {
   }
 
   Future<void> setEquipped(String userId, String itemId) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('slayer')
-        .doc('SO1')
-        .set({'item_equipped': itemId}, SetOptions(merge: true));
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('slayer').doc('SO1').set({
+      'item_equipped': itemId,
+    }, SetOptions(merge: true));
   }
 
   Future<void> saveWorkout(String userId, CompletedWorkout workout) async {
@@ -324,7 +246,8 @@ class DatabaseService {
         .add(workout.toMap());
   }
 
-  // Checks on app launch if the user's streak has expired (3+ days skipped) and resets streak to 0 in Firestore if expired
+  // Checks on app launch if the user's streak has expired (3+ days skipped)
+  // and resets streak to 0 in Firestore if expired
   Future<void> checkAndUpdateStreakOnLaunch(String userId) async {
     if (userId.isEmpty) return;
 
@@ -344,17 +267,14 @@ class DatabaseService {
       lastWorkoutDate = rawLastDate;
     }
 
-    if (currentStreak > 0 &&
-        StreakService.isStreakExpired(lastWorkoutDate, DateTime.now())) {
+    if (currentStreak > 0 && StreakService.isStreakExpired(lastWorkoutDate, DateTime.now())) {
       await userRef.set({'streak': 0}, SetOptions(merge: true));
     }
   }
 
-  // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore after completing a workout, returning UserStatsResult
-  Future<UserStatsResult> updateUserStatsForWorkout(
-    String userId,
-    CompletedWorkout workout,
-  ) async {
+  // Updates user's XP, Level, Streak, and lastWorkoutDate in Firestore after completing
+  // a workout, returning UserStatsResult
+  Future<UserStatsResult> updateUserStatsForWorkout(String userId, CompletedWorkout workout) async {
     int xpEarned = calculateWorkoutXp(workout);
 
     final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
@@ -390,20 +310,13 @@ class DatabaseService {
       }
 
       // Find the most recent workout that occurred BEFORE the current workout being submitted
-      if (d != null &&
-          d.isBefore(
-            workout.dateCompleted.subtract(const Duration(milliseconds: 10)),
-          )) {
+      if (d != null && d.isBefore(workout.dateCompleted.subtract(const Duration(milliseconds: 10)))) {
         lastWorkoutDate = d;
         break;
       }
     }
 
-    final xpAndLevel = calculateNewXpAndLevel(
-      currentXp,
-      currentLevel,
-      xpEarned,
-    );
+    final xpAndLevel = calculateNewXpAndLevel(currentXp, currentLevel, xpEarned);
     int newStreak = calculateNewStreak(
       currentStreak: currentStreak,
       lastWorkoutDate: lastWorkoutDate,
@@ -426,30 +339,15 @@ class DatabaseService {
         .doc(userId)
         .collection('workoutsCompleted')
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => CompletedWorkout.fromMap(doc.data(), doc.id))
-              .toList(),
-        );
+        .map((snapshot) => snapshot.docs.map((doc) => CompletedWorkout.fromMap(doc.data(), doc.id)).toList());
   }
 
-  Future<void> saveRoutine(
-    String userId,
-    Map<String, dynamic> routineData,
-  ) async {
+  Future<void> saveRoutine(String userId, Map<String, dynamic> routineData) async {
     // Navigates to: users / {userId} / routines / {auto-generated-doc-id}
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('routines')
-        .add(routineData);
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('routines').add(routineData);
   }
 
-  Future<void> updateRoutine(
-    String userId,
-    String routineId,
-    Map<String, dynamic> routineData,
-  ) async {
+  Future<void> updateRoutine(String userId, String routineId, Map<String, dynamic> routineData) async {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
@@ -465,78 +363,56 @@ class DatabaseService {
         .doc(userId)
         .collection('routines')
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Routine.fromMap(doc.data(), doc.id))
-              .toList(),
-        );
+        .map((snapshot) => snapshot.docs.map((doc) => Routine.fromMap(doc.data(), doc.id)).toList());
   }
 
   Future<void> deleteRoutine(String userId, String routineId) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('routines')
-        .doc(routineId)
-        .delete();
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('routines').doc(routineId).delete();
   }
 
-  /// Fetches the user's saved BMI values, or null when no record exists.
+  /// Fetches the latest BMI data for the given user.
   Future<Map<String, dynamic>?> getUserBMI(String userId) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('BMI')
-        .doc('userBMI')
-        .get();
+    final doc = await FirebaseFirestore.instance.collection('users').doc(userId).collection('BMI').doc('userBMI').get();
     return doc.exists ? doc.data() : null;
   }
 
-  /// Streams permanent side-quest history so calendar entries update live.
+  /// Streams permanent side quest history entries for the given user.
   Stream<List<SideQuestEntry>> getSideQuestStream(String userId) {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
         .collection('sideQuestLog')
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => SideQuestEntry.fromMap(doc.data()))
-              .toList(),
-        )
+        .map((snap) => snap.docs.map((doc) => SideQuestEntry.fromMap(doc.data())).toList())
         .handleError((error) {
           debugPrint('Side quest stream error: $error');
         });
   }
 
-  /// Atomically awards one side quest and returns the exact rewards applied.
-  Future<SideQuestResult> completeSideQuest(
-    String userId,
-    int questIndex,
-    List<String> dailyQuestTexts,
-  ) async {
-    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+  /// Completes a side quest for today and awards XP and coin in a transaction.
+  Future<SideQuestResult> completeSideQuest(String uid, int questIndex, List<String> dailyQuestTexts) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
     final now = DateTime.now();
     final questKey = _questKey(now, questIndex);
     final questText = dailyQuestTexts[questIndex];
     final xpGained = Random().nextInt(12) + 1;
     final coinsGained = Random().nextInt(8) + 1;
 
-    final awarded = await FirebaseFirestore.instance.runTransaction<bool>((
-      transaction,
-    ) async {
+    final awarded = await FirebaseFirestore.instance.runTransaction<bool>((transaction) async {
       final snapshot = await transaction.get(userRef);
       final data = snapshot.data() ?? <String, dynamic>{};
+
       final completedQuests = List<String>.from(
         data['completedSideQuests'] ?? [],
       ).where((key) => key.startsWith(_dayPrefix(now))).toList();
       if (completedQuests.contains(questKey)) return false;
-      completedQuests.add(questKey);
 
+      completedQuests.add(questKey);
       final currentXp = (data['xp'] as num?)?.toInt() ?? 0;
       final currentLevel = (data['level'] as num?)?.toInt() ?? 1;
       final currentCoin = (data['coin'] as num?)?.toInt() ?? 0;
       final currentStreak = (data['streak'] as num?)?.toInt() ?? 0;
+
       DateTime? lastWorkoutDate;
       final rawLastDate = data['lastWorkoutDate'];
       if (rawLastDate is Timestamp) {
@@ -551,6 +427,7 @@ class DatabaseService {
         updatedXp -= 100;
         updatedLevel += 1;
       }
+
       final updatedStreak = StreakService.calculateNewStreak(
         currentStreak: currentStreak,
         lastWorkoutDate: lastWorkoutDate,
@@ -565,59 +442,39 @@ class DatabaseService {
         'lastWorkoutDate': now,
         'completedSideQuests': completedQuests,
       }, SetOptions(merge: true));
+
       transaction.set(userRef.collection('sideQuestLog').doc(questKey), {
         'text': questText,
         'xp': xpGained,
         'coins': coinsGained,
         'dateCompleted': Timestamp.fromDate(now),
       });
+
       return true;
     });
 
-    return SideQuestResult(
-      awarded: awarded,
-      xpGained: xpGained,
-      coinsGained: coinsGained,
-    );
+    return SideQuestResult(awarded: awarded, xpGained: xpGained, coinsGained: coinsGained);
   }
 
   /// Loads the saved slayer document for customization editing.
   Future<Map<String, dynamic>?> getSlayerCustomization(String userId) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('slayer')
-        .doc('SO1')
-        .get();
+    final doc = await FirebaseFirestore.instance.collection('users').doc(userId).collection('slayer').doc('SO1').get();
     return doc.data();
   }
 
   /// Loads inventory document IDs used to filter the outfit catalog.
   Future<Set<String>> getUserInventoryIds(String userId) async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('inventory')
-        .get();
+    final snapshot = await FirebaseFirestore.instance.collection('users').doc(userId).collection('inventory').get();
     return snapshot.docs.map((doc) => doc.id).toSet();
   }
 
   /// Saves the slayer name and equipped outfit selected by the user.
-  Future<void> saveSlayerCustomization(
-    String userId,
-    String slayerName,
-    String? outfitId,
-  ) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('slayer')
-        .doc('SO1')
-        .set({
-          'slayer_name': slayerName,
-          // ignore: use_null_aware_elements
-          if (outfitId != null) 'item_equipped': outfitId,
-        }, SetOptions(merge: true));
+  Future<void> saveSlayerCustomization(String userId, String slayerName, String? outfitId) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).collection('slayer').doc('SO1').set({
+      'slayer_name': slayerName,
+      // ignore: use_null_aware_elements
+      if (outfitId != null) 'item_equipped': outfitId,
+    }, SetOptions(merge: true));
   }
 }
 
@@ -626,11 +483,7 @@ class SideQuestResult {
   final int xpGained;
   final int coinsGained;
 
-  const SideQuestResult({
-    required this.awarded,
-    required this.xpGained,
-    required this.coinsGained,
-  });
+  const SideQuestResult({required this.awarded, required this.xpGained, required this.coinsGained});
 }
 
 String _questKey(DateTime now, int questIndex) {

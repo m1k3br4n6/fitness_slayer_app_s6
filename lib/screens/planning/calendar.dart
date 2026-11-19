@@ -18,6 +18,8 @@ class Calendar extends StatefulWidget {
 class _CalendarState extends State<Calendar> {
   late DateTime _displayedMonth;
   late DateTime _today;
+
+  // Cached so the side quest stream is not resubscribed on every rebuild
   Stream<List<SideQuestEntry>>? _sideQuestStream;
   String? _sideQuestStreamUid;
 
@@ -36,15 +38,7 @@ class _CalendarState extends State<Calendar> {
     'December',
   ];
 
-  final List<String> _daysOfWeek = const [
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun',
-  ];
+  final List<String> _daysOfWeek = const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   @override
   void initState() {
@@ -55,10 +49,7 @@ class _CalendarState extends State<Calendar> {
 
   void _changeMonth(int increment) {
     setState(() {
-      _displayedMonth = DateTime(
-        _displayedMonth.year,
-        _displayedMonth.month + increment,
-      );
+      _displayedMonth = DateTime(_displayedMonth.year, _displayedMonth.month + increment);
     });
   }
 
@@ -66,6 +57,7 @@ class _CalendarState extends State<Calendar> {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
+  // Cached so the side quest stream is not resubscribed on every rebuild
   Stream<List<SideQuestEntry>> _getSideQuestStream(String uid) {
     if (_sideQuestStream == null || _sideQuestStreamUid != uid) {
       _sideQuestStreamUid = uid;
@@ -77,8 +69,7 @@ class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<myUser?>(context);
-    final String currentUserId =
-        user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+    final String currentUserId = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
 
     final year = _displayedMonth.year;
     final month = _displayedMonth.month;
@@ -97,9 +88,7 @@ class _CalendarState extends State<Calendar> {
           final allWorkouts = workoutSnapshot.data ?? [];
 
           return StreamBuilder<List<SideQuestEntry>>(
-            stream: currentUserId.isNotEmpty
-                ? _getSideQuestStream(currentUserId)
-                : const Stream.empty(),
+            stream: currentUserId.isNotEmpty ? _getSideQuestStream(currentUserId) : const Stream.empty(),
             builder: (context, questSnapshot) {
               final allSideQuests = questSnapshot.data ?? [];
 
@@ -112,11 +101,7 @@ class _CalendarState extends State<Calendar> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon: const Icon(
-                            Icons.chevron_left,
-                            color: AppColors.textPrimary,
-                            size: 28,
-                          ),
+                          icon: const Icon(Icons.chevron_left, color: AppColors.textPrimary, size: 28),
                           onPressed: () => _changeMonth(-1),
                         ),
                         Text(
@@ -128,11 +113,7 @@ class _CalendarState extends State<Calendar> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(
-                            Icons.chevron_right,
-                            color: AppColors.textPrimary,
-                            size: 28,
-                          ),
+                          icon: const Icon(Icons.chevron_right, color: AppColors.textPrimary, size: 28),
                           onPressed: () => _changeMonth(1),
                         ),
                       ],
@@ -163,13 +144,12 @@ class _CalendarState extends State<Calendar> {
                     // Full Scale Calendar Grid
                     Expanded(
                       child: GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 7,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                              childAspectRatio: 0.9,
-                            ),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 7,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                          childAspectRatio: 0.9,
+                        ),
                         itemCount: totalDays + startDayOffset,
                         itemBuilder: (context, index) {
                           if (index < startDayOffset) {
@@ -180,22 +160,14 @@ class _CalendarState extends State<Calendar> {
 
                           final isToday = _isSameDay(tileDate, _today);
 
-                          final dayWorkouts = allWorkouts
-                              .where(
-                                (w) => _isSameDay(w.dateCompleted, tileDate),
-                              )
-                              .toList();
+                          final dayWorkouts = allWorkouts.where((w) => _isSameDay(w.dateCompleted, tileDate)).toList();
 
                           // A day counts as active if it has a logged workout or a completed side quest
                           final daySideQuests = allSideQuests
-                              .where(
-                                (q) => _isSameDay(q.dateCompleted, tileDate),
-                              )
+                              .where((q) => _isSameDay(q.dateCompleted, tileDate))
                               .toList();
 
-                          final bool hasWorkout =
-                              dayWorkouts.isNotEmpty ||
-                              daySideQuests.isNotEmpty;
+                          final bool hasWorkout = dayWorkouts.isNotEmpty || daySideQuests.isNotEmpty;
 
                           return GestureDetector(
                             onTap: () {
@@ -214,16 +186,12 @@ class _CalendarState extends State<Calendar> {
                               decoration: BoxDecoration(
                                 color: isToday
                                     ? AppColors.primary
-                                    : (hasWorkout
-                                          ? AppColors.woodFrame
-                                          : AppColors.surface),
+                                    : (hasWorkout ? AppColors.woodFrame : AppColors.surface),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                   color: isToday
                                       ? AppColors.gold
-                                      : (hasWorkout
-                                            ? AppColors.flameOrange
-                                            : AppColors.border),
+                                      : (hasWorkout ? AppColors.flameOrange : AppColors.border),
                                   width: isToday ? 2.5 : (hasWorkout ? 1.5 : 1),
                                 ),
                               ),
@@ -234,9 +202,7 @@ class _CalendarState extends State<Calendar> {
                                       '$dayNumber',
                                       style: TextStyle(
                                         color: AppColors.textPrimary,
-                                        fontWeight: isToday || hasWorkout
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
+                                        fontWeight: isToday || hasWorkout ? FontWeight.bold : FontWeight.normal,
                                         fontSize: 16,
                                       ),
                                     ),
