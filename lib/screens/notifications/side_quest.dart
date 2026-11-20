@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_slayer_01/models/my_user.dart';
 import 'package:fitness_slayer_01/services/audio_service.dart';
-import 'package:fitness_slayer_01/services/streak_service.dart';
+import 'package:fitness_slayer_01/services/database_service.dart';
 import 'package:fitness_slayer_01/theme/app_colors.dart';
 import 'package:fitness_slayer_01/widgets/app_bar.dart';
 import 'package:fitness_slayer_01/widgets/loading.dart';
@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 const int _dailyQuestCount = 5;
-const int _xpPerLevel = 100;
 
 class _Quest {
   final String text;
@@ -39,10 +38,10 @@ class _SideQuestState extends State<SideQuest> {
     '10 Standing Calf Raises',
     '10 Cobra Stretches',
     '10 Seated Torso Twists'
-    '10 Bodyweight Squats',
+        '10 Bodyweight Squats',
     '5 Wall Push-ups',
     '10 Hip Circles',
-    '15-Second Overhead Reach' ,
+    '15-Second Overhead Reach',
     '10 Alternating High Knees',
     '10 Standing Glute Kicks',
     '10 Wrist Circles',
@@ -85,91 +84,22 @@ class _SideQuestState extends State<SideQuest> {
     Overlay.of(context).insert(overlayEntry);
   }
 
-  Future<void> _completeQuest(
-      String uid,
-      int questIndex, {
-        Offset? buttonCenter,
-      }) async {
+  Future<void> _completeQuest(String uid, int questIndex, {Offset? buttonCenter}) async {
     if (_isClaiming) return;
 
-    SoundService.playCommon("complete_sideQuest",600);
+    SoundService.playCommon("complete_sideQuest", 600);
     setState(() => _isClaiming = true);
 
     try {
-      final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
-      final now = DateTime.now();
-      final questKey = _questKey(now, questIndex);
-      final questText = _getTodayQuests()[questIndex].text;
+      final dailyQuests = _getTodayQuests();
+      final result = await DatabaseService().completeSideQuest(
+        uid,
+        questIndex,
+        dailyQuests.map((quest) => quest.text).toList(),
+      );
 
-      // Rolled outside the transaction so a retry does not re-roll the reward
-      final xpGained = Random().nextInt(12) + 1;
-      final coinsGained = Random().nextInt(8) + 1;
-
-      // Transaction: re-reads the latest user document before writing, so a stale
-      // snapshot or a double tap cannot overwrite XP or award a quest twice
-      final awarded = await FirebaseFirestore.instance.runTransaction<bool>((transaction) async {
-        final snapshot = await transaction.get(userRef);
-        final data = snapshot.data() ?? <String, dynamic>{};
-
-        // Keep only today's keys so old days do not pile up in the document
-        final completedQuests = List<String>.from(data['completedSideQuests'] ?? [])
-            .where((key) => key.startsWith(_dayPrefix(now)))
-            .toList();
-        if (completedQuests.contains(questKey)) return false;
-        completedQuests.add(questKey);
-
-        final currentXp = (data['xp'] as num?)?.toInt() ?? 0;
-        final currentLevel = (data['level'] as num?)?.toInt() ?? 1;
-        final currentCoin = (data['coin'] as num?)?.toInt() ?? 0;
-        final currentStreak = (data['streak'] as num?)?.toInt() ?? 0;
-
-        DateTime? lastWorkoutDate;
-        final rawLastDate = data['lastWorkoutDate'];
-        if (rawLastDate is Timestamp) {
-          lastWorkoutDate = rawLastDate.toDate();
-        } else if (rawLastDate is DateTime) {
-          lastWorkoutDate = rawLastDate;
-        }
-
-        var updatedXp = currentXp + xpGained;
-        var updatedLevel = currentLevel < 1 ? 1 : currentLevel;
-        while (updatedXp >= _xpPerLevel) {
-          updatedXp -= _xpPerLevel;
-          updatedLevel += 1;
-        }
-
-        final updatedStreak = StreakService.calculateNewStreak(
-          currentStreak: currentStreak,
-          lastWorkoutDate: lastWorkoutDate,
-          currentWorkoutDate: now,
-        );
-
-        transaction.set(userRef, {
-          'xp': updatedXp,
-          'level': updatedLevel,
-          'coin': currentCoin + coinsGained,
-          'streak': updatedStreak,
-          'lastWorkoutDate': now,
-          'completedSideQuests': completedQuests,
-        }, SetOptions(merge: true));
-
-        // Permanent history for the calendar. The document id is the quest key,
-        // so each quest can only be logged once per day
-        transaction.set(
-          userRef.collection('sideQuestLog').doc(questKey),
-          {
-            'text': questText,
-            'xp': xpGained,
-            'coins': coinsGained,
-            'dateCompleted': Timestamp.fromDate(now),
-          },
-        );
-
-        return true;
-      });
-
-      if (awarded && mounted) {
-        _showFloatingLoot(buttonCenter ?? const Offset(200, 300), xpGained, coinsGained);
+      if (result.awarded && mounted) {
+        _showFloatingLoot(buttonCenter ?? const Offset(200, 300), result.xpGained, result.coinsGained);
       }
     } catch (e) {
       if (mounted) {
@@ -186,20 +116,13 @@ class _SideQuestState extends State<SideQuest> {
     }
   }
 
-  Widget _buildQuestCard({
-    required _Quest quest,
-    required bool isDone,
-    required String uid,
-  }) {
+  Widget _buildQuestCard({required _Quest quest, required bool isDone, required String uid}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDone ? AppColors.gold : AppColors.border,
-          width: isDone ? 1.5 : 1,
-        ),
+        border: Border.all(color: isDone ? AppColors.gold : AppColors.border, width: isDone ? 1.5 : 1),
       ),
       child: Row(
         children: [
@@ -228,20 +151,18 @@ class _SideQuestState extends State<SideQuest> {
                 backgroundColor: isDone ? AppColors.container : AppColors.primary,
                 foregroundColor: AppColors.warmIvory,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               onPressed: isDone
                   ? null
                   : () {
-                Offset? buttonCenter;
-                final renderBox = btnContext.findRenderObject() as RenderBox?;
-                if (renderBox != null) {
-                  buttonCenter = renderBox.localToGlobal(renderBox.size.center(Offset.zero));
-                }
-                _completeQuest(uid, quest.index, buttonCenter: buttonCenter);
-              },
+                      Offset? buttonCenter;
+                      final renderBox = btnContext.findRenderObject() as RenderBox?;
+                      if (renderBox != null) {
+                        buttonCenter = renderBox.localToGlobal(renderBox.size.center(Offset.zero));
+                      }
+                      _completeQuest(uid, quest.index, buttonCenter: buttonCenter);
+                    },
               child: Text(
                 isDone ? 'Completed' : 'Complete',
                 style: TextStyle(
@@ -262,15 +183,12 @@ class _SideQuestState extends State<SideQuest> {
     final user = Provider.of<myUser?>(context);
 
     if (userDoc == null || user == null) {
-      return Scaffold(
-        appBar: const MyAppBar(),
-        backgroundColor: AppColors.background,
-        body: const Loading(),
-      );
+      return Scaffold(appBar: const MyAppBar(), backgroundColor: AppColors.background, body: const Loading());
     }
 
-    final Map<String, dynamic> userData =
-    userDoc.exists ? (userDoc.data() as Map<String, dynamic>? ?? <String, dynamic>{}) : <String, dynamic>{};
+    final Map<String, dynamic> userData = userDoc.exists
+        ? (userDoc.data() as Map<String, dynamic>? ?? <String, dynamic>{})
+        : <String, dynamic>{};
     final now = DateTime.now();
     final completedQuests = List<String>.from(userData['completedSideQuests'] ?? []);
 
@@ -301,11 +219,7 @@ class _SideQuestState extends State<SideQuest> {
               child: Text(
                 'Slayer Quest Board',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.warmIvory,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: AppColors.warmIvory, fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 16),
@@ -366,7 +280,6 @@ class _SideQuestState extends State<SideQuest> {
                 );
               }),
             ],
-
             if (finishedQuests.isNotEmpty) ...[
               const SizedBox(height: 12),
               const Divider(color: Colors.white12),
@@ -383,47 +296,7 @@ class _SideQuestState extends State<SideQuest> {
                 );
               }),
             ],
-
             const SizedBox(height: 24),
-
-            /*
-             Testing reset button, disabled.
-             Note: the flat 5 XP / 3 coin refund
-             does not match the random 1-12 XP / 1-8 coin rewards, so the real
-             amounts would need to be stored per quest before re-enabling this.
-            */
-            /*
-            Center(
-              child: TextButton.icon(
-                icon: const Icon(Icons.refresh, color: AppColors.crimsonRed, size: 18),
-                label: const Text('Reset Quests & XP/Coins (Testing)', style: TextStyle(color: AppColors.crimsonRed, fontSize: 13)),
-                onPressed: () async {
-                  final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-
-                  int currentXp = (userData['xp'] as num?)?.toInt() ?? 0;
-                  int currentCoin = (userData['coin'] as num?)?.toInt() ?? 0;
-
-                  int xpToDeduct = finishedQuests.length * 5;
-                  int coinsToDeduct = finishedQuests.length * 3;
-
-                  int newXp = (currentXp - xpToDeduct).clamp(0, 999999);
-                  int newCoin = (currentCoin - coinsToDeduct).clamp(0, 999999);
-
-                  await userRef.set({
-                    'completedSideQuests': [],
-                    'xp': newXp,
-                    'coin': newCoin,
-                  }, SetOptions(merge: true));
-
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Quests reset to 0/$_dailyQuestCount (-$xpToDeduct XP, -$coinsToDeduct Coins)')),
-                    );
-                  }
-                },
-              ),
-            ),
-            */
           ],
         ),
       ),
@@ -497,30 +370,32 @@ class _FloatingLootOverlay extends StatefulWidget {
 }
 
 class _FloatingLootOverlayState extends State<_FloatingLootOverlay> with SingleTickerProviderStateMixin {
-  static const double _bubbleSize = 52;
-  static const double _bubbleGap = 8;
-  static const double _totalWidth = _bubbleSize * 2 + _bubbleGap;
-
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<double> _translateAnimation;
 
+  static const double _bubbleSize = 52;
+  static const double _bubbleGap = 8;
+  static const double _totalWidth = _bubbleSize * 2 + _bubbleGap;
+
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    );
+
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400));
 
     // Fully opaque for most of the animation, fading only near the end
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.65, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.65, 1.0, curve: Curves.easeOut),
+      ),
     );
 
-    _translateAnimation = Tween<double>(begin: 0.0, end: -60.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
+    _translateAnimation = Tween<double>(
+      begin: 0.0,
+      end: -60.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.forward().then((_) {
       widget.onDismiss();
@@ -582,16 +457,8 @@ class _LootBubble extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: color, width: 2),
         boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.4),
-            blurRadius: 10,
-            spreadRadius: 1,
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.5),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
+          BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 10, spreadRadius: 1),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 6, offset: const Offset(0, 3)),
         ],
       ),
       child: Text(

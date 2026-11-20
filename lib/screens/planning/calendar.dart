@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,8 +24,18 @@ class _CalendarState extends State<Calendar> {
   String? _sideQuestStreamUid;
 
   final List<String> _monthNames = const [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   final List<String> _daysOfWeek = const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -48,16 +57,11 @@ class _CalendarState extends State<Calendar> {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  // Reads the permanent side quest history so completed quests show on the calendar
+  // Cached so the side quest stream is not resubscribed on every rebuild
   Stream<List<SideQuestEntry>> _getSideQuestStream(String uid) {
     if (_sideQuestStream == null || _sideQuestStreamUid != uid) {
       _sideQuestStreamUid = uid;
-      _sideQuestStream = FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('sideQuestLog')
-          .snapshots()
-          .map((snap) => snap.docs.map((doc) => SideQuestEntry.fromMap(doc.data())).toList());
+      _sideQuestStream = DatabaseService().getSideQuestStream(uid);
     }
     return _sideQuestStream!;
   }
@@ -84,9 +88,7 @@ class _CalendarState extends State<Calendar> {
           final allWorkouts = workoutSnapshot.data ?? [];
 
           return StreamBuilder<List<SideQuestEntry>>(
-            stream: currentUserId.isNotEmpty
-                ? _getSideQuestStream(currentUserId)
-                : const Stream.empty(),
+            stream: currentUserId.isNotEmpty ? _getSideQuestStream(currentUserId) : const Stream.empty(),
             builder: (context, questSnapshot) {
               final allSideQuests = questSnapshot.data ?? [];
 
@@ -122,17 +124,19 @@ class _CalendarState extends State<Calendar> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: _daysOfWeek
-                          .map((day) => Expanded(
-                        child: Text(
-                          day,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ))
+                          .map(
+                            (day) => Expanded(
+                              child: Text(
+                                day,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                     const SizedBox(height: 12),
@@ -156,9 +160,7 @@ class _CalendarState extends State<Calendar> {
 
                           final isToday = _isSameDay(tileDate, _today);
 
-                          final dayWorkouts = allWorkouts
-                              .where((w) => _isSameDay(w.dateCompleted, tileDate))
-                              .toList();
+                          final dayWorkouts = allWorkouts.where((w) => _isSameDay(w.dateCompleted, tileDate)).toList();
 
                           // A day counts as active if it has a logged workout or a completed side quest
                           final daySideQuests = allSideQuests
@@ -200,9 +202,7 @@ class _CalendarState extends State<Calendar> {
                                       '$dayNumber',
                                       style: TextStyle(
                                         color: AppColors.textPrimary,
-                                        fontWeight: isToday || hasWorkout
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
+                                        fontWeight: isToday || hasWorkout ? FontWeight.bold : FontWeight.normal,
                                         fontSize: 16,
                                       ),
                                     ),
