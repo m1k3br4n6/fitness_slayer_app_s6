@@ -342,18 +342,21 @@ class _SlayerCustomizeState extends State<SlayerCustomize> {
                     const SizedBox(height: 20),
 
                     //save button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _saving || uid == null ? null : () => _save(uid),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.flameOrange,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        label: Text(
-                          _saving ? 'Saving...' : 'Save Changes',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    SafeArea(
+                      top: false,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _saving || uid == null ? null : () => _save(uid),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.flameOrange,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          label: Text(
+                            _saving ? 'Saving...' : 'Save Changes',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
                         ),
                       ),
                     ),

@@ -433,10 +433,11 @@ class _WorkoutViewState extends State<WorkoutView> {
         Builder(
           builder: (context) {
             final screenHeight = MediaQuery.of(context).size.height;
+            final maxTop = screenHeight - 160.0 - MediaQuery.paddingOf(context).bottom;
             final defaultTop = screenHeight * 0.4;
             final currentTop = (_fabYPosition ?? defaultTop).clamp(
               70.0,
-              screenHeight - 160.0,
+              maxTop,
             );
 
             return Positioned(
@@ -448,7 +449,7 @@ class _WorkoutViewState extends State<WorkoutView> {
                     _fabYPosition =
                         (currentTop + details.delta.dy * _fabSensitivity).clamp(
                           70.0,
-                          screenHeight - 160.0,
+                          maxTop,
                         );
                   });
                 },
@@ -489,7 +490,8 @@ class _WorkoutViewState extends State<WorkoutView> {
           },
         ),
 
-        if (isRestRemaining) const MiniRestTimer(),
+        if (isRestRemaining)
+          const Positioned(left: 0, right: 0, bottom: 0, child: MiniRestTimer()),
       ],
     );
   }

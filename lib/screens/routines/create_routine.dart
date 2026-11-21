@@ -289,21 +289,24 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
 
                       const SizedBox(height: 16),
 
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.flameOrange,
-                            foregroundColor: AppColors.parchmentWhite,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          onPressed: _isSubmitting ? null : _saveRoutine,
-                          child: Text(
-                            _isSubmitting
-                                ? 'SAVING...'
-                                : (isEditing ? 'UPDATE ROUTINE' : 'SAVE ROUTINE'),
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                      SafeArea(
+                        top: false,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.flameOrange,
+                              foregroundColor: AppColors.parchmentWhite,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            onPressed: _isSubmitting ? null : _saveRoutine,
+                            child: Text(
+                              _isSubmitting
+                                  ? 'SAVING...'
+                                  : (isEditing ? 'UPDATE ROUTINE' : 'SAVE ROUTINE'),
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                            ),
                           ),
                         ),
                       ),

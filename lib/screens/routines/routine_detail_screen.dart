@@ -187,23 +187,26 @@ class RoutineDetailScreen extends StatelessWidget {
             ),
           ),
 
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.flameOrange,
-                  foregroundColor: AppColors.parchmentWhite,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.flameOrange,
+                    foregroundColor: AppColors.parchmentWhite,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.play_arrow, size: 28),
+                  label: const Text(
+                    'START ROUTINE',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                  ),
+                  onPressed: () => _startRoutine(context),
                 ),
-                icon: const Icon(Icons.play_arrow, size: 28),
-                label: const Text(
-                  'START ROUTINE',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.5),
-                ),
-                onPressed: () => _startRoutine(context),
               ),
             ),
           ),

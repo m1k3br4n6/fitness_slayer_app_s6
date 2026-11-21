@@ -117,7 +117,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
         return SizedBox(
           width: double.infinity,
-          height: MediaQuery.of(context).size.height * 0.48,
           child: CampsiteScene(
             playAudio: false,
             showText: true,
@@ -299,10 +298,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       const Calendar(),
 
       // Main Dashboard Hub
-      Column(
+      Stack(
         children: [
-          // CAMPSITE CONTAINER
-          _buildCampsiteContainer(context),
+          Column(
+            children: [
+              // CAMPSITE CONTAINER
+              Expanded(child: _buildCampsiteContainer(context)),
 
           const SizedBox(height: 20),
 
@@ -335,9 +336,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             ),
           ),
 
-          const Spacer(),
-          // Space for fab
-          const SizedBox(height: 90),
+              const SizedBox(height: 16),
+            ],
+          ),
+          Positioned(
+            top: 48,
+            left: 16,
+            child: _buildExpandableFab(),
+          ),
         ],
       ),
       const Shop(),
@@ -357,9 +363,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ),
       backgroundColor: AppColors.obsidianBlack,
       body: IndexedStack(index: _currentIndex, children: pages),
-
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: _currentIndex == 2 ? _buildExpandableFab() : null,
 
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
