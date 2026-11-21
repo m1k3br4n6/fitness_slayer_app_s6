@@ -56,12 +56,15 @@ class _RegisterState extends State<Register> {
           ),
         ],
       ),
-      body: Container(
-        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-        child: Form(
-          key: _formKey, //form needs form key
-          child: Column(
-            children: <Widget>[
+      body: SafeArea(
+        top: false,
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+          child: Form(
+            key: _formKey, //form needs form key
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
               SizedBox(height: 10.0),
 
               Text(
@@ -201,6 +204,8 @@ class _RegisterState extends State<Register> {
 
               Text(error, style: TextStyle(color: Colors.red, fontSize: 14.0)),
             ],
+              ),
+            ),
           ),
         ),
       ),

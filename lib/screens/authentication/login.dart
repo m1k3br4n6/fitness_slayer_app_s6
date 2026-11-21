@@ -42,12 +42,15 @@ class _LoginState extends State<Login> {
           ),
         ],
       ),
-      body: Container(
-        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-        child: Form(
-          key: _formKey, //form needs form key
-          child: Column(
-            children: <Widget>[
+      body: SafeArea(
+        top: false,
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+          child: Form(
+            key: _formKey, //form needs form key
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
 
               SizedBox(height: 20.0),
 
@@ -108,6 +111,8 @@ class _LoginState extends State<Login> {
 
               Text(error, style: TextStyle(color: Colors.red, fontSize: 14.0)),
             ],
+              ),
+            ),
           ),
         ),
       ),

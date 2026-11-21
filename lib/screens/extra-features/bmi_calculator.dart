@@ -72,11 +72,14 @@ class _BmiCalculatorState extends State<BmiCalculator> {
     return Scaffold(
       appBar: MyAppBar(),
       backgroundColor: AppColors.obsidianBlack,
-      body: Container(
-        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-        child: Form(
-          child: Column(
-            children: <Widget>[
+      body: SafeArea(
+        top: false,
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+          child: Form(
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
               SizedBox(height: 10.0),
               //age slider
               Text('Age: $age years', style: const TextStyle(color: AppColors.parchmentWhite, fontSize: 16)),
@@ -209,7 +212,9 @@ class _BmiCalculatorState extends State<BmiCalculator> {
                   ],
                 ),
               ),
-            ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
